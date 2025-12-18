@@ -123,8 +123,16 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                     transition={{ duration: 8, repeat: Infinity }}
                     className="absolute inset-0 bg-accent/30 rounded-2xl blur-md"
                   />
-                  <div className="relative w-14 h-14 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center shadow-xl">
-                    <span className="text-3xl">{config.logo}</span>
+                  <div className="relative w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
+                    {(config.logo.startsWith('data:') || config.logo.startsWith('http')) ? (
+                      <img
+                        src={config.logo}
+                        alt={config.siteName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-3xl">{config.logo}</span>
+                    )}
                   </div>
                 </div>
                 <h3 className="text-xl text-primary-foreground font-bold">{config.siteName}</h3>

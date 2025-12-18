@@ -33,6 +33,8 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
     { id: 'contact', label: 'Contact' },
   ];
 
+  const isImageLogo = siteConfig.logo.startsWith('data:') || siteConfig.logo.startsWith('http');
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -60,9 +62,17 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                     : '0 4px 15px rgba(109, 76, 65, 0.15)'
                 }}
                 transition={{ duration: 0.3 }}
-                className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform duration-300"
+                className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform duration-300 overflow-hidden"
               >
-                <span className="text-2xl">{siteConfig.logo}</span>
+                {isImageLogo ? (
+                  <img
+                    src={siteConfig.logo}
+                    alt={siteConfig.siteName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl">{siteConfig.logo}</span>
+                )}
               </motion.div>
             </div>
             <div>
