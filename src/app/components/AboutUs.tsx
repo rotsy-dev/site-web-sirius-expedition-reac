@@ -145,6 +145,7 @@ export function AboutUs({ config }: AboutUsProps) {
             src="https://images.unsplash.com/photo-1677667495307-10e01bd9530f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
             alt="Madagascar landscape"
             className="rounded-2xl shadow-xl w-full h-64 object-cover"
+            loading="lazy"
           />
         </motion.div>
 
@@ -266,6 +267,7 @@ export function AboutUs({ config }: AboutUsProps) {
                 src={member.avatar}
                 alt={member.name}
                 className="w-full h-64 object-cover"
+                loading="lazy"
               />
               <div className="p-6 text-center">
                 <h4 className="text-xl font-bold mb-2">{member.name}</h4>

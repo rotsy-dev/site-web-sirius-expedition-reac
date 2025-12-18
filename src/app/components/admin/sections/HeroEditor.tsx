@@ -273,6 +273,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                     src={previewSlide.image}
                                     alt={previewSlide.title}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
 

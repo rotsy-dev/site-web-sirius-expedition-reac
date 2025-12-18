@@ -149,7 +149,7 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                         <div className="flex items-center justify-between p-4 bg-card border-b border-border">
                             <div className="flex items-center gap-3">
                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted">
-                                    <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                                    <img src={post.image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">

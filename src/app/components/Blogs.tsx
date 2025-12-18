@@ -57,6 +57,7 @@ export function Blogs({ posts }: BlogsProps) {
               src={featuredPost.image}
               alt={featuredPost.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              loading="lazy"
             />
             <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-accent text-primary-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg">
               ✨ Featured Article
@@ -82,6 +83,7 @@ export function Blogs({ posts }: BlogsProps) {
                   src={featuredPost.authorAvatar}
                   alt={featuredPost.author}
                   className="w-8 h-8 rounded-full"
+                  loading="lazy"
                 />
                 <span>{featuredPost.author}</span>
               </div>
@@ -123,6 +125,7 @@ export function Blogs({ posts }: BlogsProps) {
                 src={post.image}
                 alt={post.title}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
@@ -153,6 +156,7 @@ export function Blogs({ posts }: BlogsProps) {
                     src={post.authorAvatar}
                     alt={post.author}
                     className="w-6 h-6 rounded-full"
+                    loading="lazy"
                   />
                   <span className="text-xs">{post.author}</span>
                 </div>

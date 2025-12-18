@@ -111,6 +111,7 @@ export function TourSpecialtiesEditor({ specialties: initialSpecialties, onSave 
                                     src={specialty.image}
                                     alt={specialty.title}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                             </div>
                             <div className="absolute top-3 left-3 w-12 h-12 bg-card/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-2xl shadow-lg">

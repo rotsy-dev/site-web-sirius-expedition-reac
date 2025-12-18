@@ -120,6 +120,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                     src={review.avatar}
                                     alt={review.name}
                                     className="w-12 h-12 rounded-full"
+                                    loading="lazy"
                                 />
                                 <div>
                                     <div className="flex items-center gap-2">

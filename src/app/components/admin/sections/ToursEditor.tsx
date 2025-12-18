@@ -155,7 +155,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                         <div className="flex items-center justify-between p-4 bg-card border-b border-border">
                             <div className="flex items-center gap-3">
                                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                                    <img src={tour.image} alt={tour.title} className="w-full h-full object-cover" />
+                                    <img src={tour.image} alt={tour.title} className="w-full h-full object-cover" loading="lazy" />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground">{tour.title}</h3>

@@ -209,6 +209,7 @@ export function Reviews({ reviews, config }: ReviewsProps) {
                         src={review.avatar}
                         alt={review.name}
                         className="relative w-16 h-16 rounded-full border-3 border-card shadow-lg object-cover"
+                        loading="lazy"
                       />
                     </div>
                     <div>
