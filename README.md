@@ -13,7 +13,7 @@ Site web pour Sirius Expedition - Agence de voyage spécialisée dans les expéd
 
 ```bash
 # Cloner le repository
-git clone [URL_DU_REPO]
+git clone https://github.com/rotsy-dev/sirius-expedition-website.git
 
 # Installer les dépendances
 npm install
