@@ -1,370 +1,165 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle } from 'lucide-react';
-import { motion } from "framer-motion";
-import { validateContactForm, type ContactFormData } from '../../utils/validation';
-import { MESSAGES } from '../../constants';
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Mail, Phone, MapPin, Sparkles, Zap, Star, CheckCircle } from 'lucide-react';
 
-interface ContactProps {
-  config: {
-    contact: {
-      email: string;
-      phone: string;
-      address: string;
-    };
-    social: {
-      facebook: string;
-      youtube: string;
-      tripadvisor: string;
-      google: string;
-    };
-    services: {
-      hosting: string[];
-      domain: string;
-      email: string;
-    };
-  };
-}
-
-export function Contact({ config }: ContactProps) {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setErrors([]);
-
-    // Validation
-    const validation = validateContactForm(formData);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Simulation d'envoi (à remplacer par un vrai appel API)
-    try {
-      // Ici vous ajouteriez votre logique d'envoi
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSubmitted(true);
-      setTimeout(() => {
-        setSubmitted(false);
-        setFormData({ name: '', email: '', phone: '', message: '' });
-        setErrors([]);
-      }, 3000);
-    } catch (error) {
-      setErrors([MESSAGES.ERROR.SAVE_FAILED]);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    // Effacer les erreurs quand l'utilisateur tape
-    if (errors.length > 0) {
-      setErrors([]);
-    }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setSubmitted(true);
+    setIsSubmitting(false);
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
+    <section className="py-28 sm:py-32 md:py-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background ultra-sophistiqué (Identique aux Tours) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
+
+      {/* Grille animée */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <span className="inline-block bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
-          💬 Get In Touch
-        </span>
-        <h2 className="text-4xl md:text-5xl mb-4 text-primary font-bold">
-          Contact Us
-        </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Get in touch with us to plan your Madagascar adventure
-        </p>
-      </motion.div>
+        animate={{ opacity: [0.02, 0.05, 0.02] }}
+        transition={{ duration: 5, repeat: Infinity }}
+        className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem]"
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-        {/* Contact Form */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="lg:col-span-3 bg-card p-8 md:p-10 rounded-3xl shadow-xl"
-        >
-          <h3 className="text-2xl font-bold mb-2">Send Us a Message</h3>
-          <p className="text-muted-foreground mb-8">
-            We'll get back to you within 24 hours
-          </p>
+      {/* Gradients flottants massifs */}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.2, 0.15], x: [0, 30, 0] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-0 left-1/4 w-[40rem] h-[40rem] bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-3xl"
+      />
 
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            {/* Affichage des erreurs globales */}
-            {errors.length > 0 && (
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header spectaculaire */}
+        <div className="text-center mb-20">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            whileInView={{ scale: 1, rotate: 0 }}
+            viewport={{ once: true }}
+            className="inline-block mb-8"
+          >
+            <div className="relative group/badge">
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-destructive mb-1">Erreurs de validation :</p>
-                  <ul className="text-sm text-destructive/80 space-y-1">
-                    {errors.map((error, index) => (
-                      <li key={index}>• {error}</li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="name" className="block mb-2 text-sm font-medium text-foreground">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  aria-required="true"
-                  aria-invalid={errors.some(e => e.toLowerCase().includes('nom'))}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border-2 border-transparent focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block mb-2 text-sm font-medium text-foreground">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  aria-required="true"
-                  aria-invalid={errors.some(e => e.toLowerCase().includes('email'))}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border-2 border-transparent focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
-                  placeholder="john@example.com"
-                />
+                animate={{ scale: [1, 1.4, 1], rotate: [0, 180, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-3 bg-gradient-to-r from-accent via-primary to-accent rounded-full blur-2xl opacity-40"
+              />
+              <div className="relative bg-gradient-to-r from-purple-50 via-blue-50 to-purple-50 dark:from-purple-950 dark:via-blue-950 dark:to-purple-950 px-8 py-4 rounded-full border-2 border-purple-300/50 dark:border-purple-700/50 shadow-2xl backdrop-blur-xl">
+                <span className="relative text-purple-900 dark:text-purple-100 font-black text-sm tracking-widest uppercase flex items-center gap-3">
+                  <Sparkles size={18} className="text-purple-600 fill-purple-600" />
+                  Get In Touch
+                  <Zap size={18} className="text-purple-600 fill-purple-600" />
+                </span>
               </div>
             </div>
+          </motion.div>
 
-            <div>
-              <label htmlFor="phone" className="block mb-2 text-sm font-medium text-foreground">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone || ''}
-                onChange={handleChange}
-                aria-invalid={errors.some(e => e.toLowerCase().includes('téléphone'))}
-                className="w-full px-4 py-3 rounded-xl bg-muted border-2 border-transparent focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
-                placeholder="+261 34 00 000 00"
-              />
-            </div>
+          <motion.h2 className="text-5xl md:text-8xl mb-8 font-black leading-[0.9] tracking-tighter">
+            <span className="bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent block">PLAN YOUR</span>
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent block">MASTERPIECE</span>
+          </motion.h2>
+        </div>
 
-            <div>
-              <label htmlFor="message" className="block mb-2 text-sm font-medium text-foreground">
-                Your Message *
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                aria-required="true"
-                aria-invalid={errors.some(e => e.toLowerCase().includes('message'))}
-                rows={6}
-                className="w-full px-4 py-3 rounded-xl bg-muted border-2 border-transparent focus:border-primary focus:outline-none transition-all resize-none text-foreground placeholder:text-muted-foreground"
-                placeholder="Tell us about your dream Madagascar adventure..."
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: submitted || isSubmitting ? 1 : 1.02 }}
-              whileTap={{ scale: submitted || isSubmitting ? 1 : 0.98 }}
-              type="submit"
-              disabled={submitted || isSubmitting}
-              aria-busy={isSubmitting}
-              className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {submitted ? (
-                <>
-                  <CheckCircle size={20} />
-                  {MESSAGES.SUCCESS.MESSAGE_SENT}
-                </>
-              ) : isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Envoi en cours...
-                </>
-              ) : (
-                <>
-                  <Send size={20} />
-                  Send Message
-                </>
-              )}
-            </motion.button>
-          </form>
-        </motion.div>
-
-        {/* Contact Information */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="lg:col-span-2 space-y-6"
-        >
-          {/* Contact Cards */}
-          <div className="bg-card p-6 rounded-2xl shadow-lg">
-            <h4 className="font-bold text-lg mb-4">Contact Information</h4>
-            <div className="space-y-4">
-              <motion.a
-                href={`mailto:${config.contact.email}`}
-                whileHover={{ x: 5 }}
-                className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted transition-colors group"
-              >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Mail size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Email</p>
-                  <p className="font-medium text-foreground">{config.contact.email}</p>
-                </div>
-              </motion.a>
-
-              <motion.a
-                href={`tel:${config.contact.phone}`}
-                whileHover={{ x: 5 }}
-                className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted transition-colors group"
-              >
-                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-accent group-hover:text-primary-foreground transition-colors">
-                  <Phone size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Phone</p>
-                  <p className="font-medium text-foreground">{config.contact.phone}</p>
-                </div>
-              </motion.a>
-
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          {/* Infos de contact style "Cards" */}
+          <div className="lg:col-span-4 space-y-6">
+            {[
+              { icon: <Mail />, label: "Email Us", val: "contact@luxurytours.mg" },
+              { icon: <Phone />, label: "Call Us", val: "+261 34 00 000 00" },
+              { icon: <MapPin />, label: "Visit Us", val: "Antananarivo, Madagascar" }
+            ].map((item, i) => (
               <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted transition-colors group"
+                key={i}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl p-6 rounded-[2rem] border border-gray-200/50 dark:border-gray-800/50 hover:border-primary/50 transition-all shadow-xl"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Address</p>
-                  <p className="font-medium text-foreground">{config.contact.address}</p>
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white shadow-lg">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{item.label}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{item.val}</p>
+                  </div>
                 </div>
               </motion.div>
+            ))}
+          </div>
+
+          {/* Le Formulaire (Style CTA de ta section Tours) */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="lg:col-span-8 relative group"
+          >
+            {/* Glow massif derrière le formulaire */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-[3rem] border border-gray-200/50 dark:border-gray-800/50 shadow-2xl overflow-hidden p-8 md:p-12">
+              <AnimatePresence mode="wait">
+                {!submitted ? (
+                  <motion.form 
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    onSubmit={handleSubmit}
+                    className="space-y-8"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-xs font-black uppercase tracking-widest ml-2">Your Name</label>
+                        <input required className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-gray-800 rounded-2xl py-5 px-6 outline-none transition-all font-medium" placeholder="John Doe" />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-black uppercase tracking-widest ml-2">Your Email</label>
+                        <input required type="email" className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-gray-800 rounded-2xl py-5 px-6 outline-none transition-all font-medium" placeholder="john@example.com" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-xs font-black uppercase tracking-widest ml-2">Describe your dream journey</label>
+                      <textarea required rows={4} className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-gray-800 rounded-[2rem] py-5 px-6 outline-none transition-all font-medium resize-none" placeholder="Tell us everything..." />
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full group/btn relative py-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-black uppercase tracking-[0.4em] text-sm overflow-hidden shadow-2xl"
+                    >
+                      {/* Shine Effect */}
+                      <motion.div
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                        className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 dark:via-black/5 to-transparent skew-x-12"
+                      />
+                      <span className="relative z-10 flex items-center justify-center gap-4">
+                        {isSubmitting ? "Processing..." : "Commence the Journey"} 
+                        {!isSubmitting && <Send size={18} className="group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />}
+                      </span>
+                    </motion.button>
+                  </motion.form>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="py-16 text-center space-y-6"
+                  >
+                    <div className="w-24 h-24 bg-gradient-to-tr from-primary to-accent rounded-3xl flex items-center justify-center mx-auto shadow-2xl rotate-12">
+                      <CheckCircle size={48} className="text-white" />
+                    </div>
+                    <h3 className="text-4xl font-black tracking-tighter">MESSAGE RECEIVED</h3>
+                    <p className="text-muted-foreground text-xl max-w-sm mx-auto">Our travel architects are already reviewing your request.</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-
-          {/* Social Links */}
-          <div className="bg-gradient-to-br from-primary to-accent p-6 rounded-2xl shadow-lg text-primary-foreground">
-            <h4 className="font-bold text-lg mb-4">Follow Our Journey</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <motion.a
-                href={config.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
-              >
-                <Facebook size={20} />
-                <span className="text-sm font-medium">Facebook</span>
-              </motion.a>
-
-              <motion.a
-                href={config.social.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
-              >
-                <Youtube size={20} />
-                <span className="text-sm font-medium">YouTube</span>
-              </motion.a>
-
-              <motion.a
-                href={config.social.tripadvisor}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
-              >
-                <div className="w-5 h-5 bg-white/90 rounded-full flex items-center justify-center text-primary text-xs font-bold">
-                  T
-                </div>
-                <span className="text-sm font-medium">TripAdvisor</span>
-              </motion.a>
-
-              <motion.a
-                href={config.social.google}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
-              >
-                <div className="w-5 h-5 bg-white/90 rounded-full flex items-center justify-center text-primary text-xs font-bold">
-                  G
-                </div>
-                <span className="text-sm font-medium">Google</span>
-              </motion.a>
-            </div>
-          </div>
-
-          {/* Services Info */}
-          <div className="bg-muted/50 p-6 rounded-2xl border border-border">
-            <h4 className="font-bold text-sm mb-3 text-muted-foreground">
-              Professional Services
-            </h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                Hosting: {config.services.hosting.join(' & ')}
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                Domain: {config.services.domain}
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-accent rounded-full" />
-                Email: {config.services.email}
-              </li>
-            </ul>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
