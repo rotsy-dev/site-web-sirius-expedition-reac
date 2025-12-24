@@ -4,7 +4,8 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Star, MapPin, Clock, ChevronLeft, ChevronRight, Check, Heart } from 'lucide-react';
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
+import { ImageWithFallback } from '../../components/common/ImageWithFallback';
 
 interface Tour {
   id: number;
@@ -129,6 +130,7 @@ export function BestSellers({ tours }: BestSellersProps) {
               whileTap={{ scale: 0.9 }}
               onClick={() => sliderRef.current?.slickPrev()}
               className="group relative"
+              aria-label="Slide précédent"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
               <div className="relative p-3 sm:p-4 bg-card border border-border rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
@@ -140,6 +142,7 @@ export function BestSellers({ tours }: BestSellersProps) {
               whileTap={{ scale: 0.9 }}
               onClick={() => sliderRef.current?.slickNext()}
               className="group relative"
+              aria-label="Slide suivant"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
               <div className="relative p-3 sm:p-4 bg-card border border-border rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
@@ -163,13 +166,17 @@ export function BestSellers({ tours }: BestSellersProps) {
                 <div className="bg-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 h-full flex flex-col border border-border">
                   {/* Image Section */}
                   <div className="relative h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden">
-                    <motion.img
+                    <motion.div
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.6 }}
-                      src={tour.image}
-                      alt={tour.title}
-                      className="w-full h-full object-cover"
-                    />
+                      className="w-full h-full"
+                    >
+                      <ImageWithFallback
+                        src={tour.image}
+                        alt={tour.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
 
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
@@ -179,6 +186,7 @@ export function BestSellers({ tours }: BestSellersProps) {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       className="absolute top-3 left-3 sm:top-4 sm:left-4 p-2 sm:p-3 bg-card/90 backdrop-blur-md rounded-full shadow-lg hover:bg-card transition-all"
+                      aria-label={`Ajouter ${tour.title} aux favoris`}
                     >
                       <Heart size={16} className="sm:w-5 sm:h-5 text-foreground" />
                     </motion.button>
@@ -252,6 +260,7 @@ export function BestSellers({ tours }: BestSellersProps) {
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       className="group/btn relative w-full mt-auto"
+                      aria-label={`Explorer le tour ${tour.title}`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-xl sm:rounded-2xl blur-md opacity-0 group-hover/btn:opacity-50 transition-opacity" />
                       <div className="relative bg-gradient-to-r from-primary to-accent text-primary-foreground py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2">

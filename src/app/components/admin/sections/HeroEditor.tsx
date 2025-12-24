@@ -2,15 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, Eye, Image, X } from 'lucide-react';
-
-interface HeroSlide {
-    id: number;
-    image: string;
-    title: string;
-    subtitle: string;
-    cta: string;
-    videoUrl: string;
-}
+import type { HeroSlide } from '../../../types/content';
 
 interface HeroEditorProps {
     slides: HeroSlide[];

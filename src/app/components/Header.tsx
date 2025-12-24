@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SITE_SECTIONS } from '../../constants';
 
 interface HeaderProps {
   activeSection: string;
@@ -26,11 +27,11 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
   }, []);
 
   const menuItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'tours', label: 'Tours' },
-    { id: 'blogs', label: 'Blog' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
+    { id: SITE_SECTIONS.HOME, label: 'Home' },
+    { id: SITE_SECTIONS.TOURS, label: 'Tours' },
+    { id: SITE_SECTIONS.BLOGS, label: 'Blog' },
+    { id: SITE_SECTIONS.ABOUT, label: 'About' },
+    { id: SITE_SECTIONS.CONTACT, label: 'Contact' },
   ];
 
   const isImageLogo = siteConfig.logo.startsWith('data:') || siteConfig.logo.startsWith('http');
@@ -48,11 +49,16 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <motion.div
+          <motion.a
+            href="#home"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => setActiveSection('home')}
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveSection(SITE_SECTIONS.HOME);
+            }}
+            aria-label="Retour à l'accueil"
           >
             <div className="relative">
               <motion.div
@@ -81,7 +87,7 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
               </h1>
               <p className="text-xs text-muted-foreground">{siteConfig.tagline}</p>
             </div>
-          </motion.div>
+          </motion.a>
 
           {/* Navigation Desktop */}
           <nav className="hidden lg:flex items-center gap-1">
@@ -92,6 +98,8 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                 className="relative px-5 py-2 rounded-lg group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                aria-label={`Aller à ${item.label}`}
+                aria-current={activeSection === item.id ? 'page' : undefined}
               >
                 <span
                   className={`relative z-10 text-sm font-medium transition-colors duration-300 ${activeSection === item.id
@@ -117,8 +125,9 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveSection('contact')}
+              onClick={() => setActiveSection(SITE_SECTIONS.CONTACT)}
               className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-medium shadow-lg hover:shadow-xl transition-shadow duration-300"
+              aria-label="Réserver maintenant"
             >
               Book Now
               <ArrowRight size={16} />
@@ -128,9 +137,10 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveSection('admin')}
+              onClick={() => setActiveSection(SITE_SECTIONS.ADMIN)}
               className="px-4 py-2.5 bg-muted/50 hover:bg-muted text-foreground rounded-lg font-medium transition-colors duration-300"
               title="Admin Dashboard"
+              aria-label="Accéder au tableau de bord administrateur"
             >
               🔐
             </motion.button>
@@ -141,6 +151,9 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
             whileTap={{ scale: 0.9 }}
             className="lg:hidden p-2.5 rounded-lg bg-card/80 backdrop-blur-md border border-border/50 text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             <AnimatePresence mode="wait">
               {mobileMenuOpen ? (
@@ -172,11 +185,13 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.nav
+              id="mobile-menu"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className="lg:hidden overflow-hidden pb-4"
+              aria-label="Navigation mobile"
             >
               <div className="space-y-1 bg-card/95 backdrop-blur-xl rounded-xl p-3 border border-border/50 mt-3 shadow-xl">
                 {menuItems.map((item, index) => (
@@ -202,10 +217,11 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: menuItems.length * 0.05 }}
                   onClick={() => {
-                    setActiveSection('contact');
+                    setActiveSection(SITE_SECTIONS.CONTACT);
                     setMobileMenuOpen(false);
                   }}
                   className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold mt-2"
+                  aria-label="Réserver maintenant"
                 >
                   Book Now
                   <ArrowRight size={16} />

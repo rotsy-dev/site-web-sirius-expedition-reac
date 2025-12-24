@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, MapPin, Calendar, Users, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ImageWithFallback } from '../../components/common/ImageWithFallback';
 
 interface Slide {
   id: number;
@@ -107,13 +108,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                   >
                     {/* Image */}
                     <div className="relative h-80 overflow-hidden">
-                      <motion.img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-full h-full object-cover"
+                      <motion.div
                         animate={{ scale: isCenter ? 1 : 1.1 }}
                         transition={{ duration: 0.6 }}
-                      />
+                        className="w-full h-full"
+                      >
+                        <ImageWithFallback
+                          src={slide.image}
+                          alt={slide.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </motion.div>
                       <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
 
                       {/* Badge premium */}
@@ -178,6 +183,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             whileTap={{ scale: 0.9 }}
             onClick={prevSlide}
             className="absolute left-4 z-50 group"
+            aria-label="Slide précédent"
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
@@ -192,6 +198,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             whileTap={{ scale: 0.9 }}
             onClick={nextSlide}
             className="absolute right-4 z-50 group"
+            aria-label="Slide suivant"
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
@@ -203,7 +210,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         </div>
 
         {/* Indicateurs de slides */}
-        <div className="flex justify-center gap-2 mt-12">
+        <div className="flex justify-center gap-2 mt-12" role="tablist" aria-label="Indicateurs de slides">
           {slides.map((_, index) => (
             <motion.button
               key={index}
@@ -211,6 +218,9 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               className="relative"
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
+              role="tab"
+              aria-selected={index === currentIndex}
+              aria-label={`Aller au slide ${index + 1}`}
             >
               <div className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
                 ? 'bg-primary scale-125'

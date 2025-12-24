@@ -2,25 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, Eye, X, MapPin, Clock, DollarSign, Star } from 'lucide-react';
-
-interface Tour {
-    id: number;
-    title: string;
-    slug: string;
-    image: string;
-    duration: string;
-    location: string;
-    price: string;
-    pricePerPerson: boolean;
-    rating: number;
-    reviews: number;
-    description: string;
-    longDescription: string;
-    highlights: string[];
-    difficulty: string;
-    groupSize: string;
-    bestTime: string;
-}
+import type { Tour } from '../../../types/content';
 
 interface ToursEditorProps {
     tours: Tour[];

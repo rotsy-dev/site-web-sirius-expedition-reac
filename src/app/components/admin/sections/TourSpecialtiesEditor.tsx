@@ -2,15 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, MapPin, X } from 'lucide-react';
-
-interface TourSpecialty {
-    id: number;
-    icon: string;
-    title: string;
-    description: string;
-    image: string;
-    link: string;
-}
+import type { TourSpecialty } from '../../../types/content';
 
 interface TourSpecialtiesEditorProps {
     specialties: TourSpecialty[];

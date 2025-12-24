@@ -2,24 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, Eye, Calendar, User, Tag, X } from 'lucide-react';
-
-interface BlogPost {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt: string;
-    content: string;
-    image: string;
-    author: string;
-    authorAvatar: string;
-    authorBio: string;
-    date: string;
-    category: string;
-    readTime: string;
-    tags: string[];
-    featured: boolean;
-    views: number;
-}
+import type { BlogPost } from '../../../types/content';
 
 interface BlogEditorProps {
     posts: BlogPost[];
