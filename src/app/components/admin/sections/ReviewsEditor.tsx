@@ -2,19 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, Star, MapPin, Calendar, CheckCircle } from 'lucide-react';
-
-interface Review {
-    id: number;
-    name: string;
-    country: string;
-    avatar: string;
-    rating: number;
-    text: string;
-    date: string;
-    tour: string;
-    verified: boolean;
-    platform: string;
-}
+import type { Review } from '../../../types/content';
 
 interface ReviewsEditorProps {
     reviews: Review[];

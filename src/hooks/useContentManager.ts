@@ -1,50 +1,62 @@
 // src/hooks/useContentManager.ts
 import { useState, useEffect } from 'react';
 import * as defaultContent from '../app/data/content';
-
-const STORAGE_KEY = 'sirius_content';
-const AUTH_KEY = 'sirius_admin_auth';
-const DEFAULT_PASSWORD = 'admin123';
+import type { ContentData, ContentSection } from '../types/content';
+import { STORAGE_KEYS, DEFAULT_CONFIG, MESSAGES } from '../constants';
+import { saveContent, loadContent, isAuthenticated as checkAuth, setAuthenticated } from '../utils/storage';
+import { handleError } from '../utils/errors';
 
 export function useContentManager() {
-    const [content, setContent] = useState(defaultContent);
+    const [content, setContent] = useState<ContentData>(defaultContent as unknown as ContentData);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     // Charger le contenu depuis localStorage au démarrage
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = loadContent<ContentData>();
         if (saved) {
             try {
-                setContent(JSON.parse(saved));
+                setContent(saved);
             } catch (error) {
-                console.error('Error loading saved content:', error);
+                const { message } = handleError(error);
+                console.error('Error loading saved content:', message);
             }
         }
 
         // Vérifier l'authentification
-        const auth = sessionStorage.getItem(AUTH_KEY);
-        setIsAuthenticated(auth === 'true');
+        setIsAuthenticated(checkAuth());
     }, []);
 
     // Sauvegarder le contenu
-    const saveContent = (newContent: typeof defaultContent) => {
-        setContent(newContent);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newContent));
+    const saveContentData = (newContent: ContentData) => {
+        try {
+            setContent(newContent);
+            saveContent(newContent);
+        } catch (error) {
+            const { message } = handleError(error);
+            console.error('Error saving content:', message);
+            throw error;
+        }
     };
 
     // Mettre à jour une section spécifique
-    const updateSection = (section: string, data: any) => {
+    const updateSection = <T extends ContentSection>(section: T, data: ContentData[T]) => {
         const newContent = {
             ...content,
             [section]: data,
         };
-        saveContent(newContent);
+        saveContentData(newContent);
     };
 
     // Réinitialiser aux valeurs par défaut
     const resetToDefaults = () => {
-        setContent(defaultContent);
-        localStorage.removeItem(STORAGE_KEY);
+        try {
+            setContent(defaultContent as unknown as ContentData);
+            localStorage.removeItem(STORAGE_KEYS.CONTENT);
+        } catch (error) {
+            const { message } = handleError(error);
+            console.error('Error resetting content:', message);
+            throw error;
+        }
     };
 
     // Exporter le contenu en JSON
@@ -65,22 +77,27 @@ export function useContentManager() {
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const imported = JSON.parse(e.target?.result as string);
-                    saveContent(imported);
+                    const imported = JSON.parse(e.target?.result as string) as ContentData;
+                    // Validation basique de la structure
+                    if (!imported || typeof imported !== 'object') {
+                        throw new Error('Format de fichier invalide');
+                    }
+                    saveContentData(imported);
                     resolve();
                 } catch (error) {
-                    reject(error);
+                    const { message } = handleError(error);
+                    reject(new Error(message || MESSAGES.ERROR.IMPORT_FAILED));
                 }
             };
-            reader.onerror = reject;
+            reader.onerror = () => reject(new Error(MESSAGES.ERROR.IMPORT_FAILED));
             reader.readAsText(file);
         });
     };
 
     // Authentification
     const login = (password: string) => {
-        if (password === DEFAULT_PASSWORD) {
-            sessionStorage.setItem(AUTH_KEY, 'true');
+        if (password === DEFAULT_CONFIG.ADMIN_PASSWORD) {
+            setAuthenticated(true);
             setIsAuthenticated(true);
             return true;
         }
@@ -88,14 +105,14 @@ export function useContentManager() {
     };
 
     const logout = () => {
-        sessionStorage.removeItem(AUTH_KEY);
+        setAuthenticated(false);
         setIsAuthenticated(false);
     };
 
     return {
         content,
         updateSection,
-        saveContent,
+        saveContent: saveContentData,
         resetToDefaults,
         exportContent,
         importContent,

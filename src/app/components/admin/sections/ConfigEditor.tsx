@@ -2,25 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Mail, Phone, MapPin, Facebook, Youtube, Globe } from 'lucide-react';
-
-interface SiteConfig {
-    siteName: string;
-    tagline: string;
-    logo: string;
-    contact: {
-        email: string;
-        phone: string;
-        address: string;
-        whatsapp: string;
-    };
-    social: {
-        facebook: string;
-        youtube: string;
-        tripadvisor: string;
-        google: string;
-        instagram: string;
-    };
-}
+import type { SiteConfig } from '../../../types/content';
 
 interface ConfigEditorProps {
     config: SiteConfig;

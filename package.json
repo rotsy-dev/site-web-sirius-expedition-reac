@@ -1,11 +1,25 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "sirius-expedition-website",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.1",
+  "description": "Site web pour Sirius Expedition - Agence de voyage spécialisée dans les expéditions d'aventure.",
+  "homepage": "https://github.com/rotsy-dev/site-web-sirius-expedition-reac#readme",
+  "bugs": {
+    "url": "https://github.com/rotsy-dev/site-web-sirius-expedition-reac/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rotsy-dev/site-web-sirius-expedition-reac.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "index.js",
   "scripts": {
+    "dev": "vite",
     "build": "vite build",
-    "dev": "vite"
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

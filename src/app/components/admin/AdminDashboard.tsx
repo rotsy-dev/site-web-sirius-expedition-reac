@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -23,13 +22,15 @@ import { BlogEditor } from './sections/BlogEditor';
 import { FAQEditor } from './sections/FAQEditor';
 import { ConfigEditor } from './sections/ConfigEditor';
 
+import type { ContentData, ContentSection } from '../../../types/content';
+
 interface AdminDashboardProps {
     onLogout: () => void;
     onExport: () => void;
     onImport: (file: File) => Promise<void>;
     onReset: () => void;
-    content: any;
-    onUpdateSection: (section: string, data: any) => void;
+    content: ContentData;
+    onUpdateSection: <T extends ContentSection>(section: T, data: ContentData[T]) => void;
 }
 
 export function AdminDashboard({ onLogout, onExport, onImport, onReset, content, onUpdateSection }: AdminDashboardProps) {

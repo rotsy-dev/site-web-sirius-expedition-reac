@@ -2,14 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, X, Youtube, Film, Sparkles } from 'lucide-react';
-
-interface Video {
-  id: number;
-  title: string;
-  youtubeId: string;
-  thumbnail: string;
-  category: string;
-}
+import type { Video } from '../../types/content';
 
 interface VideoGalleryProps {
   videos: Video[];
