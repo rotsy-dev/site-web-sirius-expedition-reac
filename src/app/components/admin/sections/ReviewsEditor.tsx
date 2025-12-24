@@ -1,8 +1,22 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, Star, MapPin, Calendar, CheckCircle } from 'lucide-react';
-import type { Review } from '../../../types/content';
+import { Plus, Trash2, Save, Star, MapPin, Calendar, CheckCircle, X } from 'lucide-react';
+import { db } from '../../../../firebase/config'; // ← ajuste le chemin si nécessaire
+import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+
+interface Review {
+    id: number;
+    name: string;
+    country: string;
+    avatar: string;
+    rating: number;
+    text: string;
+    date: string;
+    tour: string;
+    verified: boolean;
+    platform: string;
+}
 
 interface ReviewsEditorProps {
     reviews: Review[];
@@ -13,6 +27,32 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
     const [reviews, setReviews] = useState<Review[]>(initialReviews);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Charger les avis depuis Firestore au montage
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const reviewsCollection = collection(db, 'reviews');
+                const snapshot = await getDocs(reviewsCollection);
+                const fetchedReviews: Review[] = snapshot.docs.map((docSnap) => ({
+                    id: parseInt(docSnap.id),
+                    ...docSnap.data() as Omit<Review, 'id'>
+                }));
+
+                // Trier par id pour garder un ordre stable
+                fetchedReviews.sort((a, b) => a.id - b.id);
+
+                setReviews(fetchedReviews.length > 0 ? fetchedReviews : initialReviews);
+            } catch (err) {
+                console.error('Erreur chargement avis:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchReviews();
+    }, [initialReviews]);
 
     const handleChange = (id: number, field: keyof Review, value: any) => {
         setReviews(reviews.map(review =>
@@ -25,13 +65,13 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
         const newId = Math.max(...reviews.map(r => r.id), 0) + 1;
         const newReview: Review = {
             id: newId,
-            name: 'John Doe',
-            country: 'United States',
-            avatar: `https://ui-avatars.com/api/?name=John+Doe&background=6D4C41&color=fff`,
+            name: 'Nouveau Client',
+            country: 'France',
+            avatar: `https://ui-avatars.com/api/?name=Nouveau+Client&background=6D4C41&color=fff`,
             rating: 5,
-            text: 'Amazing experience! Highly recommended.',
-            date: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-            tour: 'Tour Name',
+            text: 'Expérience incroyable, je recommande vivement !',
+            date: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+            tour: 'Tour de votre choix',
             verified: true,
             platform: 'Google',
         };
@@ -40,22 +80,45 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
         setHasChanges(true);
     };
 
-    const handleDeleteReview = (id: number) => {
+    const handleDeleteReview = async (id: number) => {
         if (confirm('Êtes-vous sûr de vouloir supprimer ce témoignage ?')) {
-            setReviews(reviews.filter(r => r.id !== id));
-            setHasChanges(true);
+            try {
+                // Suppression dans Firestore
+                await deleteDoc(doc(db, 'reviews', id.toString()));
+
+                // Suppression locale
+                setReviews(reviews.filter(r => r.id !== id));
+                setHasChanges(true);
+            } catch (err) {
+                console.error('Erreur suppression avis:', err);
+                alert('Erreur lors de la suppression – vérifiez la console');
+            }
         }
     };
 
-    const handleSave = () => {
-        onSave(reviews);
-        setHasChanges(false);
-        alert('✅ Témoignages sauvegardés !');
+    const handleSave = async () => {
+        try {
+            for (const review of reviews) {
+                const reviewDoc = doc(db, 'reviews', review.id.toString());
+                await setDoc(reviewDoc, review);
+            }
+
+            onSave(reviews);
+            setHasChanges(false);
+            alert('✅ Témoignages sauvegardés dans Firestore !');
+        } catch (err) {
+            console.error('Erreur sauvegarde avis:', err);
+            alert('Erreur lors de la sauvegarde – vérifiez la console');
+        }
     };
 
     const generateAvatar = (name: string) => {
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6D4C41&color=fff`;
     };
+
+    if (isLoading) {
+        return <div className="text-center py-12 text-muted-foreground">Chargement des avis depuis Firestore…</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -107,7 +170,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                 <img
                                     src={review.avatar}
                                     alt={review.name}
-                                    className="w-12 h-12 rounded-full"
+                                    className="w-12 h-12 rounded-full object-cover"
                                     loading="lazy"
                                 />
                                 <div>
@@ -117,7 +180,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                             <CheckCircle size={16} className="text-accent fill-accent" />
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                         <span className="flex items-center gap-1">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
@@ -128,6 +191,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                             ))}
                                         </span>
                                         <span>• {review.country}</span>
+                                        <span>• {review.date}</span>
                                     </div>
                                 </div>
                             </div>
@@ -154,6 +218,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
                                     className="overflow-hidden"
                                 >
                                     <div className="p-6 space-y-4">
@@ -190,8 +255,9 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                                     type="number"
                                                     min="1"
                                                     max="5"
+                                                    step="0.5"
                                                     value={review.rating}
-                                                    onChange={(e) => handleChange(review.id, 'rating', parseInt(e.target.value))}
+                                                    onChange={(e) => handleChange(review.id, 'rating', parseFloat(e.target.value))}
                                                     className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                 />
                                             </div>
@@ -203,7 +269,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                                     type="text"
                                                     value={review.date}
                                                     onChange={(e) => handleChange(review.id, 'date', e.target.value)}
-                                                    placeholder="December 2024"
+                                                    placeholder="Décembre 2024"
                                                     className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                 />
                                             </div>
@@ -219,7 +285,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                                 />
                                             </div>
 
-                                            {/* Platform */}
+                                            {/* Plateforme */}
                                             <div>
                                                 <label className="block text-sm font-medium text-foreground mb-2">Plateforme</label>
                                                 <select
