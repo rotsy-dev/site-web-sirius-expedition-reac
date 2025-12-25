@@ -1,17 +1,21 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, Shield, Mail, User } from 'lucide-react';
+import { Lock, Eye, EyeOff, Shield, Mail, User, Check, X } from 'lucide-react';
 import { auth, db } from '../../../firebase/config';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Important pour la redirection
+import { doc, setDoc, collection, getDocs, query } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { 
+    validatePassword, 
+    getPasswordStrength, 
+    getStrengthColor, 
+    getStrengthLabel 
+} from '../../../utils/passwordValidation';
 
 // Import du dashboard
-import { AdminDashboard } from './AdminDashboard'; // Ajuste le chemin selon ta structure
+import { AdminDashboard } from './AdminDashboard';
 
-// Tu devras passer ces props depuis ton App.tsx ou un contexte
-// Pour l'exemple, on les mock temporairement si besoin
 const mockContent = {
     heroSlides: [],
     bestSellers: [],
@@ -37,9 +41,29 @@ export function AdminLogin() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // Pour afficher le dashboard
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    
+    // États pour la validation du mot de passe
+    const [passwordValidation, setPasswordValidation] = useState({
+        isValid: false,
+        errors: [] as string[]
+    });
+    const [passwordStrength, setPasswordStrength] = useState(0);
+    const [showPasswordRules, setShowPasswordRules] = useState(false);
 
     const navigate = useNavigate();
+
+    // Validation en temps réel du mot de passe
+    useEffect(() => {
+        if (mode === 'register' && password) {
+            const validation = validatePassword(password);
+            setPasswordValidation(validation);
+            setPasswordStrength(getPasswordStrength(password));
+        } else {
+            setPasswordValidation({ isValid: false, errors: [] });
+            setPasswordStrength(0);
+        }
+    }, [password, mode]);
 
     const resetForm = () => {
         setUsername('');
@@ -47,6 +71,27 @@ export function AdminLogin() {
         setPassword('');
         setConfirmPassword('');
         setError('');
+        setPasswordValidation({ isValid: false, errors: [] });
+        setPasswordStrength(0);
+        setShowPasswordRules(false);
+    };
+
+    const checkAdminCount = async (): Promise<boolean> => {
+        try {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef);
+            const querySnapshot = await getDocs(q);
+            
+            const adminCount = querySnapshot.size;
+            
+            if (adminCount >= 3) {
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.error('Erreur lors de la vérification des admins:', err);
+            throw new Error('Impossible de vérifier le nombre d\'administrateurs');
+        }
     };
 
     const handleSubmit = async () => {
@@ -60,27 +105,40 @@ export function AdminLogin() {
                 }
 
                 await signInWithEmailAndPassword(auth, email, password);
-                setIsAuthenticated(true); // Affiche le dashboard directement
+                setIsAuthenticated(true);
             } else {
                 // Mode register
                 if (!username || !email || !password || !confirmPassword) {
                     throw new Error('Tous les champs sont obligatoires');
                 }
+
+                // ✨ VALIDATION DU MOT DE PASSE
+                if (!passwordValidation.isValid) {
+                    throw new Error('Le mot de passe ne respecte pas les critères de sécurité');
+                }
+
                 if (password !== confirmPassword) {
                     throw new Error('Les mots de passe ne correspondent pas');
+                }
+
+                // Vérification de la limite de 3 admins
+                const canCreateAdmin = await checkAdminCount();
+                if (!canCreateAdmin) {
+                    throw new Error('Limite atteinte : 3 comptes administrateurs maximum autorisés');
                 }
 
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Stockage du username
                 await setDoc(doc(db, 'users', user.uid), {
                     username,
                     email,
+                    role: 'admin',
+                    active: true,
                     createdAt: new Date(),
                 });
 
-                setIsAuthenticated(true); // Affiche le dashboard après inscription
+                setIsAuthenticated(true);
             }
         } catch (err: any) {
             console.error(err);
@@ -118,7 +176,6 @@ export function AdminLogin() {
         }
     };
 
-    // Si connecté → affiche le dashboard
     if (isAuthenticated) {
         return (
             <AdminDashboard
@@ -136,7 +193,6 @@ export function AdminLogin() {
         );
     }
 
-    // Sinon → affiche le formulaire de login/register
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-6">
             <AnimatePresence mode="wait">
@@ -159,17 +215,111 @@ export function AdminLogin() {
                             <p className="text-muted-foreground">Sirius Expedition Dashboard</p>
                         </div>
 
+                        {mode === 'register' && (
+                            <div className="mb-6 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-xl text-sm">
+                                ⚠️ <strong>Limite :</strong> Maximum 3 comptes administrateurs autorisés
+                            </div>
+                        )}
+
                         <div className="space-y-5">
                             {mode === 'register' && (
-                                <Input icon={<User size={20} />} label="Nom d'utilisateur" value={username} onChange={setUsername} placeholder="Admin principal" />
+                                <Input 
+                                    icon={<User size={20} />} 
+                                    label="Nom d'utilisateur" 
+                                    value={username} 
+                                    onChange={setUsername} 
+                                    placeholder="Admin principal" 
+                                />
                             )}
 
-                            <Input icon={<Mail size={20} />} label="Email" value={email} onChange={setEmail} placeholder="admin@sirius.com" />
+                            <Input 
+                                icon={<Mail size={20} />} 
+                                label="Email" 
+                                value={email} 
+                                onChange={setEmail} 
+                                placeholder="admin@sirius.com" 
+                            />
 
-                            <PasswordInput label="Mot de passe" value={password} onChange={setPassword} show={showPassword} toggleShow={() => setShowPassword(!showPassword)} />
+                            <div>
+                                <PasswordInput 
+                                    label="Mot de passe" 
+                                    value={password} 
+                                    onChange={setPassword} 
+                                    show={showPassword} 
+                                    toggleShow={() => setShowPassword(!showPassword)}
+                                    onFocus={() => mode === 'register' && setShowPasswordRules(true)}
+                                />
+                                
+                                {/* ✨ Indicateur de force du mot de passe */}
+                                {mode === 'register' && password && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="mt-2"
+                                    >
+                                        <div className="flex items-center justify-between text-xs mb-1">
+                                            <span className="text-muted-foreground">Force du mot de passe</span>
+                                            <span className={`font-semibold ${
+                                                passwordStrength < 40 ? 'text-red-500' :
+                                                passwordStrength < 70 ? 'text-yellow-500' :
+                                                'text-green-500'
+                                            }`}>
+                                                {getStrengthLabel(passwordStrength)}
+                                            </span>
+                                        </div>
+                                        <div className="w-full bg-muted rounded-full h-1.5">
+                                            <motion.div 
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${passwordStrength}%` }}
+                                                className={`h-full rounded-full transition-all ${getStrengthColor(passwordStrength)}`}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* ✨ Règles de validation */}
+                                {mode === 'register' && showPasswordRules && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="mt-3 bg-muted/50 rounded-xl p-3 space-y-2"
+                                    >
+                                        <p className="text-xs font-semibold text-muted-foreground mb-2">
+                                            Le mot de passe doit contenir :
+                                        </p>
+                                        <PasswordRule 
+                                            met={password.length >= 8} 
+                                            text="Au moins 8 caractères" 
+                                        />
+                                        <PasswordRule 
+                                            met={/[A-Z]/.test(password)} 
+                                            text="Une lettre majuscule (A-Z)" 
+                                        />
+                                        <PasswordRule 
+                                            met={/[a-z]/.test(password)} 
+                                            text="Une lettre minuscule (a-z)" 
+                                        />
+                                        <PasswordRule 
+                                            met={/[0-9]/.test(password)} 
+                                            text="Un chiffre (0-9)" 
+                                        />
+                                        <PasswordRule 
+                                            met={/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/;'`~]/.test(password)} 
+                                            text="Un caractère spécial (!@#$%...)" 
+                                        />
+                                    </motion.div>
+                                )}
+                            </div>
 
                             {mode === 'register' && (
-                                <PasswordInput label="Confirmer le mot de passe" value={confirmPassword} onChange={setConfirmPassword} show={showPassword} toggleShow={() => setShowPassword(!showPassword)} />
+                                <PasswordInput 
+                                    label="Confirmer le mot de passe" 
+                                    value={confirmPassword} 
+                                    onChange={setConfirmPassword} 
+                                    show={showPassword} 
+                                    toggleShow={() => setShowPassword(!showPassword)} 
+                                />
                             )}
 
                             {error && (
@@ -180,10 +330,10 @@ export function AdminLogin() {
 
                             <motion.button
                                 onClick={handleSubmit}
-                                disabled={isLoading}
+                                disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="w-full py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-semibold shadow-lg transition-all"
+                                className="w-full py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-semibold shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? 'Veuillez patienter...' : mode === 'login' ? 'Se connecter' : 'Créer le compte admin'}
                             </motion.button>
@@ -211,7 +361,23 @@ export function AdminLogin() {
     );
 }
 
-/* Composants internes (inchangés) */
+/* Composant pour afficher une règle de validation */
+function PasswordRule({ met, text }: { met: boolean; text: string }) {
+    return (
+        <div className={`flex items-center gap-2 text-xs transition-colors ${
+            met ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+        }`}>
+            {met ? (
+                <Check size={14} className="flex-shrink-0" />
+            ) : (
+                <X size={14} className="flex-shrink-0" />
+            )}
+            <span>{text}</span>
+        </div>
+    );
+}
+
+/* Composants internes */
 function Input({ icon, label, value, onChange, placeholder }: any) {
     return (
         <div>
@@ -230,7 +396,7 @@ function Input({ icon, label, value, onChange, placeholder }: any) {
     );
 }
 
-function PasswordInput({ label, value, onChange, show, toggleShow }: any) {
+function PasswordInput({ label, value, onChange, show, toggleShow, onFocus }: any) {
     return (
         <div>
             <label className="block text-sm mb-2">{label}</label>
@@ -242,6 +408,7 @@ function PasswordInput({ label, value, onChange, show, toggleShow }: any) {
                     type={show ? 'text' : 'password'}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
+                    onFocus={onFocus}
                     className="w-full pl-12 pr-12 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                 />
                 <button

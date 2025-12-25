@@ -1,4 +1,5 @@
-import * as React from 'react'
+// src/app/components/Footer.tsx
+import * as React from 'react';
 import { Facebook, Youtube, Mail, Phone, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -11,6 +12,7 @@ interface FooterProps {
       email: string;
       phone: string;
       address: string;
+      whatsapp?: string;
     };
     social: {
       facebook: string;
@@ -18,10 +20,9 @@ interface FooterProps {
       tripadvisor: string;
       google: string;
     };
-    services: {
-      hosting: string[];
-      domain: string;
-      email: string;
+    services?: {
+      hosting?: string[];
+      email?: string;
     };
   };
 }
@@ -35,6 +36,10 @@ export function Footer({ setActiveSection, config }: FooterProps) {
     { id: 'blogs', label: 'Blog' },
     { id: 'about', label: 'About Us' },
   ];
+
+  // Fallback sécurisé pour services
+  const hosting = Array.isArray(config.services?.hosting) ? config.services.hosting : [];
+  const emailProvider = config.services?.email || '';
 
   return (
     <footer className="relative overflow-hidden mt-24">
@@ -147,7 +152,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 <motion.a
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  href={config.social.facebook}
+                  href={config.social.facebook || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative"
@@ -160,7 +165,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 <motion.a
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  href={config.social.youtube}
+                  href={config.social.youtube || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative"
@@ -249,7 +254,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <div className="space-y-3">
                 <motion.a
                   whileHover={{ x: 5 }}
-                  href={config.social.tripadvisor}
+                  href={config.social.tripadvisor || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 p-3 bg-card/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl hover:bg-card/10 hover:border-primary-foreground/20 transition-all"
@@ -265,7 +270,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
 
                 <motion.a
                   whileHover={{ x: 5 }}
-                  href={config.social.google}
+                  href={config.social.google || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 p-3 bg-card/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl hover:bg-card/10 hover:border-primary-foreground/20 transition-all"
@@ -300,15 +305,23 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 viewport={{ once: true }}
                 className="flex items-center gap-2 text-xs text-muted"
               >
-                <span>Powered by</span>
-                {config.services.hosting.map((host, idx) => (
-                  <React.Fragment key={host}>
-                    {idx > 0 && <span>•</span>}
-                    <span className="text-accent font-semibold">{host}</span>
-                  </React.Fragment>
-                ))}
-                <span>•</span>
-                <span className="text-primary-foreground font-semibold">{config.services.email}</span>
+                {hosting.length > 0 && (
+                  <>
+                    <span>Powered by</span>
+                    {hosting.map((host, idx) => (
+                      <React.Fragment key={host}>
+                        {idx > 0 && <span>•</span>}
+                        <span className="text-accent font-semibold">{host}</span>
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+                {emailProvider && (
+                  <>
+                    {(hosting.length > 0 ? ' • ' : '')}
+                    <span className="text-primary-foreground font-semibold">{emailProvider}</span>
+                  </>
+                )}
               </motion.div>
             </div>
           </div>
