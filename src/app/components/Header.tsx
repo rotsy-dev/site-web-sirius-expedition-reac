@@ -1,3 +1,4 @@
+// src/app/components/Header.tsx
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
@@ -33,7 +34,8 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
     { id: 'contact', label: 'Contact' },
   ];
 
-  const isImageLogo = siteConfig.logo.startsWith('data:') || siteConfig.logo.startsWith('http');
+  // CORRECTION : Ajout du chaînage optionnel (?.) pour éviter l'erreur startsWith sur undefined
+  const isImageLogo = siteConfig?.logo?.startsWith('data:') || siteConfig?.logo?.startsWith('http');
 
   return (
     <motion.header
@@ -71,15 +73,15 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl">{siteConfig.logo}</span>
+                  <span className="text-2xl">{siteConfig?.logo || 'S'}</span>
                 )}
               </motion.div>
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground tracking-tight">
-                {siteConfig.siteName}
+                {siteConfig?.siteName || 'Sirius Expedition'}
               </h1>
-              <p className="text-xs text-muted-foreground">{siteConfig.tagline}</p>
+              <p className="text-xs text-muted-foreground">{siteConfig?.tagline}</p>
             </div>
           </motion.div>
 
@@ -124,7 +126,6 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
               <ArrowRight size={16} />
             </motion.button>
 
-            {/* Bouton Admin - discret */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -197,19 +198,6 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                     {item.label}
                   </motion.button>
                 ))}
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: menuItems.length * 0.05 }}
-                  onClick={() => {
-                    setActiveSection('contact');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold mt-2"
-                >
-                  Book Now
-                  <ArrowRight size={16} />
-                </motion.button>
               </div>
             </motion.nav>
           )}

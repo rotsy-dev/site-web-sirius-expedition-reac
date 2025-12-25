@@ -1,24 +1,20 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+// src/firebase/config.ts
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyA2i7wEhzTQO9CKA45meqnn70JunpdV2RY",
-  authDomain: "site-web-sirius-expedition.firebaseapp.com",
-  projectId: "site-web-sirius-expedition",
-  storageBucket: "site-web-sirius-expedition.firebasestorage.app",
-  messagingSenderId: "805029750026",
-  appId: "1:805029750026:web:dfc4f69f38ff80a1b9c6f3"
+  apiKey:  "AIzaSyCdffy_SLEdjhbk3LgWc8fiU2IzUfHSBek",
+  authDomain: "sirius-expedition.firebaseapp.com",
+  projectId: "sirius-expedition",
+  storageBucket: "sirius-expedition.firebasestorage.app",
+  messagingSenderId: "645702472516",
+  appId: "1:645702472516:web:caca105659522da5c9fd11",
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+// Empêche la double initialisation
+export const app =
+  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-
 export const db = getFirestore(app);

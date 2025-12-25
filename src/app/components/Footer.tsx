@@ -38,15 +38,16 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   ];
 
   // Fallback sécurisé pour services
-  const hosting = Array.isArray(config.services?.hosting) ? config.services.hosting : [];
-  const emailProvider = config.services?.email || '';
+  const hosting = Array.isArray(config?.services?.hosting) ? config.services.hosting : [];
+  const emailProvider = config?.services?.email || '';
+
+  // Sécurité pour le logo : vérifie si config.logo existe avant d'appeler startsWith
+  const isImageUrl = config?.logo?.startsWith('data:') || config?.logo?.startsWith('http');
 
   return (
     <footer className="relative overflow-hidden mt-24">
-      {/* Background avec gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-foreground via-primary to-foreground" />
 
-      {/* Motif de grille */}
       <div className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `radial-gradient(circle, #FFF8F0 1px, transparent 1px)`,
@@ -54,12 +55,10 @@ export function Footer({ setActiveSection, config }: FooterProps) {
         }}
       />
 
-      {/* Bulles lumineuses */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
 
       <div className="relative z-10">
-        {/* Newsletter Section */}
         <div className="border-b border-primary-foreground/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <motion.div
@@ -108,10 +107,8 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           </div>
         </div>
 
-        {/* Main Footer Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            {/* About Column */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -129,30 +126,28 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                     className="absolute inset-0 bg-accent/30 rounded-2xl blur-md"
                   />
                   <div className="relative w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
-                    {(config.logo.startsWith('data:') || config.logo.startsWith('http')) ? (
+                    {isImageUrl ? (
                       <img
                         src={config.logo}
                         alt={config.siteName}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-3xl">{config.logo}</span>
+                      <span className="text-3xl">{config?.logo || 'S'}</span>
                     )}
                   </div>
                 </div>
-                <h3 className="text-xl text-primary-foreground font-bold">{config.siteName}</h3>
+                <h3 className="text-xl text-primary-foreground font-bold">{config?.siteName}</h3>
               </div>
               <p className="text-muted leading-relaxed mb-6">
                 Your trusted partner for discovering the wonders of Madagascar.
-                Expert guides, unforgettable experiences, lifetime memories.
               </p>
 
-              {/* Social Icons */}
               <div className="flex gap-3">
                 <motion.a
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  href={config.social.facebook || '#'}
+                  href={config?.social?.facebook || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative"
@@ -165,7 +160,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 <motion.a
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  href={config.social.youtube || '#'}
+                  href={config?.social?.youtube || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative"
@@ -178,7 +173,6 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </div>
             </motion.div>
 
-            {/* Quick Links */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -188,13 +182,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h4 className="text-primary-foreground mb-6 font-bold text-lg">Quick Links</h4>
               <ul className="space-y-3">
                 {quickLinks.map((link, index) => (
-                  <motion.li
-                    key={link.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 * index }}
-                  >
+                  <motion.li key={link.id} transition={{ delay: 0.1 * index }}>
                     <button
                       onClick={() => setActiveSection(link.id)}
                       className="group flex items-center gap-2 text-muted hover:text-primary-foreground transition-colors"
@@ -207,7 +195,6 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </ul>
             </motion.div>
 
-            {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -217,33 +204,30 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h4 className="text-primary-foreground mb-6 font-bold text-lg">Contact</h4>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3 group">
-                  <div className="p-2 bg-card/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                  <div className="p-2 bg-card/10 rounded-lg">
                     <Mail size={18} className="text-primary-foreground flex-shrink-0" />
                   </div>
-                  <a href={`mailto:${config.contact.email}`} className="text-muted hover:text-primary-foreground transition-colors">
-                    {config.contact.email}
+                  <a href={`mailto:${config?.contact?.email}`} className="text-muted hover:text-primary-foreground transition-colors">
+                    {config?.contact?.email || 'N/A'}
                   </a>
                 </li>
                 <li className="flex items-start gap-3 group">
-                  <div className="p-2 bg-card/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                  <div className="p-2 bg-card/10 rounded-lg">
                     <Phone size={18} className="text-primary-foreground flex-shrink-0" />
                   </div>
-                  <a href={`tel:${config.contact.phone}`} className="text-muted hover:text-primary-foreground transition-colors">
-                    {config.contact.phone}
+                  <a href={`tel:${config?.contact?.phone}`} className="text-muted hover:text-primary-foreground transition-colors">
+                    {config?.contact?.phone || 'N/A'}
                   </a>
                 </li>
                 <li className="flex items-start gap-3 group">
-                  <div className="p-2 bg-card/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                  <div className="p-2 bg-card/10 rounded-lg">
                     <MapPin size={18} className="text-primary-foreground flex-shrink-0" />
                   </div>
-                  <span className="text-muted">
-                    {config.contact.address}
-                  </span>
+                  <span className="text-muted">{config?.contact?.address || 'N/A'}</span>
                 </li>
               </ul>
             </motion.div>
 
-            {/* Reviews Platforms */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -254,57 +238,41 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <div className="space-y-3">
                 <motion.a
                   whileHover={{ x: 5 }}
-                  href={config.social.tripadvisor || '#'}
+                  href={config?.social?.tripadvisor || '#'}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 p-3 bg-card/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl hover:bg-card/10 hover:border-primary-foreground/20 transition-all"
+                  className="group flex items-center gap-3 p-3 bg-card/5 border border-primary-foreground/10 rounded-xl"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
                     T
                   </div>
                   <div>
                     <p className="text-primary-foreground font-medium text-sm">TripAdvisor</p>
-                    <p className="text-muted text-xs">156 reviews</p>
                   </div>
                 </motion.a>
-
                 <motion.a
                   whileHover={{ x: 5 }}
-                  href={config.social.google || '#'}
+                  href={config?.social?.google || '#'}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 p-3 bg-card/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl hover:bg-card/10 hover:border-primary-foreground/20 transition-all"
+                  className="group flex items-center gap-3 p-3 bg-card/5 border border-primary-foreground/10 rounded-xl"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
                     G
                   </div>
                   <div>
                     <p className="text-primary-foreground font-medium text-sm">Google</p>
-                    <p className="text-muted text-xs">203 reviews</p>
                   </div>
                 </motion.a>
               </div>
             </motion.div>
           </div>
 
-          {/* Bottom Bar */}
           <div className="border-t border-primary-foreground/10 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="text-muted text-sm text-center md:text-left"
-              >
-                © {currentYear} {config.siteName}. All rights reserved.
-              </motion.p>
+              <p className="text-muted text-sm text-center md:text-left">
+                © {currentYear} {config?.siteName}. All rights reserved.
+              </p>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="flex items-center gap-2 text-xs text-muted"
-              >
+              <div className="flex items-center gap-2 text-xs text-muted">
                 {hosting.length > 0 && (
                   <>
                     <span>Powered by</span>
@@ -316,13 +284,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                     ))}
                   </>
                 )}
-                {emailProvider && (
-                  <>
-                    {(hosting.length > 0 ? ' • ' : '')}
-                    <span className="text-primary-foreground font-semibold">{emailProvider}</span>
-                  </>
-                )}
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
