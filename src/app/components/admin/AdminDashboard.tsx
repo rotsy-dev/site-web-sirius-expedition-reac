@@ -126,7 +126,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                             </motion.button>
 
                             <motion.button
-                                whileHover={{ scale: 1.05 }}
+                             whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={onLogout}
                                 className="px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
