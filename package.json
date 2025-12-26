@@ -1,25 +1,11 @@
 {
-  "name": "sirius-expedition-website",
-  "version": "1.0.0",
+  "name": "@figma/my-make-file",
   "private": true,
-  "description": "Site web pour Sirius Expedition - Agence de voyage spécialisée dans les expéditions d'aventure.",
-  "homepage": "https://github.com/rotsy-dev/site-web-sirius-expedition-reac#readme",
-  "bugs": {
-    "url": "https://github.com/rotsy-dev/site-web-sirius-expedition-reac/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rotsy-dev/site-web-sirius-expedition-reac.git"
-  },
-  "license": "ISC",
-  "author": "",
+  "version": "0.0.1",
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "dev": "vite"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -58,6 +44,7 @@
     "cmdk": "1.1.1",
     "date-fns": "3.6.0",
     "embla-carousel-react": "8.6.0",
+    "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
     "input-otp": "1.4.2",
     "lucide-react": "0.487.0",
@@ -71,6 +58,7 @@
     "react-popper": "2.3.0",
     "react-resizable-panels": "2.1.7",
     "react-responsive-masonry": "2.7.1",
+    "react-router-dom": "^7.11.0",
     "react-slick": "0.31.0",
     "recharts": "2.15.2",
     "slick-carousel": "^1.8.1",

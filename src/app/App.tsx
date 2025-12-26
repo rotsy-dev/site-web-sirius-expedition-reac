@@ -1,53 +1,53 @@
 // src/app/App.tsx
 import * as React from 'react';
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+
 import { Header } from './components/Header';
+import { HeroCarousel } from './components/HeroCarousel';
+import { BestSellers } from './components/BestSellers';
+import { TourSpecialties } from './components/TourSpecialties';
+import { Reviews } from './components/Reviews';
+import { VideoGallery } from './components/VideoGallery';
+import { Blogs } from './components/Blogs';
+import { Contact } from './components/Contact';
+import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
+
+// Admin
+import { AdminLogin } from './components/admin/AdminLogin';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
-import { ErrorBoundary } from '../components/common/ErrorBoundary';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { SITE_SECTIONS } from '../constants';
 
-// Composants chargés de manière paresseuse pour optimiser les performances
-const HeroCarousel = lazy(() => import('./components/HeroCarousel').then(m => ({ default: m.HeroCarousel })));
-const BestSellers = lazy(() => import('./components/BestSellers').then(m => ({ default: m.BestSellers })));
-const TourSpecialties = lazy(() => import('./components/TourSpecialties').then(m => ({ default: m.TourSpecialties })));
-const Reviews = lazy(() => import('./components/Reviews').then(m => ({ default: m.Reviews })));
-const VideoGallery = lazy(() => import('./components/VideoGallery').then(m => ({ default: m.VideoGallery })));
-const Blogs = lazy(() => import('./components/Blogs').then(m => ({ default: m.Blogs })));
-const Contact = lazy(() => import('./components/Contact').then(m => ({ default: m.Contact })));
-const AboutUs = lazy(() => import('./components/AboutUs').then(m => ({ default: m.AboutUs })));
+// (si ces constantes existent déjà chez toi)
+import { SITE_SECTIONS } from './constants/siteSections';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { LoadingSpinner } from './components/common/LoadingSpinner';
 
-// Composants Admin
-const AdminLogin = lazy(() => import('./components/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
-const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+function App() {
+  const [activeSection, setActiveSection] = useState('home');
 
-export default function App() {
-  const [activeSection, setActiveSection] = useState(SITE_SECTIONS.HOME);
-
-  // Hook de gestion du contenu et authentification
   const {
     content,
+    loading,
     updateSection,
     resetToDefaults,
     exportContent,
     importContent,
     isAuthenticated,
-    login,
     logout,
+    login,
   } = useContentManager();
 
-  // Scroll to top when section changes
+  // Scroll automatique lors du changement de section
   useEffect(() => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth"
+      behavior: 'smooth',
     });
   }, [activeSection]);
 
-  // Si on est sur la section admin
+  // 🔐 SECTION ADMIN
   if (activeSection === SITE_SECTIONS.ADMIN) {
-    // Si pas authentifié, afficher la page de login
     if (!isAuthenticated) {
       return (
         <ErrorBoundary>
@@ -58,7 +58,6 @@ export default function App() {
       );
     }
 
-    // Si authentifié, afficher le dashboard
     return (
       <ErrorBoundary>
         <Suspense fallback={<LoadingSpinner />}>
@@ -78,62 +77,64 @@ export default function App() {
     );
   }
 
-  // Site normal - passer le contenu géré en props
+  // 🌍 SITE PUBLIC
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen">
-        <Header
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          siteConfig={content.siteConfig}
-        />
+    <div className="min-h-screen bg-background">
+      <Header
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        siteConfig={content.siteConfig}
+      />
 
-        {activeSection === SITE_SECTIONS.HOME && (
-          <Suspense fallback={<LoadingSpinner />}>
+      <main>
+        {activeSection === 'home' && (
+          <>
             <HeroCarousel slides={content.heroSlides} />
             <BestSellers tours={content.bestSellers} />
             <TourSpecialties specialties={content.tourSpecialties} />
             <VideoGallery
-              videos={content.videoGallery}
+              videos={content.videoGallery || []}
               config={content.siteConfig}
             />
             <Reviews
               reviews={content.reviews}
               config={content.siteConfig}
             />
-          </Suspense>
+          </>
         )}
 
-        {activeSection === SITE_SECTIONS.TOURS && (
-          <Suspense fallback={<LoadingSpinner />}>
+        {activeSection === 'tours' && (
+          <div className="pt-20">
             <TourSpecialties specialties={content.tourSpecialties} />
             <BestSellers tours={content.bestSellers} />
-          </Suspense>
+          </div>
         )}
 
-        {activeSection === SITE_SECTIONS.BLOGS && (
-          <Suspense fallback={<LoadingSpinner />}>
+        {activeSection === 'blogs' && (
+          <div className="pt-20">
             <Blogs posts={content.blogPosts} />
-          </Suspense>
+          </div>
         )}
 
-        {activeSection === SITE_SECTIONS.CONTACT && (
-          <Suspense fallback={<LoadingSpinner />}>
+        {activeSection === 'contact' && (
+          <div className="pt-20">
             <Contact config={content.siteConfig} />
-          </Suspense>
+          </div>
         )}
 
-        {activeSection === SITE_SECTIONS.ABOUT && (
-          <Suspense fallback={<LoadingSpinner />}>
+        {activeSection === 'about' && (
+          <div className="pt-20">
             <AboutUs config={content.siteConfig} />
-          </Suspense>
+          </div>
         )}
+      </main>
 
-        <Footer
-          setActiveSection={setActiveSection}
-          config={content.siteConfig}
-        />
-      </div>
-    </ErrorBoundary>
+      <Footer
+        setActiveSection={setActiveSection}
+        config={content.siteConfig}
+      />
+    </div>
   );
 }
+
+export default App;

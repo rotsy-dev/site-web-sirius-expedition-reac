@@ -1,198 +1,170 @@
-import * as React from 'react'
-import { Calendar, User, ArrowRight, Clock } from 'lucide-react';
-import { motion } from "framer-motion"
+import * as React from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { ArrowLeft, Clock, MapPin, Search } from 'lucide-react';
+import type { BlogPost as BlogPostType } from '../../types/content';
 
-interface BlogPost {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  image: string;
-  author: string;
-  authorAvatar: string;
-  date: string;
-  category: string;
-  readTime: string;
-  featured?: boolean;
-}
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] as const }
+  }
+};
 
-interface BlogsProps {
-  posts: BlogPost[];
-}
+export function Blogs({ posts = [] }: { posts: BlogPostType[] }) {
+  const [selectedPost, setSelectedPost] = React.useState<BlogPostType | null>(null);
+  const [activeCategory, setActiveCategory] = React.useState('All');
 
-export function Blogs({ posts }: BlogsProps) {
-  const featuredPost = posts[0];
-  const otherPosts = posts.slice(1);
+  const categories = ['All', ...Array.from(new Set(posts.map(p => p.category)))];
+  const filteredPosts = activeCategory === 'All' ? posts : posts.filter(p => p.category === activeCategory);
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <span className="inline-block bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
-          📝 Latest Stories
-        </span>
-        <h2 className="text-4xl md:text-5xl mb-4 text-primary font-bold">
-          Our Blog
-        </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Expert insights, travel tips, and stories from Madagascar
-        </p>
-      </motion.div>
-
-      {/* Featured Post */}
-      <motion.article
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        whileHover={{ y: -5 }}
-        className="bg-card rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 mb-12 group cursor-pointer"
-      >
-        <div className="grid md:grid-cols-2 gap-0">
-          <div className="relative h-96 md:h-auto overflow-hidden">
-            <img
-              src={featuredPost.image}
-              alt={featuredPost.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              loading="lazy"
-            />
-            <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-accent text-primary-foreground px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-              ✨ Featured Article
-            </div>
-          </div>
-
-          <div className="p-8 md:p-12 flex flex-col justify-center">
-            <div className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4 w-fit">
-              {featuredPost.category}
-            </div>
-
-            <h3 className="text-3xl md:text-4xl mb-4 font-bold text-foreground group-hover:text-primary transition-colors">
-              {featuredPost.title}
-            </h3>
-
-            <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-              {featuredPost.excerpt}
-            </p>
-
-            <div className="flex items-center gap-6 mb-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <img
-                  src={featuredPost.authorAvatar}
-                  alt={featuredPost.author}
-                  className="w-8 h-8 rounded-full"
-                  loading="lazy"
-                />
-                <span>{featuredPost.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar size={16} />
-                <span>{featuredPost.date}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock size={16} />
-                <span>{featuredPost.readTime}</span>
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ x: 5 }}
-              className="flex items-center gap-2 text-primary font-bold text-lg group/btn"
+    <React.Fragment>
+      <div className="bg-[#FAF7F2] min-h-screen font-sans text-[#1A120B]">
+        
+        <AnimatePresence mode="wait">
+          {!selectedPost ? (
+            <motion.div 
+              key="list" 
+              initial="hidden" animate="visible" exit={{ opacity: 0 }}
+              className="max-w-[1400px] mx-auto px-6 md:px-12 pt-32 pb-40"
             >
-              Read Full Article
-              <ArrowRight className="group-hover/btn:translate-x-1 transition-transform" size={20} />
-            </motion.button>
-          </div>
-        </div>
-      </motion.article>
-
-      {/* Other Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {otherPosts.map((post, index) => (
-          <motion.article
-            key={post.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -8 }}
-            className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer"
-          >
-            <div className="relative h-64 overflow-hidden">
-              <img
-                src={post.image}
-                alt={post.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-              <div className="absolute top-4 left-4 bg-primary/90 backdrop-blur-sm text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                {post.category}
-              </div>
-
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center gap-2 text-white/80 text-xs">
-                  <Clock size={14} />
-                  <span>{post.readTime}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-xl mb-3 font-bold line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-                {post.title}
-              </h3>
-
-              <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
-                {post.excerpt}
-              </p>
-
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={post.authorAvatar}
-                    alt={post.author}
-                    className="w-6 h-6 rounded-full"
-                    loading="lazy"
+              {/* --- HEADER EDITORIAL --- */}
+              <header className="mb-20 text-center max-w-3xl mx-auto">
+                <motion.span variants={itemVariants} className="text-[#D4A373] text-xs font-bold uppercase tracking-[0.3em] mb-4 block">
+                  Insights & Stories
+                </motion.span>
+                <motion.h1 variants={itemVariants} className="font-serif text-5xl md:text-7xl mb-8 leading-tight">
+                  Our Latest <span className="italic">Articles</span>
+                </motion.h1>
+                <motion.div variants={itemVariants} className="relative max-w-md mx-auto">
+                  <input 
+                    type="text" 
+                    placeholder="Search articles..." 
+                    className="w-full bg-white border border-[#634832]/10 rounded-full py-4 px-6 text-sm focus:outline-none focus:border-[#D4A373] transition-colors"
                   />
-                  <span className="text-xs">{post.author}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar size={14} />
-                  <span className="text-xs">{post.date}</span>
+                  <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-[#634832]/30" size={18} />
+                </motion.div>
+              </header>
+
+              {/* --- CATEGORIES PILLS --- */}
+              <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 mb-16">
+                {categories.map((cat) => (
+                  <button 
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-8 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                      activeCategory === cat 
+                      ? 'bg-[#634832] text-white shadow-lg' 
+                      : 'bg-white text-[#634832]/60 hover:bg-[#634832]/5'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </motion.div>
+
+              {/* --- GRID INSPIRED BY ENVATO PREVIEW --- */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+                {filteredPosts.map((post, idx) => (
+                  <motion.article
+                    key={post.id}
+                    variants={itemVariants}
+                    layoutId={`post-${post.id}`}
+                    onClick={() => { setSelectedPost(post); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                    className="group cursor-pointer flex flex-col h-full"
+                  >
+                    {/* Image Container */}
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] mb-6 shadow-sm group-hover:shadow-2xl transition-all duration-500">
+                      <motion.img 
+                        layoutId={`img-${post.id}`}
+                        src={post.image} 
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                      />
+                      <div className="absolute top-6 left-6">
+                        <span className="bg-white/90 backdrop-blur-sm text-[#1A120B] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                          {post.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col flex-grow px-2">
+                      <div className="flex items-center gap-4 text-[10px] font-bold text-[#D4A373] uppercase tracking-[0.15em] mb-4">
+                        <span className="flex items-center gap-1.5"><Clock size={12} /> {post.readTime}</span>
+                        <span className="w-1 h-1 bg-[#D4A373]/30 rounded-full"></span>
+                        <span>{post.date}</span>
+                      </div>
+                      <h3 className="font-serif text-3xl mb-4 leading-snug group-hover:text-[#D4A373] transition-colors duration-300">
+                        {post.title}
+                      </h3>
+                      <p className="text-[#1A120B]/50 text-sm leading-relaxed line-clamp-3 mb-6">
+                        {post.excerpt}
+                      </p>
+                      <div className="mt-auto pt-4 border-t border-[#634832]/5 flex items-center justify-between">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-[#634832]">Read Story</span>
+                         <div className="w-10 h-10 rounded-full border border-[#634832]/10 flex items-center justify-center group-hover:bg-[#634832] group-hover:text-white transition-all duration-300">
+                            <ArrowRightIcon />
+                         </div>
+                      </div>
+                    </div>
+                  </motion.article>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            /* --- VUE ARTICLE (EDITORIAL VIEW) --- */
+            <motion.article 
+              key="details" 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="max-w-4xl mx-auto px-6 pt-40 pb-40"
+            >
+              <button onClick={() => setSelectedPost(null)} className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#1A120B]/40 hover:text-[#D4A373] transition-colors mb-12">
+                <ArrowLeft size={16} /> Back to Blog
+              </button>
+              
+              <div className="text-center mb-16">
+                <h1 className="font-serif text-5xl md:text-7xl leading-tight mb-8">
+                  {selectedPost.title}
+                </h1>
+                <div className="flex items-center justify-center gap-6 text-xs font-bold uppercase tracking-widest text-[#D4A373]">
+                  <span>{selectedPost.author}</span>
+                  <span className="w-1.5 h-1.5 bg-[#D4A373]/20 rounded-full"></span>
+                  <span>{selectedPost.date}</span>
                 </div>
               </div>
 
-              <motion.button
-                whileHover={{ x: 5 }}
-                className="flex items-center gap-2 text-accent font-medium group/btn"
-              >
-                Read More
-                <ArrowRight className="group-hover/btn:translate-x-1 transition-transform" size={16} />
-              </motion.button>
-            </div>
-          </motion.article>
-        ))}
-      </div>
+              <motion.div layoutId={`img-${selectedPost.id}`} className="rounded-[30px] overflow-hidden shadow-3xl mb-16">
+                <img src={selectedPost.image} className="w-full aspect-video object-cover" alt="" />
+              </motion.div>
 
-      {/* Load More */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="text-center mt-12"
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          Load More Articles
-        </motion.button>
-      </motion.div>
-    </section>
+              <div className="prose prose-stone max-w-none px-4 md:px-12">
+                <p className="text-2xl font-serif italic text-[#634832] leading-relaxed mb-10">
+                  {selectedPost.excerpt}
+                </p>
+                <div className="text-[#1A120B]/70 text-lg leading-loose space-y-8">
+                  <p>Our journey through the red lands of Madagascar revealed secrets only the wind knows...</p>
+                </div>
+              </div>
+            </motion.article>
+          )}
+        </AnimatePresence>
+
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+          .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+          .font-serif { font-family: 'DM Serif Display', serif; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+        `}</style>
+      </div>
+    </React.Fragment>
   );
 }
+
+// Petit composant icône interne
+const ArrowRightIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14m-7-7 7 7-7 7"/>
+  </svg>
+);

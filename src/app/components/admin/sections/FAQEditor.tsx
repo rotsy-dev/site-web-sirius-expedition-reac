@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, HelpCircle } from 'lucide-react';
+import { db } from '../../../../firebase/config'; // ← ajuste le chemin selon ta structure
+import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 
 interface FAQ {
     id: number;
@@ -19,8 +21,35 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
     const [faqs, setFaqs] = useState<FAQ[]>(initialFaqs);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const categories = ['General', 'Tours', 'Pricing', 'Travel Info', 'Booking'];
+
+    // Chargement des FAQ depuis Firestore au montage
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const faqsCollection = collection(db, 'faqs');
+                const snapshot = await getDocs(faqsCollection);
+                const fetchedFaqs: FAQ[] = snapshot.docs.map((docSnap) => ({
+                    id: parseInt(docSnap.id),
+                    ...docSnap.data() as Omit<FAQ, 'id'>
+                }));
+
+                // Tri par ID pour un ordre stable
+                fetchedFaqs.sort((a, b) => a.id - b.id);
+
+                setFaqs(fetchedFaqs.length > 0 ? fetchedFaqs : initialFaqs);
+            } catch (err) {
+                console.error('Erreur lors du chargement des FAQ :', err);
+                alert('Impossible de charger les FAQ depuis Firebase.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchFaqs();
+    }, [initialFaqs]);
 
     const handleChange = (id: number, field: keyof FAQ, value: string) => {
         setFaqs(faqs.map(faq =>
@@ -33,8 +62,8 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
         const newId = Math.max(...faqs.map(f => f.id), 0) + 1;
         const newFAQ: FAQ = {
             id: newId,
-            question: 'New question?',
-            answer: 'Answer here...',
+            question: 'Nouvelle question ?',
+            answer: 'Réponse détaillée ici...',
             category: 'General',
         };
         setFaqs([...faqs, newFAQ]);
@@ -42,17 +71,37 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
         setHasChanges(true);
     };
 
-    const handleDeleteFAQ = (id: number) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette FAQ ?')) {
-            setFaqs(faqs.filter(f => f.id !== id));
-            setHasChanges(true);
+    const handleDeleteFAQ = async (id: number) => {
+        if (confirm('Supprimer définitivement cette FAQ ? Cette action est irréversible.')) {
+            try {
+                // Suppression immédiate dans Firestore
+                await deleteDoc(doc(db, 'faqs', id.toString()));
+
+                // Suppression locale
+                setFaqs(faqs.filter(f => f.id !== id));
+                setHasChanges(true);
+            } catch (err) {
+                console.error('Erreur lors de la suppression de la FAQ :', err);
+                alert('Impossible de supprimer la FAQ. Vérifiez votre connexion ou les permissions.');
+            }
         }
     };
 
-    const handleSave = () => {
-        onSave(faqs);
-        setHasChanges(false);
-        alert('✅ FAQ sauvegardées !');
+    const handleSave = async () => {
+        try {
+            // Sauvegarde de chaque FAQ dans Firestore
+            for (const faq of faqs) {
+                const faqDoc = doc(db, 'faqs', faq.id.toString());
+                await setDoc(faqDoc, faq);
+            }
+
+            onSave(faqs);
+            setHasChanges(false);
+            alert('✅ FAQ sauvegardées avec succès dans Firestore !');
+        } catch (err) {
+            console.error('Erreur lors de la sauvegarde des FAQ :', err);
+            alert('Erreur lors de la sauvegarde. Vérifiez votre connexion et les règles Firestore.');
+        }
     };
 
     const groupedFaqs = faqs.reduce((acc, faq) => {
@@ -60,6 +109,14 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
         acc[faq.category].push(faq);
         return acc;
     }, {} as Record<string, FAQ[]>);
+
+    if (isLoading) {
+        return (
+            <div className="text-center py-16">
+                <p className="text-lg text-muted-foreground">Chargement des FAQ depuis Firebase...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -79,7 +136,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleAddFAQ}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium"
+                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
                     >
                         <Plus size={18} />
                         Ajouter FAQ
@@ -89,7 +146,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                         whileTap={{ scale: 0.95 }}
                         onClick={handleSave}
                         disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <Save size={18} />
                         Sauvegarder
@@ -100,7 +157,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {categories.map(category => (
-                    <div key={category} className="bg-card border border-border rounded-xl p-4">
+                    <div key={category} className="bg-card border border-border rounded-xl p-4 text-center">
                         <p className="text-sm text-muted-foreground mb-1">{category}</p>
                         <p className="text-2xl font-bold text-foreground">
                             {groupedFaqs[category]?.length || 0}
@@ -120,21 +177,21 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                             <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                 <HelpCircle size={16} className="text-primary" />
                             </div>
-                            {category}
+                            {category} ({categoryFaqs.length})
                         </h3>
-                        <div className="grid gap-3">
-                            {categoryFaqs.map((faq, index) => (
+                        <div className="grid gap-4">
+                            {categoryFaqs.map((faq) => (
                                 <motion.div
                                     key={faq.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="bg-muted/30 rounded-xl border border-border overflow-hidden"
+                                    className="bg-muted/30 rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                                 >
                                     <div className="flex items-center justify-between p-4 bg-card border-b border-border">
                                         <div className="flex-1">
-                                            <h4 className="font-medium text-foreground">{faq.question}</h4>
+                                            <h4 className="font-medium text-foreground text-lg">{faq.question}</h4>
                                             {editingId !== faq.id && (
-                                                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                                                     {faq.answer}
                                                 </p>
                                             )}
@@ -142,13 +199,14 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                         <div className="flex items-center gap-2 ml-4">
                                             <button
                                                 onClick={() => setEditingId(editingId === faq.id ? null : faq.id)}
-                                                className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium"
+                                                className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
                                             >
                                                 {editingId === faq.id ? 'Fermer' : 'Modifier'}
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteFAQ(faq.id)}
-                                                className="p-2 hover:bg-destructive/10 rounded-lg"
+                                                className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
+                                                title="Supprimer"
                                             >
                                                 <Trash2 size={18} className="text-destructive" />
                                             </button>
@@ -162,16 +220,17 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: 'auto', opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="p-6 space-y-4">
+                                                <div className="p-6 space-y-5">
                                                     {/* Catégorie */}
                                                     <div>
                                                         <label className="block text-sm font-medium text-foreground mb-2">Catégorie</label>
                                                         <select
                                                             value={faq.category}
                                                             onChange={(e) => handleChange(faq.id, 'category', e.target.value)}
-                                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-4 py-3 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                         >
                                                             {categories.map(cat => (
                                                                 <option key={cat} value={cat}>{cat}</option>
@@ -186,7 +245,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                             type="text"
                                                             value={faq.question}
                                                             onChange={(e) => handleChange(faq.id, 'question', e.target.value)}
-                                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            className="w-full px-4 py-3 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                                                         />
                                                     </div>
 
@@ -196,8 +255,8 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                         <textarea
                                                             value={faq.answer}
                                                             onChange={(e) => handleChange(faq.id, 'answer', e.target.value)}
-                                                            rows={4}
-                                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                                            rows={6}
+                                                            className="w-full px-4 py-3 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                                         />
                                                     </div>
                                                 </div>
@@ -211,11 +270,22 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                 );
             })}
 
-            {faqs.length === 0 && (
-                <div className="bg-muted/30 rounded-xl p-12 text-center">
-                    <HelpCircle size={48} className="text-muted-foreground mx-auto mb-4" />
-                    <p className="text-foreground font-medium mb-2">Aucune FAQ</p>
-                    <p className="text-muted-foreground text-sm">Cliquez sur "Ajouter FAQ" pour commencer</p>
+            {/* Empty state */}
+            {faqs.length === 0 && !isLoading && (
+                <div className="bg-muted/30 rounded-2xl p-16 text-center border border-border border-dashed">
+                    <HelpCircle size={64} className="text-muted-foreground mx-auto mb-6" />
+                    <h3 className="text-2xl font-bold text-foreground mb-3">Aucune FAQ pour le moment</h3>
+                    <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                        Ajoutez vos premières questions fréquentes pour aider vos visiteurs
+                    </p>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleAddFAQ}
+                        className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all"
+                    >
+                        Ajouter la première FAQ
+                    </motion.button>
                 </div>
             )}
         </div>
