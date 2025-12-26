@@ -1,6 +1,6 @@
 // src/app/App.tsx
 import * as React from 'react';
-import { useState, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { useContentManager } from '../hooks/useContentManager';
@@ -36,6 +36,14 @@ export default function App() {
     login,
     logout,
   } = useContentManager();
+
+  // Scroll to top when section changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, [activeSection]);
 
   // Si on est sur la section admin
   if (activeSection === SITE_SECTIONS.ADMIN) {
