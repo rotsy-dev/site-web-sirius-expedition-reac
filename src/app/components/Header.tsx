@@ -1,146 +1,107 @@
-// src/app/components/Header.tsx
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import * as React from "react"
+import { useState, useEffect } from "react"
+import { Menu, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface HeaderProps {
-  activeSection: string;
-  setActiveSection: (section: string) => void;
+  activeSection: string
+  setActiveSection: (section: string) => void
   siteConfig: {
-    siteName: string;
-    tagline: string;
-    logo: string;
-  };
+    siteName: string
+    tagline: string
+    logo: string
+  }
 }
 
-export function Header({ activeSection, setActiveSection, siteConfig }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+export function Header({
+  activeSection,
+  setActiveSection,
+  siteConfig,
+}: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const menuItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'tours', label: 'Tours' },
-    { id: 'blogs', label: 'Blog' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
-  ];
-
-  // CORRECTION : Ajout du chaînage optionnel (?.) pour éviter l'erreur startsWith sur undefined
-  const isImageLogo = siteConfig?.logo?.startsWith('data:') || siteConfig?.logo?.startsWith('http');
+    { id: "home", label: "Home" },
+    { id: "tours", label: "Tours" },
+    { id: "blogs", label: "Blog" },
+    { id: "about", label: "About" },
+    { id: "contact", label: "Contact" },
+  ]
 
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-        ? 'bg-card/80 backdrop-blur-xl shadow-lg border-b border-border/50'
-        : 'bg-transparent'
-        }`}
+      transition={{ duration: 0.6 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-md"
+          : "bg-transparent"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => setActiveSection('home')}
+          <motion.a
+            href="#home"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex flex-col cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault()
+              setActiveSection("home")
+            }}
           >
-            <div className="relative">
-              <motion.div
-                animate={{
-                  boxShadow: scrolled
-                    ? '0 4px 20px rgba(109, 76, 65, 0.25)'
-                    : '0 4px 15px rgba(109, 76, 65, 0.15)'
-                }}
-                transition={{ duration: 0.3 }}
-                className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform duration-300 overflow-hidden"
-              >
-                {isImageLogo ? (
-                  <img
-                    src={siteConfig.logo}
-                    alt={siteConfig.siteName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl">{siteConfig?.logo || 'S'}</span>
-                )}
-              </motion.div>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-foreground tracking-tight">
-                {siteConfig?.siteName || 'Sirius Expedition'}
-              </h1>
-              <p className="text-xs text-muted-foreground">{siteConfig?.tagline}</p>
-            </div>
-          </motion.div>
+            <h1 className="text-3xl font-bold text-[#443C34] tracking-tight">
+              {siteConfig.siteName}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {siteConfig.tagline}
+            </p>
+          </motion.a>
 
           {/* Navigation Desktop */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1 bg-white rounded-full px-4 py-2">
             {menuItems.map((item) => (
-              <motion.button
+              <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className="relative px-5 py-2 rounded-lg group"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className={`px-5 py-2 rounded-full text-md transition-all ${
+                  activeSection === item.id
+                    ? "font-bold text-gray-900"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
               >
-                <span
-                  className={`relative z-10 text-sm font-medium transition-colors duration-300 ${activeSection === item.id
-                    ? 'text-primary-foreground'
-                    : 'text-foreground group-hover:text-primary'
-                    }`}
-                >
-                  {item.label}
-                </span>
-                {activeSection === item.id && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-lg"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </motion.button>
+                {item.label}
+              </button>
             ))}
           </nav>
 
-          {/* CTA Buttons Desktop */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Login Desktop */}
+          <div className="hidden lg:flex items-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveSection('contact')}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-medium shadow-lg hover:shadow-xl transition-shadow duration-300"
+              onClick={() => setActiveSection("admin")}
+              className="px-8 py-2.5 bg-[#443C34] text-white rounded-full font-semibold hover:bg-gray-900 transition-colors"
             >
-              Book Now
-              <ArrowRight size={16} />
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveSection('admin')}
-              className="px-4 py-2.5 bg-muted/50 hover:bg-muted text-foreground rounded-lg font-medium transition-colors duration-300"
-              title="Admin Dashboard"
-            >
-              🔐
+              Login
             </motion.button>
           </div>
 
-          {/* Menu Mobile Button */}
+          {/* Mobile Menu Button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="lg:hidden p-2.5 rounded-lg bg-card/80 backdrop-blur-md border border-border/50 text-foreground"
+            className="lg:hidden p-2 rounded-lg text-gray-900"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <AnimatePresence mode="wait">
@@ -150,7 +111,6 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                   initial={{ rotate: -90, opacity: 0 }}
                   animate={{ rotate: 0, opacity: 1 }}
                   exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
                 >
                   <X size={22} />
                 </motion.div>
@@ -160,7 +120,6 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                   initial={{ rotate: 90, opacity: 0 }}
                   animate={{ rotate: 0, opacity: 1 }}
                   exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
                 >
                   <Menu size={22} />
                 </motion.div>
@@ -169,40 +128,47 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
           </motion.button>
         </div>
 
-        {/* Menu Mobile */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.nav
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
               className="lg:hidden overflow-hidden pb-4"
             >
-              <div className="space-y-1 bg-card/95 backdrop-blur-xl rounded-xl p-3 border border-border/50 mt-3 shadow-xl">
-                {menuItems.map((item, index) => (
-                  <motion.button
+              <div className="bg-white rounded-2xl p-4 mt-2 space-y-1">
+                {menuItems.map((item) => (
+                  <button
                     key={item.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
                     onClick={() => {
-                      setActiveSection(item.id);
-                      setMobileMenuOpen(false);
+                      setActiveSection(item.id)
+                      setMobileMenuOpen(false)
                     }}
-                    className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 ${activeSection === item.id
-                      ? 'text-primary-foreground bg-gradient-to-r from-primary to-accent'
-                      : 'text-foreground hover:bg-muted'
-                      }`}
+                    className={`block w-full text-left px-4 py-3 rounded-lg text-sm ${
+                      activeSection === item.id
+                        ? "font-bold bg-gray-100"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
                   >
                     {item.label}
-                  </motion.button>
+                  </button>
                 ))}
+
+                <button
+                  onClick={() => {
+                    setActiveSection("admin")
+                    setMobileMenuOpen(false)
+                  }}
+                  className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg text-sm font-medium mt-3 hover:bg-gray-900"
+                >
+                  Login
+                </button>
               </div>
             </motion.nav>
           )}
         </AnimatePresence>
       </div>
     </motion.header>
-  );
+  )
 }
