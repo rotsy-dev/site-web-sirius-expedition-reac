@@ -7,7 +7,8 @@ import {
 import { auth, db } from '../../../firebase/config';
 import {
     signInWithEmailAndPassword,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, query } from 'firebase/firestore';
 import {
@@ -61,6 +62,39 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
     );
 }
 
+// ========== TOAST SUCCÈS ==========
+function SuccessToast({ message, onClose }: { message: string; onClose: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 5000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-6 right-6 z-50 max-w-md"
+        >
+            <div className="bg-green-500/95 backdrop-blur-xl text-white rounded-2xl shadow-2xl border border-green-400/50 p-4 flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Check size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold mb-1">Succès</h4>
+                    <p className="text-sm text-green-50">{message}</p>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
+                >
+                    <XCircle size={20} />
+                </button>
+            </div>
+        </motion.div>
+    );
+}
+
 // ========== COMPOSANT PRINCIPAL ==========
 export function AdminLogin({ onBack }: { onBack?: () => void }) {
     const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -72,6 +106,11 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Mot de passe oublié
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetSuccess, setResetSuccess] = useState('');
 
     // Validation mot de passe
     const [passwordValidation, setPasswordValidation] = useState({ isValid: false, errors: [] as string[] });
@@ -188,6 +227,48 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
         }
     };
 
+    const handlePasswordReset = async () => {
+        if (!resetEmail) {
+            setError('Veuillez entrer votre adresse email');
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+            await sendPasswordResetEmail(auth, resetEmail);
+            setResetSuccess('Un email de réinitialisation a été envoyé à ' + resetEmail);
+            setResetEmail('');
+            
+            // Retour au mode login après 3 secondes
+            setTimeout(() => {
+                setShowForgotPassword(false);
+                setResetSuccess('');
+            }, 3000);
+        } catch (err: any) {
+            let message = 'Une erreur est survenue';
+            
+            switch (err.code) {
+                case 'auth/invalid-email':
+                    message = 'Adresse email invalide';
+                    break;
+                case 'auth/user-not-found':
+                    message = 'Aucun compte associé à cet email';
+                    break;
+                case 'auth/too-many-requests':
+                    message = 'Trop de tentatives. Réessayez plus tard';
+                    break;
+                default:
+                    message = 'Impossible d\'envoyer l\'email de réinitialisation';
+            }
+            
+            setError(message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const closeError = () => setError('');
 
     if (isAuthenticated) {
@@ -211,6 +292,7 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
         <>
             <AnimatePresence>
                 {error && <ErrorToast message={error} onClose={closeError} />}
+                {resetSuccess && <SuccessToast message={resetSuccess} onClose={() => setResetSuccess('')} />}
             </AnimatePresence>
 
             {/* === FOND GLOBAL + FORMULAIRE À GAUCHE + TEXTE À DROITE === */}
@@ -249,91 +331,162 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                                     <Shield className="text-primary-foreground" size={32} />
                                 </div>
                                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-                                    {mode === 'login' ? 'Connexion Admin' : 'Inscription Admin'}
+                                    {showForgotPassword ? 'Réinitialiser' : mode === 'login' ? 'Connexion Admin' : 'Inscription Admin'}
                                 </h1>
-                                <p className="text-muted-foreground text-base sm:text-lg">Sirius Expedition Dashboard</p>
+                                <p className="text-muted-foreground text-base sm:text-lg">
+                                    {showForgotPassword ? 'Récupération de compte' : 'Sirius Expedition Dashboard'}
+                                </p>
                             </div>
 
                             <div className="space-y-6">
-                                {mode === 'register' && (
-                                    <Input icon={<User size={20} />} label="Nom d'utilisateur" value={username} onChange={setUsername} placeholder="Admin principal" />
-                                )}
+                                {!showForgotPassword ? (
+                                    <>
+                                        {/* Formulaire normal (login/register) */}
+                                        {mode === 'register' && (
+                                            <Input 
+                                                icon={<User size={20} />} 
+                                                label="Nom d'utilisateur" 
+                                                value={username} 
+                                                onChange={setUsername} 
+                                                placeholder="Admin principal" 
+                                            />
+                                        )}
 
-                                <Input icon={<Mail size={20} />} label="Email" value={email} onChange={setEmail} placeholder="admin@sirius.com" />
+                                        <Input 
+                                            icon={<Mail size={20} />} 
+                                            label="Email" 
+                                            value={email} 
+                                            onChange={setEmail} 
+                                            placeholder="admin@sirius.com" 
+                                        />
 
-                                <div>
-                                    <PasswordInput
-                                        label="Mot de passe"
-                                        value={password}
-                                        onChange={setPassword}
-                                        show={showPassword}
-                                        toggleShow={() => setShowPassword(!showPassword)}
-                                    />
+                                        <div>
+                                            <PasswordInput
+                                                label="Mot de passe"
+                                                value={password}
+                                                onChange={setPassword}
+                                                show={showPassword}
+                                                toggleShow={() => setShowPassword(!showPassword)}
+                                            />
 
-                                    {mode === 'register' && (
-                                        <div className="mt-3 flex items-center gap-2 text-xs">
-                                            {passwordValidation.isValid ? (
-                                                <Check size={16} className="text-green-600" />
-                                            ) : password ? (
-                                                <X size={16} className="text-red-600" />
-                                            ) : null}
-                                            <span className={passwordValidation.isValid ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
-                                                Au moins 8 caractères, majuscule, minuscule, chiffre et caractère spécial
-                                            </span>
+                                            {mode === 'register' && (
+                                                <div className="mt-3 flex items-center gap-2 text-xs">
+                                                    {passwordValidation.isValid ? (
+                                                        <Check size={16} className="text-green-600" />
+                                                    ) : password ? (
+                                                        <X size={16} className="text-red-600" />
+                                                    ) : null}
+                                                    <span className={passwordValidation.isValid ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
+                                                        Au moins 8 caractères, majuscule, minuscule, chiffre et caractère spécial
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {mode === 'register' && password && (
+                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+                                                    <div className="flex items-center justify-center gap-16 xl:gap-24 text-xs mb-2">
+                                                        <span className="text-muted-foreground">Force du mot de passe</span>
+                                                        <span className={`font-semibold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
+                                                            {getStrengthLabel(passwordStrength)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full bg-muted rounded-full h-2">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${passwordStrength}%` }}
+                                                            className={`h-full rounded-full ${getStrengthColor(passwordStrength)}`}
+                                                        />
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {/* Lien Mot de passe oublié (uniquement en mode login) */}
+                                            {mode === 'login' && (
+                                                <div className="mt-2 text-right">
+                                                    <button
+                                                        onClick={() => setShowForgotPassword(true)}
+                                                        className="text-sm text-primary hover:underline"
+                                                    >
+                                                        Mot de passe oublié ?
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
 
-                                    {mode === 'register' && password && (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-                                            <div className="flex items-center justify-center gap-16 xl:gap-24 text-xs mb-2">
-                                                <span className="text-muted-foreground">Force du mot de passe</span>
-                                                <span className={`font-semibold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
-                                                    {getStrengthLabel(passwordStrength)}
-                                                </span>
-                                            </div>
-                                            <div className="w-full bg-muted rounded-full h-2">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${passwordStrength}%` }}
-                                                    className={`h-full rounded-full ${getStrengthColor(passwordStrength)}`}
-                                                />
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </div>
+                                        {mode === 'register' && (
+                                            <PasswordInput
+                                                label="Confirmer le mot de passe"
+                                                value={confirmPassword}
+                                                onChange={setConfirmPassword}
+                                                show={showPassword}
+                                                toggleShow={() => setShowPassword(!showPassword)}
+                                            />
+                                        )}
 
-                                {mode === 'register' && (
-                                    <PasswordInput
-                                        label="Confirmer le mot de passe"
-                                        value={confirmPassword}
-                                        onChange={setConfirmPassword}
-                                        show={showPassword}
-                                        toggleShow={() => setShowPassword(!showPassword)}
-                                    />
+                                        <motion.button
+                                            onClick={handleSubmit}
+                                            disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
+                                        >
+                                            {isLoading ? 'Patientez...' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
+                                        </motion.button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {/* Formulaire Mot de passe oublié */}
+                                        <div className="text-center mb-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                Entrez votre email pour recevoir un lien de réinitialisation
+                                            </p>
+                                        </div>
+
+                                        <Input 
+                                            icon={<Mail size={20} />} 
+                                            label="Adresse email" 
+                                            value={resetEmail} 
+                                            onChange={setResetEmail} 
+                                            placeholder="admin@sirius.com" 
+                                        />
+
+                                        <motion.button
+                                            onClick={handlePasswordReset}
+                                            disabled={isLoading}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
+                                        >
+                                            {isLoading ? 'Envoi en cours...' : 'Envoyer le lien'}
+                                        </motion.button>
+
+                                        <button
+                                            onClick={() => {
+                                                setShowForgotPassword(false);
+                                                setResetEmail('');
+                                                setError('');
+                                            }}
+                                            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            ← Retour à la connexion
+                                        </button>
+                                    </>
                                 )}
-
-                                <motion.button
-                                    onClick={handleSubmit}
-                                    disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
-                                >
-                                    {isLoading ? 'Patientez...' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
-                                </motion.button>
                             </div>
 
-                            <div className="mt-8 text-center">
-                                <button
-                                    onClick={() => {
-                                        setMode(mode === 'login' ? 'register' : 'login');
-                                        resetForm();
-                                    }}
-                                    className="text-primary hover:underline font-medium"
-                                >
-                                    {mode === 'login' ? 'Créer un compte admin' : 'Déjà un compte ? Se connecter'}
-                                </button>
-                            </div>
+                            {!showForgotPassword && (
+                                <div className="mt-8 text-center">
+                                    <button
+                                        onClick={() => {
+                                            setMode(mode === 'login' ? 'register' : 'login');
+                                            resetForm();
+                                        }}
+                                        className="text-primary hover:underline font-medium"
+                                    >
+                                        {mode === 'login' ? 'Créer un compte admin' : 'Déjà un compte ? Se connecter'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
 
