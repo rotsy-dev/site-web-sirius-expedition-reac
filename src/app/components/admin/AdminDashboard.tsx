@@ -76,73 +76,23 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-xl bg-card/80">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-                                <LayoutDashboard className="text-primary-foreground" size={20} />
-                            </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-                                <p className="text-xs text-muted-foreground">Sirius Expedition</p>
-                            </div>
+        <div className="min-h-screen bg-background flex">
+            {/* ========== LEFT SIDEBAR - COLLÉE À GAUCHE ========== */}
+            <aside className="w-64 min-h-screen bg-card border-r border-border fixed left-0 top-0 bottom-0 z-40">
+                <div className="p-4 h-full flex flex-col">
+                    {/* Logo / Header de la sidebar */}
+                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+                            <LayoutDashboard className="text-primary-foreground" size={20} />
                         </div>
-
-                        <div className="flex items-center gap-2">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onExport}
-                                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
-                            >
-                                <Download size={16} />
-                                Exporter
-                            </motion.button>
-
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleImport}
-                                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
-                            >
-                                <Upload size={16} />
-                                Importer
-                            </motion.button>
-
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleReset}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${showResetConfirm
-                                        ? 'bg-destructive text-destructive-foreground'
-                                        : 'bg-muted hover:bg-muted/80 text-foreground'
-                                    }`}
-                            >
-                                <RotateCcw size={16} />
-                                {showResetConfirm ? 'Confirmer ?' : 'Reset'}
-                            </motion.button>
-
-                            <motion.button
-                             whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onLogout}
-                                className="px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
-                            >
-                                <LogOut size={16} />
-                                Déconnexion
-                            </motion.button>
+                        <div>
+                            <h1 className="text-sm font-bold text-foreground">Admin Dashboard</h1>
+                            <p className="text-xs text-muted-foreground">Sirius Expedition</p>
                         </div>
                     </div>
-                </div>
-            </header>
 
-            <div className="flex max-w-7xl mx-auto">
-                {/* Sidebar */}
-                <aside className="w-64 min-h-screen bg-card border-r border-border p-4">
-                    <nav className="space-y-1">
+                    {/* Navigation Menu */}
+                    <nav className="space-y-1 flex-1">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
                             return (
@@ -150,10 +100,11 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                                     key={item.id}
                                     whileHover={{ x: 4 }}
                                     onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                                        activeTab === item.id
                                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg'
                                             : 'text-foreground hover:bg-muted'
-                                        }`}
+                                    }`}
                                 >
                                     <Icon size={18} />
                                     {item.label}
@@ -161,10 +112,78 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                             );
                         })}
                     </nav>
-                </aside>
 
-                {/* Contenu principal */}
-                <main className="flex-1 p-8">
+                    {/* Bouton de déconnexion en bas */}
+                    <div className="pt-4 border-t border-border">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={onLogout}
+                            className="w-full px-4 py-2.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
+                        >
+                            <LogOut size={16} />
+                            Déconnexion
+                        </motion.button>
+                    </div>
+                </div>
+            </aside>
+
+            {/* ========== CONTENU PRINCIPAL AVEC MARGIN LEFT ========== */}
+            <div className="flex-1 ml-64 w-full">
+                {/* Header - AVEC PADDING ÉGAL DES DEUX CÔTÉS */}
+                <header className="bg-card border-b border-border sticky top-0 z-30 backdrop-blur-xl bg-card/80 w-full">
+                    <div className="w-full px-8 py-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-foreground">
+                                    {menuItems.find(item => item.id === activeTab)?.label}
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Gérez le contenu de cette section
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={onExport}
+                                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
+                                >
+                                    <Download size={16} />
+                                    Exporter
+                                </motion.button>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleImport}
+                                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
+                                >
+                                    <Upload size={16} />
+                                    Importer
+                                </motion.button>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleReset}
+                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${
+                                        showResetConfirm
+                                            ? 'bg-destructive text-destructive-foreground'
+                                            : 'bg-muted hover:bg-muted/80 text-foreground'
+                                    }`}
+                                >
+                                    <RotateCcw size={16} />
+                                    {showResetConfirm ? 'Confirmer ?' : 'Reset'}
+                                </motion.button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Contenu principal - AVEC PADDING ÉGAL */}
+                <main className="w-full p-8">
                     <div className="bg-card rounded-2xl border border-border p-6 min-h-[600px]">
                         {activeTab === 'hero' && (
                             <HeroEditor
@@ -186,7 +205,6 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                                 onSave={(specialties) => onUpdateSection('tourSpecialties', specialties)}
                             />
                         )}
-
 
                         {activeTab === 'reviews' && (
                             <ReviewsEditor
