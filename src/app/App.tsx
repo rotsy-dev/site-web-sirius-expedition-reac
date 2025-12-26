@@ -1,131 +1,164 @@
 // src/app/App.tsx
-import * as React from 'react';
-import { useState, Suspense, lazy } from 'react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from './components/Header';
+import { HeroCarousel } from './components/HeroCarousel';
+import { BestSellers } from './components/BestSellers';
+import { TourSpecialties } from './components/TourSpecialties';
+import { Reviews } from './components/Reviews';
+import { VideoGallery } from './components/VideoGallery';
+import { Blogs } from './components/Blogs';
+import { Contact } from './components/Contact';
+import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
-import { useContentManager } from '../hooks/useContentManager';
-import { ErrorBoundary } from '../components/common/ErrorBoundary';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { SITE_SECTIONS } from '../constants';
-
-// Composants chargés de manière paresseuse pour optimiser les performances
-const HeroCarousel = lazy(() => import('./components/HeroCarousel').then(m => ({ default: m.HeroCarousel })));
-const BestSellers = lazy(() => import('./components/BestSellers').then(m => ({ default: m.BestSellers })));
-const TourSpecialties = lazy(() => import('./components/TourSpecialties').then(m => ({ default: m.TourSpecialties })));
-const Reviews = lazy(() => import('./components/Reviews').then(m => ({ default: m.Reviews })));
-const VideoGallery = lazy(() => import('./components/VideoGallery').then(m => ({ default: m.VideoGallery })));
-const Blogs = lazy(() => import('./components/Blogs').then(m => ({ default: m.Blogs })));
-const Contact = lazy(() => import('./components/Contact').then(m => ({ default: m.Contact })));
-const AboutUs = lazy(() => import('./components/AboutUs').then(m => ({ default: m.AboutUs })));
 
 // Composants Admin
-const AdminLogin = lazy(() => import('./components/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
-const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+import { AdminLogin } from './components/admin/AdminLogin';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { useContentManager } from '../hooks/useContentManager';
 
-export default function App() {
-  const [activeSection, setActiveSection] = useState(SITE_SECTIONS.HOME);
+function App() {
+  const [activeSection, setActiveSection] = useState('home');
 
-  // Hook de gestion du contenu et authentification
   const {
     content,
+    loading,
     updateSection,
     resetToDefaults,
     exportContent,
     importContent,
     isAuthenticated,
-    login,
     logout,
   } = useContentManager();
 
-  // Si on est sur la section admin
-  if (activeSection === SITE_SECTIONS.ADMIN) {
-    // Si pas authentifié, afficher la page de login
-    if (!isAuthenticated) {
-      return (
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminLogin onLogin={login} />
-          </Suspense>
-        </ErrorBoundary>
-      );
-    }
-
-    // Si authentifié, afficher le dashboard
-    return (
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <AdminDashboard
-            onLogout={() => {
-              logout();
-              setActiveSection(SITE_SECTIONS.HOME);
-            }}
-            onExport={exportContent}
-            onImport={importContent}
-            onReset={resetToDefaults}
-            content={content}
-            onUpdateSection={updateSection}
-          />
-        </Suspense>
-      </ErrorBoundary>
-    );
-  }
-
-  // Site normal - passer le contenu géré en props
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen">
-        <Header
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          siteConfig={content.siteConfig}
-        />
+    <div className="min-h-screen bg-background">
+      <AnimatePresence mode="wait">
+        {loading ? (
+          /* --- 1. ÉCRAN DE CHARGEMENT ÉLÉGANT --- */
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-foreground"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.2, 1],
+                rotate: [0, 180, 360],
+                borderRadius: ["20%", "50%", "20%"]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="w-16 h-16 bg-gradient-to-br from-primary to-accent mb-6"
+            />
+            <motion.h2 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-primary-foreground font-bold tracking-[0.3em] text-2xl"
+            >
+              SIRIUS EXPEDITION
+            </motion.h2>
+            <div className="w-48 h-1 bg-white/10 mt-4 rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-accent"
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
+        ) : activeSection === 'admin' ? (
+          /* --- 2. LOGIQUE ADMIN --- */
+          <motion.div 
+            key="admin" 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="min-h-screen bg-muted/30"
+          >
+            {!isAuthenticated ? (
+              <AdminLogin 
+              onBack={() => setActiveSection('home')}/>
+            ) : (
+              <AdminDashboard
+                onLogout={() => {
+                  logout();
+                  setActiveSection('home');
+                }}
+                onExport={exportContent}
+                onImport={importContent}
+                onReset={resetToDefaults}
+                content={content}
+                onUpdateSection={updateSection}
+              />
+            )}
+          </motion.div>
+        ) : (
+          /* --- 3. SITE PUBLIC --- */
+          <motion.div
+            key="site"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Header
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+              siteConfig={content.siteConfig}
+            />
 
-        {activeSection === SITE_SECTIONS.HOME && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <HeroCarousel slides={content.heroSlides} />
-            <BestSellers tours={content.bestSellers} />
-            <TourSpecialties specialties={content.tourSpecialties} />
-            <VideoGallery
-              videos={content.videoGallery}
+            <main>
+              {activeSection === 'home' && (
+                <>
+                  <HeroCarousel slides={content.heroSlides} />
+                  <BestSellers tours={content.bestSellers} />
+                  <TourSpecialties specialties={content.tourSpecialties} />
+                  <VideoGallery
+                    videos={content.videoGallery || []}
+                    config={content.siteConfig}
+                  />
+                  <Reviews
+                    reviews={content.reviews}
+                    config={content.siteConfig}
+                  />
+                </>
+              )}
+
+              {activeSection === 'tours' && (
+                <div className="pt-20">
+                  <TourSpecialties specialties={content.tourSpecialties} />
+                  <BestSellers tours={content.bestSellers} />
+                </div>
+              )}
+
+              {activeSection === 'blogs' && (
+                <div className="pt-20">
+                  <Blogs posts={content.blogPosts} />
+                </div>
+              )}
+
+              {activeSection === 'contact' && (
+                <div className="pt-20">
+                  <Contact config={content.siteConfig} />
+                </div>
+              )}
+
+              {activeSection === 'about' && (
+                <div className="pt-20">
+                  <AboutUs config={content.siteConfig} />
+                </div>
+              )}
+            </main>
+
+            <Footer
+              setActiveSection={setActiveSection}
               config={content.siteConfig}
             />
-            <Reviews
-              reviews={content.reviews}
-              config={content.siteConfig}
-            />
-          </Suspense>
+          </motion.div>
         )}
-
-        {activeSection === SITE_SECTIONS.TOURS && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <TourSpecialties specialties={content.tourSpecialties} />
-            <BestSellers tours={content.bestSellers} />
-          </Suspense>
-        )}
-
-        {activeSection === SITE_SECTIONS.BLOGS && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <Blogs posts={content.blogPosts} />
-          </Suspense>
-        )}
-
-        {activeSection === SITE_SECTIONS.CONTACT && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <Contact config={content.siteConfig} />
-          </Suspense>
-        )}
-
-        {activeSection === SITE_SECTIONS.ABOUT && (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AboutUs config={content.siteConfig} />
-          </Suspense>
-        )}
-
-        <Footer
-          setActiveSection={setActiveSection}
-          config={content.siteConfig}
-        />
-      </div>
-    </ErrorBoundary>
+      </AnimatePresence>
+    </div>
   );
 }
+
+// ✅ EXPORT PAR DÉFAUT (obligatoire)
+export default App;

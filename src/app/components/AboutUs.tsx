@@ -1,6 +1,6 @@
-import * as React from 'react'
+import * as React from 'react';
 import { Award, Users, Globe, Heart, Shield, Clock, Star, CheckCircle } from 'lucide-react';
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion";
 
 interface AboutUsProps {
   config: {
@@ -17,296 +17,181 @@ interface AboutUsProps {
 }
 
 export function AboutUs({ config }: AboutUsProps) {
-  const values = [
-    {
-      icon: <Award size={40} />,
-      title: 'Excellence',
-      description: 'We provide top-quality tours with experienced guides and exceptional service',
-    },
-    {
-      icon: <Users size={40} />,
-      title: 'Local Expertise',
-      description: 'Our team consists of passionate locals who know Madagascar inside out',
-    },
-    {
-      icon: <Globe size={40} />,
-      title: 'Sustainability',
-      description: 'We practice responsible tourism that protects Madagascar\'s unique environment',
-    },
-    {
-      icon: <Heart size={40} />,
-      title: 'Passion',
-      description: 'We love what we do and it shows in every tour we organize',
-    },
-  ];
+  
+  // Variantes d'animation ralenties pour plus d'élégance
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.25, // Plus d'espace entre l'apparition de chaque mot
+        delayChildren: 0.5 
+      }
+    }
+  };
+
+  const wordVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 1.5, // Animation beaucoup plus lente (1.5s au lieu de 0.8s)
+        ease: [0.22, 1, 0.36, 1] 
+      } 
+    }
+  };
 
   const stats = [
-    { number: '500+', label: 'Happy Travelers', icon: <Users size={24} /> },
-    { number: '50+', label: 'Tour Packages', icon: <Globe size={24} /> },
-    { number: '15+', label: 'Years Experience', icon: <Clock size={24} /> },
-    { number: '4.9', label: 'Average Rating', icon: <Star size={24} /> },
+    { number: '500+', label: 'Happy Travelers', icon: <Users size={20} /> },
+    { number: '50+', label: 'Tour Packages', icon: <Globe size={20} /> },
+    { number: '15+', label: 'Years Experience', icon: <Clock size={20} /> },
+    { number: '4.9', label: 'Average Rating', icon: <Star size={20} /> },
   ];
 
   const whyChooseUs = [
-    {
-      title: 'Expert Local Guides',
-      description: 'All our guides are certified professionals with extensive knowledge of Madagascar\'s ecosystems and culture',
-    },
-    {
-      title: 'Customized Itineraries',
-      description: 'Every tour is tailored to your interests, budget, and schedule for a unique experience',
-    },
-    {
-      title: 'Small Group Sizes',
-      description: 'We keep groups small (max 8 people) for a more personalized and intimate experience',
-    },
-    {
-      title: '24/7 Support',
-      description: 'We\'re always available to assist you before, during, and after your trip',
-    },
-    {
-      title: 'Best Price Guarantee',
-      description: 'We offer competitive prices without compromising on quality or safety',
-    },
-    {
-      title: 'Safety First',
-      description: 'Your safety is our priority with comprehensive insurance and safety protocols',
-    },
+    { title: 'Expert Local Guides', description: 'Certified professionals with extensive knowledge.' },
+    { title: 'Customized Itineraries', description: 'Tailored to your interests, budget, and schedule.' },
+    { title: 'Small Group Sizes', description: 'Max 8 people for a personalized experience.' },
+    { title: '24/7 Support', description: 'Always available to assist you during your trip.' },
+    { title: 'Best Price Guarantee', description: 'Competitive prices without compromising quality.' },
+    { title: 'Safety First', description: 'Priority with comprehensive safety protocols.' },
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <span className="inline-block bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
-          🌟 About Us
-        </span>
-        <h2 className="text-4xl md:text-5xl mb-4 text-primary font-bold">
-          About {config.siteName}
-        </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Your trusted partner for unforgettable Madagascar adventures
-        </p>
-      </motion.div>
-
-      {/* Stats Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
-      >
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -5 }}
-            className="bg-gradient-to-br from-primary to-accent p-6 rounded-2xl text-center shadow-xl"
-          >
-            <div className="text-primary-foreground mb-2 flex justify-center">
-              {stat.icon}
-            </div>
-            <h3 className="text-4xl font-bold text-primary-foreground mb-2">
-              {stat.number}
-            </h3>
-            <p className="text-primary-foreground/90 text-sm">{stat.label}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Our Story with Video */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+    <section className="bg-[#FAF7F2] text-[#3D2B1F] pt-40 pb-24 px-6 lg:px-12 overflow-hidden font-sans">
+      
+      {/* --- SECTION TITRE RÉDUIT ET LENT --- */}
+      <div className="max-w-7xl mx-auto mb-24 text-center">
+        <motion.span 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
           viewport={{ once: true }}
+          className="inline-block bg-[#F3E5AB] text-[#6F4E37] px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.4em] mb-8"
         >
-          {/* Video YouTube */}
-          <div className="rounded-2xl overflow-hidden shadow-2xl mb-6">
-            <div className="relative pb-[56.25%] h-0">
-              <iframe
-                className="absolute top-0 left-0 w-full h-full"
-                src={`https://www.youtube.com/embed/${config.videos.aboutUsVideoId}`}
-                title="Sirius Expedition - Discover Madagascar"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1677667495307-10e01bd9530f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
-            alt="Madagascar landscape"
-            className="rounded-2xl shadow-xl w-full h-64 object-cover"
-            loading="lazy"
-          />
-        </motion.div>
+          Discover Our Story
+        </motion.span>
 
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+        <motion.h2 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          className="flex flex-col justify-center"
+          // Taille réduite : text-5xl au lieu de 6xl, text-7xl au lieu de 8xl
+          className="text-5xl md:text-7xl font-serif text-[#3D2B1F] leading-tight mb-8 tracking-tight"
         >
-          <h3 className="text-3xl font-bold mb-6 text-primary">Our Story</h3>
-          <p className="text-muted-foreground mb-4 text-lg leading-relaxed">
-            {config.siteName} was founded with a simple mission: to share the incredible beauty and
-            biodiversity of Madagascar with the world. Named after the brightest star in the night sky,
-            we aim to be your guiding light in exploring this unique island nation.
-          </p>
-          <p className="text-muted-foreground mb-4 text-lg leading-relaxed">
-            With years of experience and deep local knowledge, we specialize in creating customized
-            tours that showcase Madagascar's endemic wildlife, stunning landscapes, and rich cultural heritage.
-          </p>
-          <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-            From the iconic Avenue of the Baobabs to the pristine beaches of Sainte Marie, from lemur
-            encounters to birdwatching expeditions, we ensure every journey is memorable and authentic.
-          </p>
+          <motion.span variants={wordVariants} className="inline-block mr-3">About</motion.span>
+          <motion.span variants={wordVariants} className="inline-block text-[#6F4E37] italic font-normal mr-3">Sirius</motion.span>
+          <motion.span variants={wordVariants} className="inline-block">Expedition</motion.span>
+        </motion.h2>
 
-          {/* Mission Statement */}
-          <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-xl border-l-4 border-primary">
-            <p className="text-lg font-medium text-foreground italic">
-              "We believe in sustainable tourism that benefits local communities while preserving
-              Madagascar's extraordinary natural heritage for future generations."
-            </p>
-          </div>
-        </motion.div>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 2 }} // Apparition très douce du texte
+          viewport={{ once: true }}
+          className="text-[#6F4E37]/70 text-lg max-w-xl mx-auto font-light leading-relaxed"
+        >
+          Your trusted partner for unforgettable Madagascar adventures where the aroma of Mocha meets the sweetness of Vanilla.
+        </motion.p>
       </div>
 
-      {/* Our Values */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-20"
-      >
-        <h3 className="text-3xl font-bold text-center mb-12 text-primary">Our Core Values</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((value, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -8, scale: 1.02 }}
-              className="bg-card p-8 rounded-2xl shadow-lg text-center hover:shadow-2xl transition-all duration-300 border border-border"
-            >
-              <div className="inline-block text-primary mb-4 p-4 bg-primary/10 rounded-xl">
-                {value.icon}
-              </div>
-              <h4 className="text-xl font-bold mb-3">{value.title}</h4>
-              <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      {/* --- LE RESTE DU CONTENU --- */}
+      <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
+        {stats.map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 * i, duration: 1 }}
+            className="bg-[#6F4E37] p-10 rounded-[2.5rem] text-center shadow-2xl shadow-mocha/20"
+          >
+            <div className="text-[#F3E5AB] mb-4 flex justify-center">{stat.icon}</div>
+            <div className="text-3xl font-serif text-[#F3E5AB] mb-2">{stat.number}</div>
+            <div className="text-white/50 text-[10px] uppercase tracking-widest font-bold">{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
 
-      {/* Why Choose Us */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="bg-muted/30 p-8 md:p-12 rounded-3xl mb-20"
-      >
-        <h3 className="text-3xl font-bold mb-8 text-center text-primary">Why Choose {config.siteName}?</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {whyChooseUs.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ x: 5 }}
-              className="flex gap-4 bg-card p-6 rounded-xl shadow-md hover:shadow-lg transition-all"
-            >
-              <div className="flex-shrink-0">
-                <CheckCircle className="text-accent" size={24} />
-              </div>
-              <div>
-                <h4 className="font-bold mb-2 text-foreground">{item.title}</h4>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center mb-32">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2 }}
+          viewport={{ once: true }}
+          className="rounded-[3rem] overflow-hidden shadow-2xl bg-white p-4"
+        >
+          <div className="relative pb-[56.25%] h-0 rounded-[2rem] overflow-hidden">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${config.videos.aboutUsVideoId}`}
+              title="Sirius Expedition"
+              frameBorder="0"
+              allowFullScreen
+            />
+          </div>
+        </motion.div>
 
-      {/* Team Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mb-20"
-      >
-        <h3 className="text-3xl font-bold text-center mb-12 text-primary">Meet Our Team</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { name: 'Rakoto Jean', role: 'Founder & Lead Guide', avatar: 'https://ui-avatars.com/api/?name=Rakoto+Jean&background=6D4C41&color=fff&size=200' },
-            { name: 'Marie Rasolofo', role: 'Operations Manager', avatar: 'https://ui-avatars.com/api/?name=Marie+Rasolofo&background=6D4C41&color=fff&size=200' },
-            { name: 'David Andriamanana', role: 'Wildlife Expert', avatar: 'https://ui-avatars.com/api/?name=David+Andriamanana&background=6D4C41&color=fff&size=200' },
-          ].map((member, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-              className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all"
-            >
-              <img
-                src={member.avatar}
-                alt={member.name}
-                className="w-full h-64 object-cover"
-                loading="lazy"
-              />
-              <div className="p-6 text-center">
-                <h4 className="text-xl font-bold mb-2">{member.name}</h4>
-                <p className="text-muted-foreground">{member.role}</p>
-              </div>
-            </motion.div>
-          ))}
+        <div className="space-y-8">
+          <h3 className="text-3xl font-serif text-[#3D2B1F]">The Spirit of Exploration</h3>
+          <p className="text-[#6F4E37]/80 text-base leading-relaxed">
+            {config.siteName} was founded to share the incredible biodiversity of Madagascar. Named after the brightest star, we aim to be your guiding light in exploring the Red Island.
+          </p>
+          <div className="bg-[#F3E5AB]/50 p-8 rounded-[2rem] border-l-8 border-[#6F4E37]">
+            <p className="italic font-serif text-lg text-[#3D2B1F]">
+              "We believe in sustainable tourism that preserves Madagascar's natural heritage for future generations."
+            </p>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Certifications & Partnerships */}
+      <div className="max-w-7xl mx-auto bg-[#6F4E37] rounded-[4rem] p-12 md:p-20 text-white relative overflow-hidden mb-32 shadow-2xl">
+         <div className="absolute top-0 right-0 opacity-10 translate-x-1/4 -translate-y-1/4">
+            <Globe size={400} />
+         </div>
+         <h3 className="text-3xl font-serif text-[#F3E5AB] text-center mb-16 relative z-10">Why Choose Us</h3>
+         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 relative z-10">
+            {whyChooseUs.map((item, i) => (
+              <div key={i} className="flex gap-4 items-start">
+                <CheckCircle className="text-[#F3E5AB] shrink-0" size={24} />
+                <div>
+                  <h4 className="font-bold tracking-tight mb-1 text-sm uppercase">{item.title}</h4>
+                  <p className="text-white/60 text-xs leading-relaxed">{item.description}</p>
+                </div>
+              </div>
+            ))}
+         </div>
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
         viewport={{ once: true }}
-        className="bg-gradient-to-br from-primary to-accent p-8 md:p-12 rounded-3xl text-center text-primary-foreground"
+        className="bg-[#F3E5AB] p-12 lg:p-16 rounded-[3rem] text-center max-w-7xl mx-auto border border-[#6F4E37]/10"
       >
-        <Shield className="mx-auto mb-6" size={64} />
-        <h3 className="text-3xl font-bold mb-4">Licensed & Certified</h3>
-        <p className="text-xl mb-8 text-primary-foreground/90 max-w-3xl mx-auto">
-          {config.siteName} is officially registered with Madagascar Tourism Board and holds all necessary
-          certifications for operating tours. We maintain partnerships with local conservation organizations
-          and communities.
+        <Shield className="mx-auto mb-8 text-[#6F4E37]" size={48} strokeWidth={1} />
+        <h3 className="text-2xl font-serif mb-6 text-[#3D2B1F]">Licensed & Certified</h3>
+        <p className="text-[#6F4E37]/80 text-base mb-12 max-w-2xl mx-auto leading-relaxed">
+          Officially registered with the Madagascar Tourism Board. We maintain partnerships with local conservation organizations.
         </p>
-        <div className="flex flex-wrap justify-center gap-8 mt-8">
-          <div className="text-center">
-            <p className="text-sm opacity-80">Hosted by</p>
-            <p className="font-bold">{config.services.hosting.join(' & ')}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm opacity-80">Domain by</p>
-            <p className="font-bold">{config.services.domain}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm opacity-80">Email by</p>
-            <p className="font-bold">{config.services.email}</p>
-          </div>
+        <div className="flex flex-wrap justify-center gap-12 pt-8 border-t border-[#6F4E37]/10">
+          {[
+            { label: 'Hosted by', val: config.services.hosting.join(' & ') },
+            { label: 'Domain by', val: config.services.domain },
+            { label: 'Email by', val: config.services.email }
+          ].map((s, i) => (
+            <div key={i}>
+              <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#6F4E37]/50 mb-1">{s.label}</p>
+              <p className="font-serif text-sm text-[#3D2B1F]">{s.val}</p>
+            </div>
+          ))}
         </div>
       </motion.div>
+
+      
     </section>
   );
 }

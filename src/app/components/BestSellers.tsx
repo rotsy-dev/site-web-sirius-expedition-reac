@@ -1,11 +1,10 @@
 import * as React from 'react';
-const { useRef, useState } = React;
+const { useRef } = React;
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { Star, MapPin, Clock, ChevronLeft, ChevronRight, Check, Heart, Sparkles, TrendingUp, Award } from 'lucide-react';
-import { motion, AnimatePresence } from "framer-motion";
-import { ImageWithFallback } from '../../components/common/ImageWithFallback';
+import { Star, MapPin, Clock, ChevronLeft, ChevronRight, Check, Heart } from 'lucide-react';
+import { motion } from "framer-motion"
 
 interface Tour {
   id: number;
@@ -27,19 +26,6 @@ interface BestSellersProps {
 
 export function BestSellers({ tours }: BestSellersProps) {
   const sliderRef = useRef<Slider>(null);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-
-  const toggleFavorite = (tourId: number) => {
-    setFavorites(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(tourId)) {
-        newSet.delete(tourId);
-      } else {
-        newSet.add(tourId);
-      }
-      return newSet;
-    });
-  };
 
   const settings = {
     dots: true,
@@ -68,460 +54,254 @@ export function BestSellers({ tours }: BestSellersProps) {
   };
 
   return (
-    <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background sophistiqué */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
-      
-      {/* Grille de fond */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
-      
-      {/* Gradients animés */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="absolute bottom-0 right-1/4 w-[32rem] h-[32rem] bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl"
-      />
+    <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background décoratif */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-card to-background" />
+      <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-accent/5 rounded-full blur-3xl" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header premium */}
+        {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 sm:mb-20 md:mb-24"
+          className="text-center mb-12 sm:mb-16 md:mb-20"
         >
-          {/* Badge 3D avec effets */}
+          {/* Badge avec animation */}
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            whileInView={{ scale: 1, rotate: 0 }}
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-            className="inline-flex items-center gap-3 mb-6 sm:mb-8 relative"
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="inline-flex items-center gap-2 mb-4 sm:mb-6"
           >
-            {/* Glow animé */}
-            <motion.div
-              animate={{
-                scale: [1, 1.3, 1],
-                opacity: [0.5, 0.8, 0.5],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-              }}
-              className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-full blur-2xl"
-            />
-            
-            <div className="relative bg-gradient-to-r from-amber-50 via-amber-100 to-amber-50 dark:from-amber-950 dark:via-amber-900 dark:to-amber-950 px-8 py-4 rounded-full border-2 border-amber-300/50 dark:border-amber-700/50 shadow-2xl backdrop-blur-xl">
-              {/* Shine effect */}
-              <motion.div
-                animate={{
-                  x: ['-100%', '200%'],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatDelay: 2,
-                }}
-                className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
-              />
-              
-              <span className="relative flex items-center gap-3 text-amber-900 dark:text-amber-100 font-black text-sm sm:text-base tracking-widest uppercase">
-                <motion.span
-                  animate={{ 
-                    rotate: [0, -15, 15, 0],
-                    scale: [1, 1.2, 1]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Award className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-500" />
-                </motion.span>
-                Best Sellers
-                <motion.span
-                  animate={{ 
-                    y: [0, -5, 0],
-                  }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
-                </motion.span>
-              </span>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-md opacity-50 animate-pulse" />
+              <div className="relative bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 px-4 py-2 sm:px-6 sm:py-3 rounded-full border border-primary/20">
+                <span className="text-primary font-bold text-xs sm:text-sm tracking-widest uppercase flex items-center gap-2">
+                  <motion.span
+                    animate={{ rotate: [0, 15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    🏆
+                  </motion.span>
+                  Best Sellers
+                </span>
+              </div>
             </div>
           </motion.div>
 
-          {/* Titre spectaculaire */}
+          {/* Titre */}
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl mb-6 sm:mb-8 font-black leading-[0.95] px-4"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 font-black leading-tight px-4"
           >
-            <motion.span
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-[length:200%_100%] bg-clip-text text-transparent block"
-            >
+            <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
               Most Popular
-            </motion.span>
-            <motion.span
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent block mt-2"
-            >
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Adventures
-            </motion.span>
+            </span>
           </motion.h2>
 
-          <motion.div
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-base sm:text-lg md:text-xl font-medium px-4"
+            className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl font-light px-4"
           >
-            <Sparkles className="w-5 h-5 text-primary" />
-            <p>Handpicked experiences loved by thousands of travelers</p>
-            <Sparkles className="w-5 h-5 text-accent" />
-          </motion.div>
+            Handpicked experiences loved by thousands of travelers
+          </motion.p>
         </motion.div>
 
-        {/* Navigation élégante */}
-        <div className="relative mb-8 sm:mb-12 hidden sm:block">
-          <div className="flex justify-end gap-3 sm:gap-4">
-            {[
-              { onClick: () => sliderRef.current?.slickPrev(), icon: ChevronLeft, label: 'Précédent' },
-              { onClick: () => sliderRef.current?.slickNext(), icon: ChevronRight, label: 'Suivant' }
-            ].map((btn, idx) => (
-              <motion.button
-                key={idx}
-                whileHover={{ scale: 1.15, x: idx === 0 ? -8 : 8 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={btn.onClick}
-                className="group relative"
-                aria-label={btn.label}
-              >
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.3, 0.6, 0.3],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-xl"
-                />
-                <div className="relative p-4 sm:p-5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-gray-800/50 rounded-full shadow-2xl group-hover:shadow-primary/30 transition-all duration-300">
-                  <btn.icon size={24} className="sm:w-7 sm:h-7 text-gray-900 dark:text-white" strokeWidth={2.5} />
-                </div>
-              </motion.button>
-            ))}
+        {/* Navigation Buttons */}
+        <div className="relative mb-6 sm:mb-8 hidden sm:block">
+          <div className="flex justify-end gap-2 sm:gap-3">
+            <motion.button
+              whileHover={{ scale: 1.1, x: -5 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => sliderRef.current?.slickPrev()}
+              className="group relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
+              <div className="relative p-3 sm:p-4 bg-card border border-border rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                <ChevronLeft size={20} className="sm:w-6 sm:h-6 text-foreground" strokeWidth={2.5} />
+              </div>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1, x: 5 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => sliderRef.current?.slickNext()}
+              className="group relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
+              <div className="relative p-3 sm:p-4 bg-card border border-border rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                <ChevronRight size={20} className="sm:w-6 sm:h-6 text-foreground" strokeWidth={2.5} />
+              </div>
+            </motion.button>
           </div>
         </div>
 
-        {/* Carousel avec cartes premium */}
+        {/* Carousel */}
         <Slider ref={sliderRef} {...settings}>
-          {tours.map((tour, index) => {
-            const isFavorite = favorites.has(tour.id);
-            
-            return (
-              <div key={tour.id} className="px-2 sm:px-3 md:px-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="group h-full"
-                >
-                  <motion.div 
-                    whileHover={{ y: -12 }}
-                    className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl hover:shadow-primary/20 transition-all duration-500 h-full flex flex-col border border-gray-200/50 dark:border-gray-800/50"
-                  >
-                    {/* Image avec effets avancés */}
-                    <div className="relative h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden">
-                      <motion.div
-                        whileHover={{ scale: 1.15 }}
-                        transition={{ duration: 0.7 }}
-                        className="w-full h-full"
-                      >
-                        <ImageWithFallback
-                          src={tour.image}
-                          alt={tour.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </motion.div>
+          {tours.map((tour, index) => (
+            <div key={tour.id} className="px-2 sm:px-3 md:px-4">
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                className="group h-full"
+              >
+                <div className="bg-card rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 h-full flex flex-col border border-border">
+                  {/* Image Section */}
+                  <div className="relative h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden">
+                    <motion.img
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                      src={tour.image}
+                      alt={tour.title}
+                      className="w-full h-full object-cover"
+                    />
 
-                      {/* Gradient overlay sophistiqué */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                      
-                      {/* Effet de lumière au hover */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 0.3 }}
-                        className="absolute inset-0 bg-gradient-to-br from-primary/50 via-transparent to-accent/50"
-                      />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
 
-                      {/* Bouton favori animé */}
-                      <motion.button
-                        whileHover={{ scale: 1.15, rotate: 10 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(tour.id);
-                        }}
-                        className="absolute top-4 left-4 sm:top-5 sm:left-5 p-3 sm:p-3.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-full shadow-xl hover:shadow-2xl transition-all z-10 group/fav"
-                        aria-label={`${isFavorite ? 'Retirer' : 'Ajouter'} ${tour.title} ${isFavorite ? 'des' : 'aux'} favoris`}
-                      >
-                        <AnimatePresence mode="wait">
-                          {isFavorite ? (
-                            <motion.div
-                              key="filled"
-                              initial={{ scale: 0, rotate: -180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              exit={{ scale: 0, rotate: 180 }}
-                            >
-                              <Heart size={18} className="sm:w-5 sm:h-5 text-red-500 fill-red-500" />
-                            </motion.div>
-                          ) : (
-                            <motion.div
-                              key="outline"
-                              initial={{ scale: 0, rotate: 180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              exit={{ scale: 0, rotate: -180 }}
-                            >
-                              <Heart size={18} className="sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300 group-hover/fav:text-red-500 transition-colors" />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.button>
+                    {/* Favorite button */}
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="absolute top-3 left-3 sm:top-4 sm:left-4 p-2 sm:p-3 bg-card/90 backdrop-blur-md rounded-full shadow-lg hover:bg-card transition-all"
+                    >
+                      <Heart size={16} className="sm:w-5 sm:h-5 text-foreground" />
+                    </motion.button>
 
-                      {/* Rating badge premium */}
-                      <motion.div
-                        initial={{ x: 50, opacity: 0 }}
-                        whileInView={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="absolute top-4 right-4 sm:top-5 sm:right-5"
-                      >
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-600 rounded-2xl blur-md opacity-60" />
-                          <div className="relative bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl shadow-2xl border border-amber-200/50 dark:border-amber-800/50">
-                            <div className="flex items-center gap-2">
-                              <Star size={16} className="sm:w-5 sm:h-5 text-amber-500 fill-amber-500" />
-                              <span className="font-black text-base sm:text-lg text-gray-900 dark:text-white">{tour.rating}</span>
-                              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-semibold">({tour.reviews})</span>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-
-                      {/* Price tag spectaculaire */}
-                      <motion.div
-                        initial={{ x: -50, opacity: 0 }}
-                        whileInView={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5"
-                      >
-                        <div className="relative group/price">
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.1, 1],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                            }}
-                            className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-2xl blur-lg opacity-70"
-                          />
-                          <div className="relative bg-gradient-to-r from-primary via-accent to-primary px-6 py-3 sm:px-8 sm:py-4 rounded-2xl shadow-2xl overflow-hidden">
-                            <motion.div
-                              animate={{
-                                x: ['-100%', '200%'],
-                              }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatDelay: 1,
-                              }}
-                              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
-                            />
-                            <span className="relative text-white font-black text-xl sm:text-2xl md:text-3xl drop-shadow-lg">
-                              {tour.price}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
+                    {/* Rating Badge */}
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-card/95 backdrop-blur-md px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl shadow-xl">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Star size={14} className="sm:w-[18px] sm:h-[18px] text-primary" fill="#6D4C41" />
+                        <span className="font-bold text-sm sm:text-base text-foreground">{tour.rating}</span>
+                        <span className="text-xs text-muted-foreground">({tour.reviews})</span>
+                      </div>
                     </div>
 
-                    {/* Contenu de la carte */}
-                    <div className="p-5 sm:p-6 md:p-7 flex-1 flex flex-col">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                        {tour.title}
-                      </h3>
-                      
-                      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-5 sm:mb-6 line-clamp-2 flex-shrink-0 font-medium">
-                        {tour.description}
-                      </p>
-
-                      {/* Highlights avec icônes animées */}
-                      <div className="mb-6 sm:mb-7 space-y-3 flex-shrink-0">
-                        {tour.highlights.slice(0, 3).map((highlight, idx) => (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 * idx }}
-                            className="flex items-start gap-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 group/item"
-                          >
-                            <motion.div 
-                              whileHover={{ scale: 1.2, rotate: 360 }}
-                              transition={{ duration: 0.5 }}
-                              className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg flex-shrink-0 shadow-md"
-                            >
-                              <Check size={14} className="sm:w-4 sm:h-4 text-green-600 dark:text-green-400" strokeWidth={3} />
-                            </motion.div>
-                            <span className="line-clamp-2 font-medium group-hover/item:text-gray-900 dark:group-hover/item:text-white transition-colors">
-                              {highlight}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* Info badges modernisés */}
-                      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-t border-gray-200/50 dark:border-gray-800/50 pt-6 sm:pt-8 flex-shrink-0">
-                        {[
-                          { icon: MapPin, text: tour.location, gradient: 'from-blue-500 to-cyan-500' },
-                          { icon: Clock, text: tour.duration, gradient: 'from-purple-500 to-pink-500' }
-                        ].map((item, idx) => (
-                          <motion.div
-                            key={idx}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            className="flex items-center gap-2.5 text-sm sm:text-base group/badge relative"
-                          >
-                            <div className={`absolute inset-0 bg-gradient-to-r ${item.gradient} rounded-xl blur opacity-0 group-hover/badge:opacity-30 transition-opacity`} />
-                            <div className="relative p-2.5 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md">
-                              <item.icon size={16} className={`sm:w-[18px] sm:h-[18px] bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent`} />
-                            </div>
-                            <span className="font-bold text-gray-900 dark:text-white">{item.text}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* CTA Button ultra-premium */}
-                      <motion.button
-                        whileHover={{ scale: 1.03, y: -4 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="group/btn relative w-full mt-auto overflow-hidden"
-                        aria-label={`Explorer le tour ${tour.title}`}
-                      >
-                        {/* Glow extérieur */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] rounded-2xl blur-lg opacity-60 group-hover/btn:opacity-100 transition-all duration-500 animate-gradient" />
-                        
-                        {/* Button principal */}
-                        <div className="relative bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] text-white py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg shadow-2xl flex items-center justify-center gap-3 overflow-hidden animate-gradient">
-                          {/* Shine effect */}
-                          <motion.div
-                            animate={{
-                              x: ['-100%', '200%'],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              repeatDelay: 1,
-                            }}
-                            className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
-                          />
-                          
-                          <span className="relative z-10">Explore Tour</span>
-                          <motion.div
-                            className="relative z-10"
-                            animate={{ x: [0, 5, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          >
-                            <ChevronRight size={20} className="sm:w-6 sm:h-6" strokeWidth={3} />
-                          </motion.div>
+                    {/* Price Tag */}
+                    <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-xl sm:rounded-2xl blur-md opacity-70" />
+                        <div className="relative bg-gradient-to-r from-primary to-accent px-4 py-2 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl">
+                          <span className="text-primary-foreground font-bold text-lg sm:text-xl md:text-2xl">{tour.price}</span>
                         </div>
-                      </motion.button>
+                      </div>
                     </div>
-                  </motion.div>
-                </motion.div>
-              </div>
-            );
-          })}
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col">
+                    <h3 className="text-lg sm:text-xl md:text-2xl mb-2 sm:mb-3 font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                      {tour.title}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-5 line-clamp-2 flex-shrink-0">
+                      {tour.description}
+                    </p>
+
+                    {/* Highlights */}
+                    <div className="mb-4 sm:mb-5 space-y-2 sm:space-y-2.5 flex-shrink-0">
+                      {tour.highlights.slice(0, 3).map((highlight, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.1 * idx }}
+                          className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground"
+                        >
+                          <div className="mt-0.5 p-1 bg-accent/10 rounded-full flex-shrink-0">
+                            <Check size={12} className="sm:w-[14px] sm:h-[14px] text-accent" strokeWidth={3} />
+                          </div>
+                          <span className="line-clamp-2">{highlight}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Info Row */}
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-t border-border pt-4 sm:pt-6 flex-shrink-0">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                          <MapPin size={14} className="sm:w-4 sm:h-4 text-primary" />
+                        </div>
+                        <span className="font-medium">{tour.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <div className="p-1.5 sm:p-2 bg-accent/10 rounded-lg">
+                          <Clock size={14} className="sm:w-4 sm:h-4 text-accent" />
+                        </div>
+                        <span className="font-medium">{tour.duration}</span>
+                      </div>
+                    </div>
+
+                    {/* CTA Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="group/btn relative w-full mt-auto"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-xl sm:rounded-2xl blur-md opacity-0 group-hover/btn:opacity-50 transition-opacity" />
+                      <div className="relative bg-gradient-to-r from-primary to-accent text-primary-foreground py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2">
+                        Explore Tour
+                        <ChevronRight size={18} className="sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform" strokeWidth={2.5} />
+                      </div>
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          ))}
         </Slider>
       </div>
 
-      {/* Styles personnalisés */}
+      {/* Custom Dots Styling */}
       <style>{`
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient {
-          animation: gradient 3s ease infinite;
-        }
-        
         .slick-dots {
-          bottom: -50px;
+          bottom: -40px;
         }
         @media (min-width: 640px) {
           .slick-dots {
-            bottom: -70px;
+            bottom: -60px;
           }
         }
         .slick-dots li {
-          margin: 0 6px;
+          margin: 0 4px;
+        }
+        @media (min-width: 640px) {
+          .slick-dots li {
+            margin: 0 6px;
+          }
         }
         .slick-dots li button:before {
-          font-size: 12px;
+          font-size: 10px;
           color: #6D4C41;
           opacity: 0.3;
           transition: all 0.3s ease;
         }
         @media (min-width: 640px) {
           .slick-dots li button:before {
-            font-size: 14px;
+            font-size: 12px;
           }
         }
         .slick-dots li.slick-active button:before {
           opacity: 1;
-          transform: scale(1.5);
+          transform: scale(1.3);
         }
         .slick-dots li:hover button:before {
-          opacity: 0.7;
-          transform: scale(1.2);
+          opacity: 0.6;
         }
       `}</style>
     </section>

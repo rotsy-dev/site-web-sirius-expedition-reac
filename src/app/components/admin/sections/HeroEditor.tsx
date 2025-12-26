@@ -1,8 +1,18 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, Eye, Image, X } from 'lucide-react';
-import type { HeroSlide } from '../../../types/content';
+import { db } from '../../../../firebase/config';
+import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+
+interface HeroSlide {
+    id: number;
+    image: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    videoUrl: string;
+}
 
 interface HeroEditorProps {
     slides: HeroSlide[];
@@ -14,6 +24,31 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [previewSlide, setPreviewSlide] = useState<HeroSlide | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Chargement des slides depuis Firestore
+    useEffect(() => {
+        const fetchSlides = async () => {
+            try {
+                const slidesCollection = collection(db, 'heroSlides');
+                const snapshot = await getDocs(slidesCollection);
+                const fetchedSlides: HeroSlide[] = snapshot.docs.map((docSnap) => ({
+                    id: parseInt(docSnap.id),
+                    ...docSnap.data() as Omit<HeroSlide, 'id'>
+                }));
+
+                // Trie par ID pour garder un ordre stable
+                fetchedSlides.sort((a, b) => a.id - b.id);
+
+                setSlides(fetchedSlides.length > 0 ? fetchedSlides : initialSlides);
+            } catch (err) {
+                console.error('Erreur lors du chargement des slides:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchSlides();
+    }, [initialSlides]);
 
     const handleChange = (id: number, field: keyof HeroSlide, value: string) => {
         setSlides(slides.map(slide =>
@@ -28,7 +63,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
             id: newId,
             image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920',
             title: 'New Slide Title',
-            subtitle: 'Add your description here',
+            subtitle: 'New description here',
             cta: 'Learn More',
             videoUrl: '',
         };
@@ -37,26 +72,55 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
         setHasChanges(true);
     };
 
-    const handleDeleteSlide = (id: number) => {
+    // Suppression IMMÉDIATE dans Firestore + locale
+    const handleDeleteSlide = async (id: number) => {
         if (slides.length <= 1) {
             alert('Vous devez garder au moins une slide !');
             return;
         }
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette slide ?')) {
-            setSlides(slides.filter(s => s.id !== id));
-            setHasChanges(true);
+
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette slide ? Cette action est irréversible.')) {
+            try {
+                // 1. Suppression dans Firestore
+                await deleteDoc(doc(db, 'heroSlides', id.toString()));
+
+                // 2. Suppression locale
+                setSlides(prev => prev.filter(s => s.id !== id));
+                setHasChanges(true);
+
+                // Optionnel : message de succès
+                alert('Slide supprimée avec succès !');
+            } catch (err) {
+                console.error('Erreur lors de la suppression:', err);
+                alert('Erreur lors de la suppression de la slide. Vérifiez votre connexion ou les règles Firestore.');
+            }
         }
     };
 
-    const handleSave = () => {
-        onSave(slides);
-        setHasChanges(false);
-        alert('✅ Modifications sauvegardées !');
+    const handleSave = async () => {
+        try {
+            // Sauvegarde uniquement les slides actuelles (les nouvelles et modifiées)
+            for (const slide of slides) {
+                const slideDoc = doc(db, 'heroSlides', slide.id.toString());
+                await setDoc(slideDoc, slide);
+            }
+
+            onSave(slides);
+            setHasChanges(false);
+            alert('✅ Modifications sauvegardées dans Firestore !');
+        } catch (err) {
+            console.error('Erreur lors de la sauvegarde:', err);
+            alert('Erreur lors de la sauvegarde');
+        }
     };
+
+    if (isLoading) {
+        return <div className="text-center py-8">Chargement des slides...</div>;
+    }
 
     return (
         <div className="space-y-6">
-            {/* Header avec actions */}
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">Hero Carousel</h2>
@@ -133,7 +197,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </div>
                         </div>
 
-                        {/* Formulaire d'édition */}
+                        {/* Formulaire d'édition (inchangé) */}
                         <AnimatePresence>
                             {editingId === slide.id && (
                                 <motion.div
@@ -145,7 +209,6 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                 >
                                     <div className="p-6 space-y-4">
                                         <div className="grid md:grid-cols-2 gap-4">
-                                            {/* Image URL */}
                                             <div className="md:col-span-2">
                                                 <label className="block text-sm font-medium text-foreground mb-2">
                                                     URL de l'image
@@ -172,11 +235,8 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                                 </div>
                                             </div>
 
-                                            {/* Titre */}
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-foreground mb-2">
-                                                    Titre
-                                                </label>
+                                                <label className="block text-sm font-medium text-foreground mb-2">Titre</label>
                                                 <input
                                                     type="text"
                                                     value={slide.title}
@@ -186,11 +246,8 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                                 />
                                             </div>
 
-                                            {/* Sous-titre */}
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-foreground mb-2">
-                                                    Sous-titre / Description
-                                                </label>
+                                                <label className="block text-sm font-medium text-foreground mb-2">Sous-titre / Description</label>
                                                 <textarea
                                                     value={slide.subtitle}
                                                     onChange={(e) => handleChange(slide.id, 'subtitle', e.target.value)}
@@ -200,11 +257,8 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                                 />
                                             </div>
 
-                                            {/* CTA */}
                                             <div>
-                                                <label className="block text-sm font-medium text-foreground mb-2">
-                                                    Texte du bouton (CTA)
-                                                </label>
+                                                <label className="block text-sm font-medium text-foreground mb-2">Texte du bouton (CTA)</label>
                                                 <input
                                                     type="text"
                                                     value={slide.cta}
@@ -214,11 +268,8 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                                 />
                                             </div>
 
-                                            {/* Video URL (optionnel) */}
                                             <div>
-                                                <label className="block text-sm font-medium text-foreground mb-2">
-                                                    URL Vidéo (optionnel)
-                                                </label>
+                                                <label className="block text-sm font-medium text-foreground mb-2">URL Vidéo (optionnel)</label>
                                                 <input
                                                     type="text"
                                                     value={slide.videoUrl}
@@ -236,7 +287,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                 ))}
             </div>
 
-            {/* Modal de prévisualisation */}
+            {/* Modal preview (inchangé) */}
             <AnimatePresence>
                 {previewSlide && (
                     <motion.div
@@ -268,7 +319,6 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                     loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-
                                 <div className="absolute bottom-0 left-0 right-0 p-8 text-primary-foreground">
                                     <h3 className="text-4xl font-bold mb-3">{previewSlide.title}</h3>
                                     <p className="text-xl mb-4 opacity-90">{previewSlide.subtitle}</p>
