@@ -1,44 +1,32 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Lock, Eye, EyeOff, Shield, Mail, User, Check, X, AlertCircle, XCircle, Info 
+import {
+    Lock, Eye, EyeOff, Shield, Mail, User, Check, X, AlertCircle, XCircle, ArrowLeft
 } from 'lucide-react';
 import { auth, db } from '../../../firebase/config';
-import { 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword 
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, query } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import { 
-    validatePassword, 
-    getPasswordStrength, 
-    getStrengthColor, 
-    getStrengthLabel 
+import {
+    validatePassword,
+    getPasswordStrength,
+    getStrengthColor,
+    getStrengthLabel
 } from '../../../utils/passwordValidation';
 
+const backgroundImageUrl = '/images/fond.jpeg';
+
 import { AdminDashboard } from './AdminDashboard';
-import { bestSellers, faqs, heroSlides, reviews, siteConfig, tourSpecialties } from '@/app/data/content';
 
 const mockContent = { heroSlides: [], bestSellers: [], tourSpecialties: [], reviews: [], blogPosts: [], faqs: [], siteConfig: {} };
-const mockOnUpdateSection = () => {};
-const mockOnLogout = () => {};
-const mockOnExport = () => {};
-const mockOnImport = async () => {};
-const mockOnReset = () => {};
-
-
-// const [content, setContent] = useState({
-//     heroSlides: [],
-//     bestSellers: [],
-//     tourSpecialties: [],
-//     reviews: [],
-//     blogPosts: [],
-//     faqs: [],
-//     siteConfig: {},
-// })
-
+const mockOnUpdateSection = () => { };
+const mockOnLogout = () => { };
+const mockOnExport = () => { };
+const mockOnImport = async () => { };
+const mockOnReset = () => { };
 
 // ========== TOAST ERREUR ==========
 function ErrorToast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -74,7 +62,7 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
 }
 
 // ========== COMPOSANT PRINCIPAL ==========
-export function AdminLogin() {
+export function AdminLogin({ onBack }: { onBack?: () => void }) {
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -88,8 +76,6 @@ export function AdminLogin() {
     // Validation mot de passe
     const [passwordValidation, setPasswordValidation] = useState({ isValid: false, errors: [] as string[] });
     const [passwordStrength, setPasswordStrength] = useState(0);
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (mode === 'register' && password) {
@@ -223,123 +209,155 @@ export function AdminLogin() {
 
     return (
         <>
-            {/* Toast erreur */}
             <AnimatePresence>
                 {error && <ErrorToast message={error} onClose={closeError} />}
             </AnimatePresence>
 
-            <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
-                >
-                    <div className="bg-card/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-border/50 p-8">
-                        <div className="text-center mb-8">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 shadow-lg">
-                                <Shield className="text-primary-foreground" size={32} />
+            {/* === FOND GLOBAL + FORMULAIRE À GAUCHE + TEXTE À DROITE === */}
+            <div 
+                className="min-h-screen relative flex items-center bg-cover bg-center bg-no-repeat overflow-x-hidden"
+                style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+            >
+                {/* Overlay sombre pour lisibilité */}
+                <div className="absolute inset-0 bg-black/50" />
+
+                {/* Contenu principal */}
+                <div className="relative z-10 w-full flex flex-col lg:flex-row items-center justify-center lg:gap-12 xl:gap-16 px-4 sm:px-6 lg:px-12 py-8 lg:py-0">
+                    {/* === FORMULAIRE À GAUCHE === */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="w-full max-w-md lg:max-w-lg mb-12 lg:mb-0"
+                    >
+                        {/* Bouton Retour */}
+                        <motion.button
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => onBack?.()}
+                            className="mb-8 flex items-center gap-2 text-white/80 hover:text-white transition-all group"
+                        >
+                            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+                            <span className="text-sm font-medium">Retour</span>
+                        </motion.button>
+
+                        <div className="bg-card/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-border/50 p-6 sm:p-8 lg:p-10">
+                            <div className="text-center mb-8 sm:mb-10">
+                                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 sm:mb-6 shadow-xl">
+                                    <Shield className="text-primary-foreground" size={32} />
+                                </div>
+                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+                                    {mode === 'login' ? 'Connexion Admin' : 'Inscription Admin'}
+                                </h1>
+                                <p className="text-muted-foreground text-base sm:text-lg">Sirius Expedition Dashboard</p>
                             </div>
-                            <h1 className="text-3xl font-bold">
-                                {mode === 'login' ? 'Connexion Admin' : 'Inscription Admin'}
-                            </h1>
-                            <p className="text-muted-foreground">Sirius Expedition Dashboard</p>
-                        </div>
 
-
-
-                        <div className="space-y-5">
-                            {mode === 'register' && (
-                                <Input icon={<User size={20} />} label="Nom d'utilisateur" value={username} onChange={setUsername} placeholder="Admin principal" />
-                            )}
-
-                            <Input icon={<Mail size={20} />} label="Email" value={email} onChange={setEmail} placeholder="admin@sirius.com" />
-
-                            <div>
-                                <PasswordInput
-                                    label="Mot de passe"
-                                    value={password}
-                                    onChange={setPassword}
-                                    show={showPassword}
-                                    toggleShow={() => setShowPassword(!showPassword)}
-                                />
-
-                                {/* Règle mot de passe en une ligne */}
+                            <div className="space-y-6">
                                 {mode === 'register' && (
-                                    <div className="mt-2 flex items-center gap-2 text-xs">
-                                        {passwordValidation.isValid ? (
-                                            <Check size={16} className="text-green-600 flex-shrink-0" />
-                                        ) : password ? (
-                                            <X size={16} className="text-red-600 flex-shrink-0" />
-                                        ) : null}
-
-                                        <span className={passwordValidation.isValid ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
-                                            Au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial
-                                        </span>
-                                    </div>
+                                    <Input icon={<User size={20} />} label="Nom d'utilisateur" value={username} onChange={setUsername} placeholder="Admin principal" />
                                 )}
 
-                                {/* Barre de force (optionnelle) */}
-                                {mode === 'register' && password && (
-                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3">
-                                        <div className="flex items-center justify-between text-xs mb-1">
-                                            <span className="text-muted-foreground">Force du mot de passe</span>
-                                            <span className={`font-semibold ${
-                                                passwordStrength < 40 ? 'text-red-500' :
-                                                passwordStrength < 70 ? 'text-yellow-500' :
-                                                'text-green-500'
-                                            }`}>
-                                                {getStrengthLabel(passwordStrength)}
+                                <Input icon={<Mail size={20} />} label="Email" value={email} onChange={setEmail} placeholder="admin@sirius.com" />
+
+                                <div>
+                                    <PasswordInput
+                                        label="Mot de passe"
+                                        value={password}
+                                        onChange={setPassword}
+                                        show={showPassword}
+                                        toggleShow={() => setShowPassword(!showPassword)}
+                                    />
+
+                                    {mode === 'register' && (
+                                        <div className="mt-3 flex items-center gap-2 text-xs">
+                                            {passwordValidation.isValid ? (
+                                                <Check size={16} className="text-green-600" />
+                                            ) : password ? (
+                                                <X size={16} className="text-red-600" />
+                                            ) : null}
+                                            <span className={passwordValidation.isValid ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
+                                                Au moins 8 caractères, majuscule, minuscule, chiffre et caractère spécial
                                             </span>
                                         </div>
-                                        <div className="w-full bg-muted rounded-full h-1.5">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${passwordStrength}%` }}
-                                                className={`h-full rounded-full transition-all ${getStrengthColor(passwordStrength)}`}
-                                            />
-                                        </div>
-                                    </motion.div>
+                                    )}
+
+                                    {mode === 'register' && password && (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+                                            <div className="flex items-center justify-center gap-16 xl:gap-24 text-xs mb-2">
+                                                <span className="text-muted-foreground">Force du mot de passe</span>
+                                                <span className={`font-semibold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
+                                                    {getStrengthLabel(passwordStrength)}
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-muted rounded-full h-2">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${passwordStrength}%` }}
+                                                    className={`h-full rounded-full ${getStrengthColor(passwordStrength)}`}
+                                                />
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                {mode === 'register' && (
+                                    <PasswordInput
+                                        label="Confirmer le mot de passe"
+                                        value={confirmPassword}
+                                        onChange={setConfirmPassword}
+                                        show={showPassword}
+                                        toggleShow={() => setShowPassword(!showPassword)}
+                                    />
                                 )}
+
+                                <motion.button
+                                    onClick={handleSubmit}
+                                    disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
+                                >
+                                    {isLoading ? 'Patientez...' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
+                                </motion.button>
                             </div>
 
-                            {mode === 'register' && (
-                                <PasswordInput
-                                    label="Confirmer le mot de passe"
-                                    value={confirmPassword}
-                                    onChange={setConfirmPassword}
-                                    show={showPassword}
-                                    toggleShow={() => setShowPassword(!showPassword)}
-                                />
-                            )}
-
-                            <motion.button
-                                onClick={handleSubmit}
-                                disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-semibold shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isLoading ? 'Veuillez patienter...' : mode === 'login' ? 'Se connecter' : 'Créer le compte admin'}
-                            </motion.button>
+                            <div className="mt-8 text-center">
+                                <button
+                                    onClick={() => {
+                                        setMode(mode === 'login' ? 'register' : 'login');
+                                        resetForm();
+                                    }}
+                                    className="text-primary hover:underline font-medium"
+                                >
+                                    {mode === 'login' ? 'Créer un compte admin' : 'Déjà un compte ? Se connecter'}
+                                </button>
+                            </div>
                         </div>
+                    </motion.div>
 
-                        <div className="mt-6 text-center">
-                            <button
-                                onClick={() => {
-                                    setMode(mode === 'login' ? 'register' : 'login');
-                                    resetForm();
-                                }}
-                                className="text-sm text-primary hover:underline"
-                            >
-                                {mode === 'login' ? 'Créer un compte admin' : 'Déjà un compte ? Se connecter'}
-                            </button>
-                        </div>
+                    {/* === TEXTE BRANDING À DROITE === */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="hidden lg:block text-white max-w-md xl:max-w-lg"
+                    >
+                        <h2 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
+                            Sirius Expedition
+                        </h2>
+                        <p className="text-xl xl:text-2xl 2xl:text-3xl opacity-90 drop-shadow-md">
+                            Aventures authentiques à Madagascar
+                        </p>
+                    </motion.div>
+
+                    {/* Texte branding en bas sur mobile */}
+                    <div className="lg:hidden absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full">
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-2 drop-shadow-lg">Sirius Expedition</h2>
+                        <p className="text-lg sm:text-xl opacity-90 drop-shadow-md">Aventures authentiques à Madagascar</p>
                     </div>
-
-                    <p className="text-center text-sm text-muted-foreground mt-6">
-                        Protégé • Sirius Expedition © 2024
-                    </p>
-                </motion.div>
+                </div>
             </div>
         </>
     );

@@ -76,7 +76,8 @@ function App() {
             className="min-h-screen bg-muted/30"
           >
             {!isAuthenticated ? (
-              <AdminLogin />
+              <AdminLogin 
+              onBack={() => setActiveSection('home')}/>
             ) : (
               <AdminDashboard
                 onLogout={() => {
