@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Provider de notifications
@@ -34,6 +34,12 @@ function App() {
     isAuthenticated,
     logout,
   } = useContentManager();
+
+  // UseEffect pour croller en haut à chaque changement de section
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeSection]);
+
 
   return (
     <ToastProvider>
