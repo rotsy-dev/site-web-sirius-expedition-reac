@@ -19,9 +19,9 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 
 // (si ces constantes existent déjà chez toi)
-import { SITE_SECTIONS } from './constants/siteSections';
-import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { LoadingSpinner } from './components/common/LoadingSpinner';
+import { SITE_SECTIONS } from '../constants/index';
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
