@@ -1,9 +1,12 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, Eye, Calendar, User, Tag, X } from 'lucide-react';
-import { db } from '../../../../firebase/config'; // ← ajuste le chemin selon ta structure
+import { Plus, Trash2, Save, Eye, Calendar, User, Tag, X, FileText, Image as ImageIcon, Settings } from 'lucide-react';
+import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+import { useToast } from '../../../../components/shared/Toast';
+import { ImageUploader } from '../../../../components/shared/ImageUploader';
+import { RichTextEditor } from '../../../../components/blog/RichTextEditor';
 
 interface BlogPost {
     id: number;
@@ -34,8 +37,11 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
     const [hasChanges, setHasChanges] = useState(false);
     const [newTag, setNewTag] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'content' | 'media' | 'settings'>('content');
+    const [showPreview, setShowPreview] = useState(false);
+    const { showToast } = useToast();
 
-    // Chargement des articles depuis Firestore au montage
+    // Chargement depuis Firestore
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -46,13 +52,11 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                     ...docSnap.data() as Omit<BlogPost, 'id'>
                 }));
 
-                // Tri par ID pour un ordre stable
                 fetchedPosts.sort((a, b) => a.id - b.id);
-
                 setPosts(fetchedPosts.length > 0 ? fetchedPosts : initialPosts);
             } catch (err) {
-                console.error('Erreur chargement articles blog:', err);
-                alert('Impossible de charger les articles depuis Firebase.');
+                console.error('Erreur chargement articles:', err);
+                showToast('error', 'Impossible de charger les articles depuis Firebase');
             } finally {
                 setIsLoading(false);
             }
@@ -61,10 +65,27 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
         fetchPosts();
     }, [initialPosts]);
 
+    const generateSlug = (title: string): string => {
+        return title
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    };
+
     const handleChange = (id: number, field: keyof BlogPost, value: any) => {
-        setPosts(posts.map(post =>
-            post.id === id ? { ...post, [field]: value } : post
-        ));
+        setPosts(posts.map(post => {
+            if (post.id === id) {
+                const updated = { ...post, [field]: value };
+                // Auto-generate slug when title changes
+                if (field === 'title') {
+                    updated.slug = generateSlug(value);
+                }
+                return updated;
+            }
+            return post;
+        }));
         setHasChanges(true);
     };
 
@@ -72,38 +93,37 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
         const newId = Math.max(...posts.map(p => p.id), 0) + 1;
         const newPost: BlogPost = {
             id: newId,
-            title: 'Nouvel Article de Blog',
+            title: 'Nouvel Article',
             slug: 'nouvel-article',
-            excerpt: 'Court résumé de l’article...',
-            content: 'Contenu complet de l’article ici...',
-            image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200',
-            author: 'Auteur Nom',
-            authorAvatar: `https://ui-avatars.com/api/?name=Auteur+Nom&background=6D4C41&color=fff`,
-            authorBio: 'Biographie de l’auteur...',
+            excerpt: 'Un résumé captivant de votre article...',
+            content: '## Introduction\n\nCommencez à écrire votre article ici...\n\n## Développement\n\nDéveloppez vos idées...',
+            image: '',
+            author: 'Auteur',
+            authorAvatar: `https://ui-avatars.com/api/?name=Auteur&background=6D4C41&color=fff`,
+            authorBio: 'Passionné par Madagascar et ses merveilles...',
             date: new Date().toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' }),
             category: 'Voyage',
-            readTime: '8 min de lecture',
-            tags: ['madagascar', 'aventure'],
+            readTime: '5 min de lecture',
+            tags: [],
             featured: false,
             views: 0,
         };
         setPosts([...posts, newPost]);
         setEditingId(newId);
         setHasChanges(true);
+        showToast('info', 'Nouvel article créé');
     };
 
     const handleDeletePost = async (id: number) => {
-        if (confirm('Supprimer définitivement cet article ? Cette action est irréversible.')) {
+        if (confirm('⚠️ Supprimer définitivement cet article ?')) {
             try {
-                // Suppression dans Firestore
                 await deleteDoc(doc(db, 'blogPosts', id.toString()));
-
-                // Suppression locale
                 setPosts(posts.filter(p => p.id !== id));
                 setHasChanges(true);
+                showToast('success', 'Article supprimé');
             } catch (err) {
-                console.error('Erreur suppression article:', err);
-                alert('Erreur lors de la suppression – vérifiez la console.');
+                console.error('Erreur suppression:', err);
+                showToast('error', 'Erreur lors de la suppression');
             }
         }
     };
@@ -112,7 +132,7 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
         if (newTag.trim()) {
             setPosts(posts.map(post =>
                 post.id === postId
-                    ? { ...post, tags: [...post.tags, newTag.trim()] }
+                    ? { ...post, tags: [...post.tags, newTag.trim().toLowerCase()] }
                     : post
             ));
             setNewTag('');
@@ -130,8 +150,14 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
     };
 
     const handleSave = async () => {
+        // Validation
+        const invalidPosts = posts.filter(p => !p.title || p.title.length < 3 || !p.image);
+        if (invalidPosts.length > 0) {
+            showToast('warning', 'Certains articles ont un titre trop court ou pas d\'image');
+            return;
+        }
+
         try {
-            // Sauvegarde de chaque article dans Firestore
             for (const post of posts) {
                 const postDoc = doc(db, 'blogPosts', post.id.toString());
                 await setDoc(postDoc, post);
@@ -139,10 +165,10 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
 
             onSave(posts);
             setHasChanges(false);
-            alert('✅ Articles de blog sauvegardés dans Firestore !');
+            showToast('success', '✓ Tous les articles ont été sauvegardés !');
         } catch (err) {
-            console.error('Erreur sauvegarde blog:', err);
-            alert('Erreur lors de la sauvegarde – vérifiez la console.');
+            console.error('Erreur sauvegarde:', err);
+            showToast('error', 'Erreur lors de la sauvegarde');
         }
     };
 
@@ -150,10 +176,13 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6D4C41&color=fff`;
     };
 
+    const currentPost = posts.find(p => p.id === editingId);
+
     if (isLoading) {
         return (
-            <div className="text-center py-12 text-muted-foreground">
-                Chargement des articles de blog depuis Firebase...
+            <div className="text-center py-12 text-[#634832]/60">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A373]"></div>
+                <p className="mt-4">Chargement des articles...</p>
             </div>
         );
     }
@@ -163,20 +192,24 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-foreground">Articles de Blog</h2>
-                    <p className="text-muted-foreground">Gérez vos articles et publications</p>
+                    <h2 className="text-2xl font-bold text-[#1A120B]">Articles de Blog</h2>
+                    <p className="text-[#634832]/60">Gérez vos articles et publications</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {hasChanges && (
-                        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                            Non sauvegardé
-                        </span>
+                        <motion.span
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-sm text-[#D4A373] bg-[#D4A373]/10 px-3 py-1 rounded-lg font-medium"
+                        >
+                            ● Non sauvegardé
+                        </motion.span>
                     )}
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleAddPost}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#FAF7F2] rounded-xl text-[#634832] font-medium transition-colors border border-[#634832]/10"
                     >
                         <Plus size={18} />
                         Nouvel Article
@@ -186,7 +219,7 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                         whileTap={{ scale: 0.95 }}
                         onClick={handleSave}
                         disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-[#D4A373] to-[#634832] text-white rounded-xl font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <Save size={18} />
                         Sauvegarder
@@ -202,23 +235,30 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-muted/30 rounded-xl border border-border overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                        className="bg-white rounded-2xl border border-[#634832]/10 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                     >
-                        <div className="flex items-center justify-between p-4 bg-card border-b border-border">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-[#634832]/10">
                             <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                                    <img src={post.image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
+                                <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#FAF7F2] flex-shrink-0 border border-[#634832]/10">
+                                    {post.image ? (
+                                        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-[#634832]/30">
+                                            <ImageIcon size={24} />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="font-semibold text-foreground text-lg">{post.title}</h3>
+                                        <h3 className="font-semibold text-[#1A120B] text-lg">{post.title}</h3>
                                         {post.featured && (
-                                            <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-medium rounded">
-                                                En vedette
+                                            <span className="px-2 py-1 bg-[#D4A373]/20 text-[#D4A373] text-xs font-medium rounded">
+                                                ★ Vedette
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                                    <div className="flex flex-wrap items-center gap-4 text-sm text-[#634832]/60">
                                         <span className="flex items-center gap-1">
                                             <Calendar size={14} /> {post.date}
                                         </span>
@@ -228,30 +268,32 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                                         <span className="flex items-center gap-1">
                                             <Eye size={14} /> {post.views} vues
                                         </span>
-                                        <span className="flex items-center gap-1">
-                                            <Tag size={14} /> {post.tags.length} tag{post.tags.length > 1 ? 's' : ''}
-                                        </span>
+                                        {post.tags.length > 0 && (
+                                            <span className="flex items-center gap-1">
+                                                <Tag size={14} /> {post.tags.length} tag{post.tags.length > 1 ? 's' : ''}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setEditingId(editingId === post.id ? null : post.id)}
-                                    className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
+                                    className="px-4 py-2 bg-[#D4A373]/10 hover:bg-[#D4A373]/20 text-[#D4A373] rounded-xl text-sm font-medium transition-colors"
                                 >
                                     {editingId === post.id ? 'Fermer' : 'Modifier'}
                                 </button>
                                 <button
                                     onClick={() => handleDeletePost(post.id)}
-                                    className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-red-50 rounded-xl transition-colors"
                                     title="Supprimer"
                                 >
-                                    <Trash2 size={18} className="text-destructive" />
+                                    <Trash2 size={18} className="text-red-500" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Formulaire d'édition */}
+                        {/* Formulaire d'édition avec onglets */}
                         <AnimatePresence>
                             {editingId === post.id && (
                                 <motion.div
@@ -262,174 +304,192 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                                     className="overflow-hidden"
                                 >
                                     <div className="p-6 space-y-6">
-                                        <div className="grid md:grid-cols-2 gap-6">
-                                            {/* Titre */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Titre de l'article</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.title}
-                                                    onChange={(e) => handleChange(post.id, 'title', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
+                                        {/* Tabs */}
+                                        <div className="flex items-center gap-2 border-b border-[#634832]/10 pb-4">
+                                            {[
+                                                { key: 'content', icon: FileText, label: 'Contenu' },
+                                                { key: 'media', icon: ImageIcon, label: 'Médias' },
+                                                { key: 'settings', icon: Settings, label: 'Paramètres' }
+                                            ].map(tab => (
+                                                <button
+                                                    key={tab.key}
+                                                    onClick={() => setActiveTab(tab.key as any)}
+                                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                                                        activeTab === tab.key
+                                                            ? 'bg-[#D4A373] text-white'
+                                                            : 'text-[#634832]/60 hover:bg-[#FAF7F2]'
+                                                    }`}
+                                                >
+                                                    <tab.icon size={16} />
+                                                    {tab.label}
+                                                </button>
+                                            ))}
+                                        </div>
 
-                                            {/* Slug */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Slug (URL)</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.slug}
-                                                    onChange={(e) => handleChange(post.id, 'slug', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Image */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Image principale (URL)</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.image}
-                                                    onChange={(e) => handleChange(post.id, 'image', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Extrait */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Extrait (meta description)</label>
-                                                <textarea
-                                                    value={post.excerpt}
-                                                    onChange={(e) => handleChange(post.id, 'excerpt', e.target.value)}
-                                                    rows={2}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                                                />
-                                            </div>
-
-                                            {/* Contenu complet */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Contenu complet de l'article</label>
-                                                <textarea
-                                                    value={post.content}
-                                                    onChange={(e) => handleChange(post.id, 'content', e.target.value)}
-                                                    rows={10}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                                                />
-                                            </div>
-
-                                            {/* Auteur */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Auteur</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.author}
-                                                    onChange={(e) => {
-                                                        handleChange(post.id, 'author', e.target.value);
-                                                        handleChange(post.id, 'authorAvatar', generateAuthorAvatar(e.target.value));
-                                                    }}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Bio auteur */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Biographie de l'auteur</label>
-                                                <textarea
-                                                    value={post.authorBio}
-                                                    onChange={(e) => handleChange(post.id, 'authorBio', e.target.value)}
-                                                    rows={3}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary resize-none"
-                                                />
-                                            </div>
-
-                                            {/* Catégorie */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Catégorie</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.category}
-                                                    onChange={(e) => handleChange(post.id, 'category', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Temps de lecture */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Temps de lecture</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.readTime}
-                                                    onChange={(e) => handleChange(post.id, 'readTime', e.target.value)}
-                                                    placeholder="8 min de lecture"
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Date */}
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Date de publication</label>
-                                                <input
-                                                    type="text"
-                                                    value={post.date}
-                                                    onChange={(e) => handleChange(post.id, 'date', e.target.value)}
-                                                    placeholder="Décembre 2025"
-                                                    className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* En vedette */}
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`featured-${post.id}`}
-                                                    checked={post.featured}
-                                                    onChange={(e) => handleChange(post.id, 'featured', e.target.checked)}
-                                                    className="w-5 h-5 rounded border-border text-primary focus:ring-2 focus:ring-primary"
-                                                />
-                                                <label htmlFor={`featured-${post.id}`} className="text-sm font-medium text-foreground">
-                                                    Article en vedette
-                                                </label>
-                                            </div>
-
-                                            {/* Tags */}
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Tags</label>
-                                                <div className="flex flex-wrap gap-2 mb-3">
-                                                    {post.tags.map((tag, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className="flex items-center gap-1 px-3 py-1 bg-muted rounded-full text-sm font-medium"
-                                                        >
-                                                            <Tag size={12} />
-                                                            {tag}
-                                                            <button
-                                                                onClick={() => removeTag(post.id, idx)}
-                                                                className="ml-1 hover:text-destructive"
-                                                            >
-                                                                <X size={14} />
-                                                            </button>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-2">
+                                        {/* Content Tab */}
+                                        {activeTab === 'content' && (
+                                            <div className="space-y-6">
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2 text-[#634832]">Titre</label>
                                                     <input
                                                         type="text"
-                                                        value={newTag}
-                                                        onChange={(e) => setNewTag(e.target.value)}
-                                                        onKeyPress={(e) => e.key === 'Enter' && addTag(post.id)}
-                                                        placeholder="Nouveau tag..."
-                                                        className="flex-1 px-4 py-3 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                                        value={post.title}
+                                                        onChange={(e) => handleChange(post.id, 'title', e.target.value)}
+                                                        placeholder="Un titre accrocheur..."
+                                                        className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent transition-all"
                                                     />
-                                                    <button
-                                                        onClick={() => addTag(post.id)}
-                                                        className="px-4 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-medium"
-                                                    >
-                                                        Ajouter
-                                                    </button>
+                                                    <div className="mt-1 text-xs text-[#634832]/40">
+                                                        Slug auto : <span className="font-mono text-[#D4A373]">{post.slug}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2 text-[#634832]">Extrait (résumé)</label>
+                                                    <textarea
+                                                        value={post.excerpt}
+                                                        onChange={(e) => handleChange(post.id, 'excerpt', e.target.value)}
+                                                        rows={2}
+                                                        placeholder="Un résumé captivant en 1-2 phrases..."
+                                                        className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent resize-none transition-all"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2 text-[#634832]">Contenu de l'article</label>
+                                                    <RichTextEditor
+                                                        value={post.content}
+                                                        onChange={(val) => handleChange(post.id, 'content', val)}
+                                                        minHeight="400px"
+                                                    />
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {/* Media Tab */}
+                                        {activeTab === 'media' && (
+                                            <div className="space-y-6">
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-3 text-[#634832]">Image principale</label>
+                                                    <ImageUploader
+                                                        value={post.image}
+                                                        onChange={(url) => handleChange(post.id, 'image', url)}
+                                                        folder="blog-images"
+                                                        aspectRatio="4/5"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Settings Tab */}
+                                        {activeTab === 'settings' && (
+                                            <div className="space-y-6">
+                                                <div className="grid md:grid-cols-2 gap-6">
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2 text-[#634832]">Auteur</label>
+                                                        <input
+                                                            type="text"
+                                                            value={post.author}
+                                                            onChange={(e) => {
+                                                                handleChange(post.id, 'author', e.target.value);
+                                                                handleChange(post.id, 'authorAvatar', generateAuthorAvatar(e.target.value));
+                                                            }}
+                                                            className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2 text-[#634832]">Catégorie</label>
+                                                        <input
+                                                            type="text"
+                                                            value={post.category}
+                                                            onChange={(e) => handleChange(post.id, 'category', e.target.value)}
+                                                            className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2 text-[#634832]">Temps de lecture</label>
+                                                        <input
+                                                            type="text"
+                                                            value={post.readTime}
+                                                            onChange={(e) => handleChange(post.id, 'readTime', e.target.value)}
+                                                            placeholder="5 min de lecture"
+                                                            className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2 text-[#634832]">Date</label>
+                                                        <input
+                                                            type="text"
+                                                            value={post.date}
+                                                            onChange={(e) => handleChange(post.id, 'date', e.target.value)}
+                                                            placeholder="Décembre 2025"
+                                                            className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-2 text-[#634832]">Biographie de l'auteur</label>
+                                                    <textarea
+                                                        value={post.authorBio}
+                                                        onChange={(e) => handleChange(post.id, 'authorBio', e.target.value)}
+                                                        rows={3}
+                                                        className="w-full px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent resize-none"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center gap-3 p-4 bg-[#FAF7F2] rounded-xl">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`featured-${post.id}`}
+                                                        checked={post.featured}
+                                                        onChange={(e) => handleChange(post.id, 'featured', e.target.checked)}
+                                                        className="w-5 h-5 rounded border-[#634832]/20 text-[#D4A373] focus:ring-2 focus:ring-[#D4A373]"
+                                                    />
+                                                    <label htmlFor={`featured-${post.id}`} className="text-sm font-medium text-[#634832]">
+                                                        ⭐ Mettre en vedette sur la page d'accueil
+                                                    </label>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-3 text-[#634832]">Tags</label>
+                                                    <div className="flex flex-wrap gap-2 mb-3">
+                                                        {post.tags.map((tag, idx) => (
+                                                            <span
+                                                                key={idx}
+                                                                className="flex items-center gap-1 px-3 py-1.5 bg-[#D4A373]/10 text-[#634832] rounded-full text-sm font-medium"
+                                                            >
+                                                                {tag}
+                                                                <button
+                                                                    onClick={() => removeTag(post.id, idx)}
+                                                                    className="ml-1 hover:text-red-500 transition-colors"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={newTag}
+                                                            onChange={(e) => setNewTag(e.target.value)}
+                                                            onKeyPress={(e) => e.key === 'Enter' && addTag(post.id)}
+                                                            placeholder="Nouveau tag..."
+                                                            className="flex-1 px-4 py-3 bg-white border border-[#634832]/20 rounded-xl focus:ring-2 focus:ring-[#D4A373] focus:border-transparent"
+                                                        />
+                                                        <button
+                                                            onClick={() => addTag(post.id)}
+                                                            className="px-6 py-3 bg-[#D4A373]/10 hover:bg-[#D4A373]/20 text-[#D4A373] rounded-xl font-medium transition-colors"
+                                                        >
+                                                            Ajouter
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}
