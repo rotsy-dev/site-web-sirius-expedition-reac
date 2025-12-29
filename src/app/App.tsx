@@ -124,9 +124,7 @@ function App() {
                     <HeroCarousel slides={content.heroSlides} />
                     <BestSellers
                       tours={content.bestSellers}
-                      onNavigateToTour={(tour) => {
-                        const extended = getDetailedTour(tour);
-                        setPendingTour(extended);
+                      onNavigateToTour={() => {
                         setActiveSection('tours');
                       }}
                     />
