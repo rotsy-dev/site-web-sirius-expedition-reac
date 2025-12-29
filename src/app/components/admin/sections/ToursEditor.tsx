@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, Eye, X, MapPin, Clock, DollarSign, Star } from 'lucide-react';
-import { db } from '../../../../firebase/config'; // Ajuste le chemin selon ta structure
+import { Plus, Trash2, Save, X, MapPin, Clock, DollarSign, Star, Edit2 } from 'lucide-react';
+import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 
 interface Tour {
@@ -31,11 +31,14 @@ interface ToursEditorProps {
 
 export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
     const [tours, setTours] = useState<Tour[]>(initialTours);
-    const [editingId, setEditingId] = useState<number | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Chargement des tours depuis Firestore au montage
+    // États pour la modale d'édition
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingTour, setEditingTour] = useState<Tour | null>(null);
+
+    // Chargement depuis Firestore
     useEffect(() => {
         const fetchTours = async () => {
             try {
@@ -46,10 +49,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                     ...docSnap.data() as Omit<Tour, 'id'>
                 }));
 
-                // Tri par ID pour un ordre stable
                 fetchedTours.sort((a, b) => a.id - b.id);
-
-                // Si Firestore a des données, on les utilise, sinon on garde les initiales
                 setTours(fetchedTours.length > 0 ? fetchedTours : initialTours);
             } catch (err) {
                 console.error('Erreur lors du chargement des tours (Best Sellers) :', err);
@@ -67,6 +67,11 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
             tour.id === id ? { ...tour, [field]: value } : tour
         ));
         setHasChanges(true);
+
+        // Mise à jour synchrone dans la modale
+        if (editingTour && editingTour.id === id) {
+            setEditingTour(prev => prev ? { ...prev, [field]: value } : null);
+        }
     };
 
     const handleHighlightChange = (tourId: number, index: number, value: string) => {
@@ -79,6 +84,12 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
             return tour;
         }));
         setHasChanges(true);
+
+        if (editingTour && editingTour.id === tourId) {
+            const newHighlights = [...editingTour.highlights];
+            newHighlights[index] = value;
+            setEditingTour({ ...editingTour, highlights: newHighlights });
+        }
     };
 
     const addHighlight = (tourId: number) => {
@@ -88,6 +99,13 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                 : tour
         ));
         setHasChanges(true);
+
+        if (editingTour && editingTour.id === tourId) {
+            setEditingTour({
+                ...editingTour,
+                highlights: [...editingTour.highlights, 'Nouvelle caractéristique']
+            });
+        }
     };
 
     const removeHighlight = (tourId: number, index: number) => {
@@ -97,6 +115,13 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                 : tour
         ));
         setHasChanges(true);
+
+        if (editingTour && editingTour.id === tourId) {
+            setEditingTour({
+                ...editingTour,
+                highlights: editingTour.highlights.filter((_, i) => i !== index)
+            });
+        }
     };
 
     const handleAddTour = () => {
@@ -120,8 +145,19 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
             bestTime: 'Mai à Novembre',
         };
         setTours(prev => [...prev, newTour]);
-        setEditingId(newId);
+        setEditingTour(newTour);
+        setIsEditModalOpen(true);
         setHasChanges(true);
+    };
+
+    const openEditModal = (tour: Tour) => {
+        setEditingTour(tour);
+        setIsEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingTour(null);
     };
 
     const handleDeleteTour = async (id: number) => {
@@ -132,33 +168,30 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
 
         if (confirm('Supprimer définitivement ce tour ? Cette action est irréversible.')) {
             try {
-                // Suppression immédiate dans Firestore
                 await deleteDoc(doc(db, 'bestSellers', id.toString()));
-
-                // Suppression locale
                 setTours(prev => prev.filter(t => t.id !== id));
                 setHasChanges(true);
+                alert('Tour supprimé avec succès !');
             } catch (err) {
                 console.error('Erreur lors de la suppression dans Firebase :', err);
-                alert('Impossible de supprimer le tour. Vérifiez votre connexion ou les permissions.');
+                alert('Impossible de supprimer le tour.');
             }
         }
     };
 
     const handleSave = async () => {
         try {
-            // Sauvegarde de chaque tour dans Firestore
             for (const tour of tours) {
                 const tourDoc = doc(db, 'bestSellers', tour.id.toString());
                 await setDoc(tourDoc, tour);
             }
 
-            onSave(tours); // Pour compatibilité avec ton système existant
+            onSave(tours);
             setHasChanges(false);
             alert('✅ Tous les tours Best Sellers ont été sauvegardés avec succès dans Firebase !');
         } catch (err) {
             console.error('Erreur lors de la sauvegarde dans Firebase :', err);
-            alert('Erreur lors de la sauvegarde. Vérifiez votre connexion internet et les règles Firestore.');
+            alert('Erreur lors de la sauvegarde.');
         }
     };
 
@@ -206,7 +239,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                 </div>
             </div>
 
-            {/* Liste des tours */}
+            {/* Liste des tours (cartes compactes) */}
             <div className="grid gap-6">
                 {tours.map((tour, index) => (
                     <motion.div
@@ -219,7 +252,12 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                         <div className="flex items-center justify-between p-4 bg-card border-b border-border">
                             <div className="flex items-center gap-4">
                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                                    <img src={tour.image} alt={tour.title} className="w-full h-full object-cover" loading="lazy" />
+                                    <img
+                                        src={tour.image}
+                                        alt={tour.title}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground text-lg">{tour.title}</h3>
@@ -234,17 +272,19 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                             <DollarSign size={14} /> {tour.price}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Star size={14} fill="currentColor" className="text-primary" /> {tour.rating} ({tour.reviews} avis)
+                                            <Star size={14} fill="currentColor" className="text-primary" />
+                                            {tour.rating} ({tour.reviews} avis)
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setEditingId(editingId === tour.id ? null : tour.id)}
-                                    className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
+                                    onClick={() => openEditModal(tour)}
+                                    className="flex items-center gap-1 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
                                 >
-                                    {editingId === tour.id ? 'Fermer' : 'Modifier'}
+                                    <Edit2 size={16} />
+                                    Modifier
                                 </button>
                                 <button
                                     onClick={() => handleDeleteTour(tour.id)}
@@ -256,173 +296,214 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                             </div>
                         </div>
 
-                        {/* Formulaire d'édition */}
-                        <AnimatePresence>
-                            {editingId === tour.id && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="p-6 space-y-6">
-                                        <div className="grid md:grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Titre du tour</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.title}
-                                                    onChange={(e) => handleChange(tour.id, 'title', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Slug (URL)</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.slug}
-                                                    onChange={(e) => handleChange(tour.id, 'slug', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Image principale (URL)</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.image}
-                                                    onChange={(e) => handleChange(tour.id, 'image', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Durée</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.duration}
-                                                    onChange={(e) => handleChange(tour.id, 'duration', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Localisation</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.location}
-                                                    onChange={(e) => handleChange(tour.id, 'location', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Prix</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.price}
-                                                    onChange={(e) => handleChange(tour.id, 'price', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Note (sur 5)</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.1"
-                                                    min="0"
-                                                    max="5"
-                                                    value={tour.rating}
-                                                    onChange={(e) => handleChange(tour.id, 'rating', parseFloat(e.target.value) || 0)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Description courte (affichée dans le carousel)</label>
-                                                <textarea
-                                                    value={tour.description}
-                                                    onChange={(e) => handleChange(tour.id, 'description', e.target.value)}
-                                                    rows={3}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg resize-none focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium mb-2">Description longue (pour la page détail)</label>
-                                                <textarea
-                                                    value={tour.longDescription}
-                                                    onChange={(e) => handleChange(tour.id, 'longDescription', e.target.value)}
-                                                    rows={6}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg resize-none focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Difficulté</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.difficulty}
-                                                    onChange={(e) => handleChange(tour.id, 'difficulty', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Taille du groupe</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.groupSize}
-                                                    onChange={(e) => handleChange(tour.id, 'groupSize', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium mb-2">Meilleure période</label>
-                                                <input
-                                                    type="text"
-                                                    value={tour.bestTime}
-                                                    onChange={(e) => handleChange(tour.id, 'bestTime', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            {/* Highlights */}
-                                            <div className="md:col-span-2">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <label className="block text-sm font-medium">Points forts</label>
-                                                    <button
-                                                        onClick={() => addHighlight(tour.id)}
-                                                        className="text-sm text-primary hover:underline flex items-center gap-1"
-                                                    >
-                                                        <Plus size={16} /> Ajouter un point fort
-                                                    </button>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    {tour.highlights.map((highlight, idx) => (
-                                                        <div key={idx} className="flex gap-2">
-                                                            <input
-                                                                type="text"
-                                                                value={highlight}
-                                                                onChange={(e) => handleHighlightChange(tour.id, idx, e.target.value)}
-                                                                className="flex-1 px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                                            />
-                                                            <button
-                                                                onClick={() => removeHighlight(tour.id, idx)}
-                                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                                                            >
-                                                                <X size={18} />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {/* Aperçu de l'image */}
+                        <div className="p-4 bg-muted/50 flex justify-center">
+                            <img
+                                src={tour.image}
+                                alt={tour.title}
+                                className="max-h-48 rounded-lg object-cover shadow-md"
+                                loading="lazy"
+                            />
+                        </div>
                     </motion.div>
                 ))}
             </div>
+
+            {/* Modale d'édition / ajout */}
+            <AnimatePresence>
+                {isEditModalOpen && editingTour && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+                        onClick={closeEditModal}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between">
+                                <h3 className="text-2xl font-bold text-foreground">
+                                    {editingTour.id > Math.max(...initialTours.map(t => t.id), 0)
+                                        ? 'Ajouter un nouveau tour'
+                                        : 'Modifier le tour'}
+                                </h3>
+                                <button
+                                    onClick={closeEditModal}
+                                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                >
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-6">
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Titre du tour</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.title}
+                                            onChange={(e) => handleChange(editingTour.id, 'title', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Slug (URL)</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.slug}
+                                            onChange={(e) => handleChange(editingTour.id, 'slug', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium mb-2">Image principale (URL)</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.image}
+                                            onChange={(e) => handleChange(editingTour.id, 'image', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Durée</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.duration}
+                                            onChange={(e) => handleChange(editingTour.id, 'duration', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Localisation</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.location}
+                                            onChange={(e) => handleChange(editingTour.id, 'location', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Prix</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.price}
+                                            onChange={(e) => handleChange(editingTour.id, 'price', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Note (sur 5)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            max="5"
+                                            value={editingTour.rating}
+                                            onChange={(e) => handleChange(editingTour.id, 'rating', parseFloat(e.target.value) || 0)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium mb-2">Description courte</label>
+                                        <textarea
+                                            value={editingTour.description}
+                                            onChange={(e) => handleChange(editingTour.id, 'description', e.target.value)}
+                                            rows={3}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg resize-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium mb-2">Description longue</label>
+                                        <textarea
+                                            value={editingTour.longDescription}
+                                            onChange={(e) => handleChange(editingTour.id, 'longDescription', e.target.value)}
+                                            rows={6}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg resize-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Difficulté</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.difficulty}
+                                            onChange={(e) => handleChange(editingTour.id, 'difficulty', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Taille du groupe</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.groupSize}
+                                            onChange={(e) => handleChange(editingTour.id, 'groupSize', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Meilleure période</label>
+                                        <input
+                                            type="text"
+                                            value={editingTour.bestTime}
+                                            onChange={(e) => handleChange(editingTour.id, 'bestTime', e.target.value)}
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    {/* Points forts */}
+                                    <div className="md:col-span-2">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <label className="text-lg font-medium">Points forts</label>
+                                            <button
+                                                onClick={() => addHighlight(editingTour.id)}
+                                                className="text-sm text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                <Plus size={16} /> Ajouter un point fort
+                                            </button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {editingTour.highlights.map((highlight, idx) => (
+                                                <div key={idx} className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        value={highlight}
+                                                        onChange={(e) => handleHighlightChange(editingTour.id, idx, e.target.value)}
+                                                        className="flex-1 px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
+                                                    />
+                                                    <button
+                                                        onClick={() => removeHighlight(editingTour.id, idx)}
+                                                        className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                                    >
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end pt-6 border-t border-border">
+                                    <button
+                                        onClick={closeEditModal}
+                                        className="px-8 py-3 bg-muted hover:bg-muted/80 rounded-lg font-medium transition-colors"
+                                    >
+                                        Fermer
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

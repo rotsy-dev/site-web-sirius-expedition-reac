@@ -576,24 +576,6 @@ export function Contact({ config }: ContactProps) {
                     />
                   </div>
 
-                  {/* <div>
-                    <label htmlFor="preferredHours" className="block mb-2 text-sm font-medium text-foreground flex items-center gap-2">
-                      <Clock size={16} className="text-accent" />
-                      Preferred Contact Hours
-                    </label>
-                    <select
-                      id="preferredHours"
-                      name="preferredHours"
-                      value={formData.preferredHours}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-muted border-2 border-transparent focus:border-accent focus:outline-none transition-all text-foreground"
-                    >
-                      <option value="">Select time slot</option>
-                      {preferredHours.map(hour => (
-                        <option key={hour} value={hour}>{hour}</option>
-                      ))}
-                    </select>
-                  </div> */}
                 </div>
 
                 <div>
