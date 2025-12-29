@@ -61,7 +61,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 overflow-hidden pt-32 pb-20">
+    <section className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 overflow-hidden pt-24 pb-12 md:pt-32 md:pb-20">
       {/* Background animé */}
       <div className="absolute inset-0">
         {/* Gradients flottants */}
@@ -91,22 +91,22 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10 mt-12">
         {/* En-tête */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-10 md:mb-20"
         >
           {/* Badge simple */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-6"
+            className="mb-6 md:mb-6"
           >
-            <span className="text-sm text-[#443C34] dark:text-gray-400 font-semibold bg-white px-6 py-3 rounded-full">
+            <span className="text-xl text-[#443C34] dark:text-gray-400 font-semibold bg-white px-10 py-3 rounded-full">
               Featured Destinations
             </span>
           </motion.div>
@@ -116,7 +116,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] dark:text-white leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] dark:text-white leading-tight"
           >
             Your Next Adventure Awaits
           </motion.h2>
@@ -138,22 +138,22 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             transition={{ delay: 0.5 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 bg-[#443C34] dark:bg-gray-700 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
+            className="inline-flex items-center gap-4 bg-[#443C34] dark:bg-gray-700 text-white pl-1 pr-8 py-1 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden border-2 border-white/20 shrink-0">
               <img
                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dera"
                 alt="Dera"
                 className="w-full h-full object-cover"
               />
             </div>
-            <span className='text-xl font-semibold'>Planifier un appel avec Dera</span>
+            <span className='text-lg sm:text-xl font-semibold'>Planifier un appel avec Dera</span>
           </motion.button>
         </motion.div>
 
         {/* Carousel interactif de destinations */}
         <div className="relative py-20">
-          <div className="relative w-full max-w-5xl mx-auto h-[400px] md:h-[500px] lg:h-[600px] flex items-center justify-center">
+          <div className="relative w-full max-w-5xl mx-auto h-[350px] md:h-[500px] lg:h-[600px] flex items-center justify-center">
             <AnimatePresence initial={false} custom={direction}>
               {slides.map((slide, index) => {
                 const position = getCardPosition(index);
@@ -187,8 +187,8 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                       alt={slide.title}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 flex flex-col justify-end p-8 text-white">
-                      <h3 className="text-3xl font-bold mb-2">{slide.title}</h3>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 flex flex-col justify-end p-6 md:p-8 text-white">
+                      <h3 className="text-2xl md:text-3xl font-bold mb-2">{slide.title}</h3>
                       <p className="text-lg mb-4">{slide.subtitle}</p>
                       <div className="flex items-center gap-4">
                         <motion.button
@@ -217,7 +217,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             {/* Navigation Buttons */}
             <motion.button
               onClick={prevSlide}
-              className="absolute left-0 md:-left-16 z-40 p-3 bg-white/80 dark:bg-gray-800/80 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-colors backdrop-blur-sm"
+              className="absolute left-2 md:-left-16 z-40 p-2 md:p-3 bg-white/80 dark:bg-gray-800/80 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-colors backdrop-blur-sm"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -225,7 +225,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             </motion.button>
             <motion.button
               onClick={nextSlide}
-              className="absolute right-0 md:-right-16 z-40 p-3 bg-white/80 dark:bg-gray-800/80 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-colors backdrop-blur-sm"
+              className="absolute right-2 md:-right-16 z-40 p-2 md:p-3 bg-white/80 dark:bg-gray-800/80 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-colors backdrop-blur-sm"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
