@@ -1,9 +1,22 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Mail, Phone, MapPin, Facebook, Youtube, Globe, X } from 'lucide-react';
+import { Save, Mail, Phone, MapPin, Facebook, Youtube, Globe, X, Plus, Trash2, Calendar, Clock } from 'lucide-react';
 import { db } from '../../../../firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+interface TourDate {
+    id: string;
+    date: string; // Format: YYYY-MM-DD
+    time: string; // Format: HH:MM
+}
+
+interface Tour {
+    id: string;
+    name: string;
+    description: string;
+    dates: TourDate[];
+}
 
 interface SiteConfig {
     siteName: string;
@@ -22,6 +35,7 @@ interface SiteConfig {
         google: string;
         instagram: string;
     };
+    tours: Tour[];
 }
 
 interface ConfigEditorProps {
@@ -47,6 +61,7 @@ const defaultConfig: SiteConfig = {
         google: '',
         instagram: '',
     },
+    tours: [],
 };
 
 export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProps) {
@@ -69,6 +84,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                         ...data,
                         contact: { ...defaultConfig.contact, ...data.contact },
                         social: { ...defaultConfig.social, ...data.social },
+                        tours: data.tours || [],
                     });
                 } else {
                     console.log('Document siteConfig/main inexistant → utilisation des valeurs par défaut');
@@ -102,6 +118,88 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
         setConfig(prev => ({
             ...prev,
             social: { ...prev.social, [field]: value }
+        }));
+        setHasChanges(true);
+    };
+
+    // Gestion des tours
+    const addTour = () => {
+        const newTour: Tour = {
+            id: `tour_${Date.now()}`,
+            name: '',
+            description: '',
+            dates: [],
+        };
+        setConfig(prev => ({
+            ...prev,
+            tours: [...prev.tours, newTour],
+        }));
+        setHasChanges(true);
+    };
+
+    const removeTour = (tourId: string) => {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce tour ?')) {
+            setConfig(prev => ({
+                ...prev,
+                tours: prev.tours.filter(tour => tour.id !== tourId),
+            }));
+            setHasChanges(true);
+        }
+    };
+
+    const updateTour = (tourId: string, field: keyof Tour, value: any) => {
+        setConfig(prev => ({
+            ...prev,
+            tours: prev.tours.map(tour =>
+                tour.id === tourId ? { ...tour, [field]: value } : tour
+            ),
+        }));
+        setHasChanges(true);
+    };
+
+    // Gestion des dates pour un tour
+    const addDateToTour = (tourId: string) => {
+        const newDate: TourDate = {
+            id: `date_${Date.now()}`,
+            date: '',
+            time: '',
+        };
+        setConfig(prev => ({
+            ...prev,
+            tours: prev.tours.map(tour =>
+                tour.id === tourId
+                    ? { ...tour, dates: [...tour.dates, newDate] }
+                    : tour
+            ),
+        }));
+        setHasChanges(true);
+    };
+
+    const removeDateFromTour = (tourId: string, dateId: string) => {
+        setConfig(prev => ({
+            ...prev,
+            tours: prev.tours.map(tour =>
+                tour.id === tourId
+                    ? { ...tour, dates: tour.dates.filter(d => d.id !== dateId) }
+                    : tour
+            ),
+        }));
+        setHasChanges(true);
+    };
+
+    const updateTourDate = (tourId: string, dateId: string, field: keyof TourDate, value: string) => {
+        setConfig(prev => ({
+            ...prev,
+            tours: prev.tours.map(tour =>
+                tour.id === tourId
+                    ? {
+                          ...tour,
+                          dates: tour.dates.map(d =>
+                              d.id === dateId ? { ...d, [field]: value } : d
+                          ),
+                      }
+                    : tour
+            ),
         }));
         setHasChanges(true);
     };
@@ -320,7 +418,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                         <li>• Formats : PNG (transparent), JPG, SVG</li>
                                         <li>• Taille max : 5 Mo → compressé automatiquement</li>
                                         <li>• Dimensions idéales : 300–400 px de largeur</li>
-                                        <li>• Taille finale cible :  500 KB</li>
+                                        <li>• Taille finale cible : ≤ 500 KB</li>
                                     </ul>
                                 </div>
                             </div>
@@ -448,9 +546,196 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                 </div>
             </div>
 
+            {/* Section Tours et Dates */}
+            <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                            <MapPin size={24} className="text-primary" />
+                            Gestion des Tours et Dates
+                        </h3>
+                        <p className="text-muted-foreground text-sm mt-1">
+                            Configurez vos circuits touristiques avec leurs dates et horaires
+                        </p>
+                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={addTour}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                    >
+                        <Plus size={20} />
+                        Nouveau Tour
+                    </motion.button>
+                </div>
+
+                {config.tours.length === 0 ? (
+                    <div className="text-center py-16 bg-background/50 border-2 border-dashed border-border rounded-xl">
+                        <MapPin size={64} className="mx-auto text-muted-foreground mb-4 opacity-50" />
+                        <h4 className="text-xl font-bold text-foreground mb-2">Aucun tour configuré</h4>
+                        <p className="text-muted-foreground mb-6">
+                            Commencez par ajouter votre premier circuit touristique
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {config.tours.map((tour, tourIndex) => (
+                            <motion.div
+                                key={tour.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="border-2 border-border rounded-xl p-6 bg-background/50"
+                            >
+                                {/* En-tête du Tour */}
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex-1 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary font-bold rounded-lg">
+                                                {tourIndex + 1}
+                                            </span>
+                                            <div className="flex-1">
+                                                <label className="block text-sm font-medium text-foreground mb-2">
+                                                    Nom du Tour
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={tour.name}
+                                                    onChange={(e) => updateTour(tour.id, 'name', e.target.value)}
+                                                    placeholder="Ex: Circuit des Baobabs, Tsingy de Bemaraha..."
+                                                    className="w-full px-5 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-foreground mb-2">
+                                                Description du Circuit
+                                            </label>
+                                            <textarea
+                                                value={tour.description}
+                                                onChange={(e) => updateTour(tour.id, 'description', e.target.value)}
+                                                placeholder="Décrivez les points forts de ce circuit touristique..."
+                                                rows={2}
+                                                className="w-full px-5 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary resize-none"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => removeTour(tour.id)}
+                                        className="ml-4 p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-all"
+                                        title="Supprimer ce tour"
+                                    >
+                                        <Trash2 size={20} />
+                                    </motion.button>
+                                </div>
+
+                                {/* Section Dates */}
+                                <div className="bg-card border border-border rounded-xl p-6">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <div className="flex items-center gap-3">
+                                            <Calendar size={20} className="text-primary" />
+                                            <h4 className="font-bold text-foreground">
+                                                Dates et Horaires
+                                                <span className="ml-2 px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-semibold">
+                                                    {tour.dates.length} {tour.dates.length > 1 ? 'dates' : 'date'}
+                                                </span>
+                                            </h4>
+                                        </div>
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => addDateToTour(tour.id)}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
+                                        >
+                                            <Plus size={18} />
+                                            Ajouter une date
+                                        </motion.button>
+                                    </div>
+
+                                    {tour.dates.length === 0 ? (
+                                        <div className="text-center py-10 bg-background/50 border-2 border-dashed border-border rounded-lg">
+                                            <Clock size={40} className="mx-auto text-muted-foreground mb-3 opacity-50" />
+                                            <p className="text-muted-foreground text-sm">
+                                                Aucune date configurée pour ce tour
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {tour.dates.map((tourDate, dateIndex) => (
+                                                <motion.div
+                                                    key={tourDate.id}
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    className="flex items-center gap-4 p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-all"
+                                                >
+                                                    <span className="flex items-center justify-center w-8 h-8 bg-primary/10 text-primary text-sm font-bold rounded-lg">
+                                                        {dateIndex + 1}
+                                                    </span>
+
+                                                    <div className="flex-1 grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
+                                                                <Calendar size={14} />
+                                                                Date du départ
+                                                            </label>
+                                                            <input
+                                                                type="date"
+                                                                value={tourDate.date}
+                                                                onChange={(e) => updateTourDate(tour.id, tourDate.id, 'date', e.target.value)}
+                                                                className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary font-medium"
+                                                            />
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
+                                                                <Clock size={14} />
+                                                                Heure de départ
+                                                            </label>
+                                                            <input
+                                                                type="time"
+                                                                value={tourDate.time}
+                                                                onChange={(e) => updateTourDate(tour.id, tourDate.id, 'time', e.target.value)}
+                                                                className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary font-medium"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={() => removeDateFromTour(tour.id, tourDate.id)}
+                                                        className="p-2.5 text-destructive hover:bg-destructive/10 rounded-lg transition-all"
+                                                        title="Supprimer cette date"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </motion.button>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="mt-4 bg-primary/5 border border-primary/20 rounded-lg p-3">
+                                        <p className="text-xs text-muted-foreground">
+                                            💡 <strong>Astuce :</strong> Vous pouvez ajouter plusieurs dates pour le même tour.
+                                            Chaque date peut avoir un horaire différent.
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl p-6 text-center">
                 <p className="text-foreground font-medium">
                     💡 Ces informations apparaissent dans le footer, les pages de contact et les métadonnées SEO du site.
+                </p>
+                <p className="text-muted-foreground text-sm mt-2">
+                    Les tours configurés seront disponibles pour la réservation sur le site public.
                 </p>
             </div>
         </div>

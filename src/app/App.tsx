@@ -12,7 +12,7 @@ import { TourSpecialties } from './components/TourSpecialties';
 import { Reviews } from './components/Reviews';
 import { VideoGallery } from './components/VideoGallery';
 import { Blogs } from './components/Blogs';
-import { Contact } from './components/Contact';
+import {Contact} from './components/Contact';
 import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
 
