@@ -21,6 +21,11 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 
+// (si ces constantes existent déjà chez toi
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { SITE_SECTIONS } from '@/constants';
+
 function App() {
   const [activeSection, setActiveSection] = useState('home');
 
