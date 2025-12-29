@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, Eye, Image, X } from 'lucide-react';
+import { Plus, Trash2, Save, Eye, Image, X, Edit2 } from 'lucide-react';
 import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 
@@ -21,10 +21,13 @@ interface HeroEditorProps {
 
 export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
     const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
-    const [editingId, setEditingId] = useState<number | null>(null);
     const [previewSlide, setPreviewSlide] = useState<HeroSlide | null>(null);
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    // État pour la modale d'édition
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
 
     // Chargement des slides depuis Firestore
     useEffect(() => {
@@ -37,9 +40,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                     ...docSnap.data() as Omit<HeroSlide, 'id'>
                 }));
 
-                // Trie par ID pour garder un ordre stable
                 fetchedSlides.sort((a, b) => a.id - b.id);
-
                 setSlides(fetchedSlides.length > 0 ? fetchedSlides : initialSlides);
             } catch (err) {
                 console.error('Erreur lors du chargement des slides:', err);
@@ -55,6 +56,11 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
             slide.id === id ? { ...slide, [field]: value } : slide
         ));
         setHasChanges(true);
+
+        // Mise à jour en temps réel dans la modale aussi
+        if (editingSlide && editingSlide.id === id) {
+            setEditingSlide({ ...editingSlide, [field]: value });
+        }
     };
 
     const handleAddSlide = () => {
@@ -68,11 +74,21 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
             videoUrl: '',
         };
         setSlides([...slides, newSlide]);
-        setEditingId(newId);
+        setEditingSlide(newSlide);
+        setIsEditModalOpen(true);
         setHasChanges(true);
     };
 
-    // Suppression IMMÉDIATE dans Firestore + locale
+    const openEditModal = (slide: HeroSlide) => {
+        setEditingSlide(slide);
+        setIsEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingSlide(null);
+    };
+
     const handleDeleteSlide = async (id: number) => {
         if (slides.length <= 1) {
             alert('Vous devez garder au moins une slide !');
@@ -81,25 +97,19 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
 
         if (confirm('Êtes-vous sûr de vouloir supprimer cette slide ? Cette action est irréversible.')) {
             try {
-                // 1. Suppression dans Firestore
                 await deleteDoc(doc(db, 'heroSlides', id.toString()));
-
-                // 2. Suppression locale
                 setSlides(prev => prev.filter(s => s.id !== id));
                 setHasChanges(true);
-
-                // Optionnel : message de succès
                 alert('Slide supprimée avec succès !');
             } catch (err) {
                 console.error('Erreur lors de la suppression:', err);
-                alert('Erreur lors de la suppression de la slide. Vérifiez votre connexion ou les règles Firestore.');
+                alert('Erreur lors de la suppression de la slide.');
             }
         }
     };
 
     const handleSave = async () => {
         try {
-            // Sauvegarde uniquement les slides actuelles (les nouvelles et modifiées)
             for (const slide of slides) {
                 const slideDoc = doc(db, 'heroSlides', slide.id.toString());
                 await setDoc(slideDoc, slide);
@@ -182,10 +192,11 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                     <Eye size={18} className="text-muted-foreground" />
                                 </button>
                                 <button
-                                    onClick={() => setEditingId(editingId === slide.id ? null : slide.id)}
-                                    className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
+                                    onClick={() => openEditModal(slide)}
+                                    className="flex items-center gap-1 px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
                                 >
-                                    {editingId === slide.id ? 'Fermer' : 'Modifier'}
+                                    <Edit2 size={16} />
+                                    Modifier
                                 </button>
                                 <button
                                     onClick={() => handleDeleteSlide(slide.id)}
@@ -197,97 +208,138 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </div>
                         </div>
 
-                        {/* Formulaire d'édition (inchangé) */}
-                        <AnimatePresence>
-                            {editingId === slide.id && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="p-6 space-y-4">
-                                        <div className="grid md:grid-cols-2 gap-4">
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-foreground mb-2">
-                                                    URL de l'image
-                                                </label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={slide.image}
-                                                        onChange={(e) => handleChange(slide.id, 'image', e.target.value)}
-                                                        placeholder="https://..."
-                                                        className="flex-1 px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                                    />
-                                                    {slide.image && (
-                                                        <a
-                                                            href={slide.image}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-                                                            title="Voir l'image"
-                                                        >
-                                                            <Image size={20} className="text-foreground" />
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-foreground mb-2">Titre</label>
-                                                <input
-                                                    type="text"
-                                                    value={slide.title}
-                                                    onChange={(e) => handleChange(slide.id, 'title', e.target.value)}
-                                                    placeholder="Découvrez Madagascar"
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-foreground mb-2">Sous-titre / Description</label>
-                                                <textarea
-                                                    value={slide.subtitle}
-                                                    onChange={(e) => handleChange(slide.id, 'subtitle', e.target.value)}
-                                                    placeholder="Une expérience unique..."
-                                                    rows={3}
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-foreground mb-2">Texte du bouton (CTA)</label>
-                                                <input
-                                                    type="text"
-                                                    value={slide.cta}
-                                                    onChange={(e) => handleChange(slide.id, 'cta', e.target.value)}
-                                                    placeholder="Explorer"
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-foreground mb-2">URL Vidéo (optionnel)</label>
-                                                <input
-                                                    type="text"
-                                                    value={slide.videoUrl}
-                                                    onChange={(e) => handleChange(slide.id, 'videoUrl', e.target.value)}
-                                                    placeholder="https://..."
-                                                    className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {/* Aperçu miniature de l'image */}
+                        <div className="p-4 flex justify-center bg-muted/50">
+                            <img
+                                src={slide.image}
+                                alt="Preview"
+                                className="h-32 rounded-lg object-cover shadow-md"
+                                loading="lazy"
+                            />
+                        </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Modal preview (inchangé) */}
+            {/* Modale d'édition/ajout */}
+            <AnimatePresence>
+                {isEditModalOpen && editingSlide && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={closeEditModal}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-foreground">
+                                    {editingSlide.id > Math.max(...initialSlides.map(s => s.id), 0)
+                                        ? 'Ajouter une nouvelle slide'
+                                        : 'Modifier la slide'}
+                                </h3>
+                                <button
+                                    onClick={closeEditModal}
+                                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-5">
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        URL de l'image
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={editingSlide.image}
+                                            onChange={(e) => handleChange(editingSlide.id, 'image', e.target.value)}
+                                            placeholder="https://..."
+                                            className="flex-1 px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                        {editingSlide.image && (
+                                            <a
+                                                href={editingSlide.image}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                                                title="Voir l'image"
+                                            >
+                                                <Image size={20} className="text-foreground" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Titre</label>
+                                    <input
+                                        type="text"
+                                        value={editingSlide.title}
+                                        onChange={(e) => handleChange(editingSlide.id, 'title', e.target.value)}
+                                        placeholder="Découvrez Madagascar"
+                                        className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">Sous-titre / Description</label>
+                                    <textarea
+                                        value={editingSlide.subtitle}
+                                        onChange={(e) => handleChange(editingSlide.id, 'subtitle', e.target.value)}
+                                        placeholder="Une expérience unique..."
+                                        rows={4}
+                                        className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    />
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-2">Texte du bouton (CTA)</label>
+                                        <input
+                                            type="text"
+                                            value={editingSlide.cta}
+                                            onChange={(e) => handleChange(editingSlide.id, 'cta', e.target.value)}
+                                            placeholder="Explorer"
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-2">URL Vidéo (optionnel)</label>
+                                        <input
+                                            type="text"
+                                            value={editingSlide.videoUrl}
+                                            onChange={(e) => handleChange(editingSlide.id, 'videoUrl', e.target.value)}
+                                            placeholder="https://..."
+                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end pt-4">
+                                    <button
+                                        onClick={closeEditModal}
+                                        className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-lg font-medium transition-colors"
+                                    >
+                                        Fermer
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal preview (inchangée) */}
             <AnimatePresence>
                 {previewSlide && (
                     <motion.div

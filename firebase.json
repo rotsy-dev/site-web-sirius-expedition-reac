@@ -6,6 +6,7 @@
     },
     "ui": {
       "enabled": true
-    }
+    },
+        "rules": "storage.rules"
   }
 }
