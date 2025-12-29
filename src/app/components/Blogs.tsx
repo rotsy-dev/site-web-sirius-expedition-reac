@@ -46,23 +46,23 @@ export function Blogs() {
         <div className="bg-white min-h-screen font-sans">
             <AnimatePresence mode="wait">
                 {!selectedPost ? (
-                    <motion.div 
-                        key="list" 
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }} 
+                    <motion.div
+                        key="list"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="pt-24 pb-20 px-6 max-w-[1400px] mx-auto"
+                        className="pt-32 pb-20 px-6 max-w-[1400px] mx-auto"
                     >
                         {/* HEADER - DESIGN ORIGINAL */}
                         <header className="text-center mb-16 space-y-4">
-                            <motion.span 
+                            <motion.span
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 className="inline-block px-3 py-1 bg-gray-50 text-[10px] font-bold uppercase tracking-widest text-gray-500 rounded-md border border-gray-100"
                             >
                                 {pageSettings.badge}
                             </motion.span>
-                            <motion.h1 
+                            <motion.h1
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.1 }}
@@ -70,7 +70,7 @@ export function Blogs() {
                             >
                                 {pageSettings.title}
                             </motion.h1>
-                            <motion.p 
+                            <motion.p
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.2 }}
@@ -82,11 +82,11 @@ export function Blogs() {
 
                         {/* FEATURED POST - DESIGN ORIGINAL */}
                         {featuredPost && (
-                            <motion.section 
+                            <motion.section
                                 initial={{ y: 40, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.3 }}
-                                onClick={() => setSelectedPost(featuredPost)} 
+                                onClick={() => setSelectedPost(featuredPost)}
                                 className="group cursor-pointer grid md:grid-cols-2 gap-12 items-center bg-white border border-gray-100 rounded-[2.5rem] p-8 mb-20 hover:shadow-xl transition-all duration-500"
                             >
                                 <div className="space-y-6">
@@ -105,11 +105,11 @@ export function Blogs() {
                                     </button>
                                 </div>
                                 <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden">
-                                    <motion.img 
+                                    <motion.img
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.8 }}
-                                        src={featuredPost.image} 
-                                        className="w-full h-full object-cover" 
+                                        src={featuredPost.image}
+                                        className="w-full h-full object-cover"
                                     />
                                 </div>
                             </motion.section>
@@ -118,20 +118,20 @@ export function Blogs() {
                         {/* GRID - DESIGN ORIGINAL */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                             {posts.slice(1).map((post, idx) => (
-                                <motion.article 
-                                    key={post.id} 
+                                <motion.article
+                                    key={post.id}
                                     initial={{ y: 40, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.1 * idx }}
-                                    onClick={() => setSelectedPost(post)} 
+                                    onClick={() => setSelectedPost(post)}
                                     className="group cursor-pointer space-y-6"
                                 >
                                     <div className="aspect-[1.4/1] rounded-[2rem] overflow-hidden">
-                                        <motion.img 
+                                        <motion.img
                                             whileHover={{ scale: 1.1 }}
                                             transition={{ duration: 0.6 }}
-                                            src={post.image} 
-                                            className="w-full h-full object-cover" 
+                                            src={post.image}
+                                            className="w-full h-full object-cover"
                                         />
                                     </div>
                                     <div className="px-2 space-y-4">
@@ -149,10 +149,10 @@ export function Blogs() {
                     </motion.div>
                 ) : (
                     /* DÉTAIL DE L'ARTICLE - DESIGN ORIGINAL */
-                    <motion.div 
-                        key="detail" 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
+                    <motion.div
+                        key="detail"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         className="max-w-4xl mx-auto px-6 py-32"
                     >
@@ -160,11 +160,11 @@ export function Blogs() {
                             <ArrowLeft size={16} /> Back to Blog
                         </button>
                         <h1 className="text-5xl font-bold mb-8 leading-tight">{selectedPost.title}</h1>
-                        <motion.img 
+                        <motion.img
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            src={selectedPost.image} 
-                            className="w-full h-[500px] object-cover rounded-[3rem] mb-12" 
+                            src={selectedPost.image}
+                            className="w-full h-[500px] object-cover rounded-[3rem] mb-12"
                         />
                         <div className="prose prose-lg max-w-none prose-p:text-gray-600" dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
                     </motion.div>
