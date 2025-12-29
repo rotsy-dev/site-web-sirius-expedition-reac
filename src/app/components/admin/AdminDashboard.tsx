@@ -14,7 +14,7 @@ import {
     Download,
     Upload,
     RotateCcw,
-    Video
+    Film,
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
@@ -22,8 +22,8 @@ import { TourSpecialtiesEditor } from './sections/TourSpecialtiesEditor';
 import { ReviewsEditor } from './sections/ReviewsEditor';
 import { BlogEditor } from './sections/BlogEditor';
 import { FAQEditor } from './sections/FAQEditor';
-import {ConfigEditor} from "./sections/ConfigEditor";
-// import { VideoGalleryEditor } from './sections/VideoGalleryEditor';
+import { ConfigEditor } from './sections/ConfigEditor';
+import VideoConfigEditor from './sections/VideoConfigEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -42,11 +42,11 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'hero', label: 'Hero Carousel', icon: Image },
         { id: 'tours', label: 'Best Sellers', icon: Package },
         { id: 'specialties', label: 'Tour Specialties', icon: Target },
-        { id: 'videos', label: 'Video Gallery', icon: Video }, // 🎬 NOUVEAU MENU
         { id: 'reviews', label: 'Témoignages', icon: Star },
         { id: 'blog', label: 'Articles Blog', icon: BookOpen },
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
+        { id: 'videos', label: 'Vidéos', icon: Film },
     ];
 
     const handleImport = () => {
@@ -77,7 +77,6 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
             setTimeout(() => setShowResetConfirm(false), 3000);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-background flex">
@@ -210,9 +209,6 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                             />
                         )}
 
-
-
-
                         {activeTab === 'reviews' && (
                             <ReviewsEditor
                                 reviews={content.reviews}
@@ -231,6 +227,18 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                             <FAQEditor
                                 faqs={content.faqs}
                                 onSave={(faqs) => onUpdateSection('faqs', faqs)}
+                            />
+                        )}
+
+                        {activeTab === 'videos' && (
+                            <VideoConfigEditor
+                                videos={content.videoGallery}
+                                config={content.siteConfig.videos}
+                                onSaveVideos={(videos) => onUpdateSection('videoGallery', videos)}
+                                onSaveConfig={(config) => onUpdateSection('siteConfig', {
+                                    ...content.siteConfig,
+                                    videos: config
+                                })}
                             />
                         )}
 
