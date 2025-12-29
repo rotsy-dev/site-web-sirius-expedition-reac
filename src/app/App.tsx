@@ -26,8 +26,11 @@ import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { SITE_SECTIONS } from '@/constants';
 
+import { getDetailedTour } from './components/TourModal';
+
 function App() {
   const [activeSection, setActiveSection] = useState('home');
+  const [pendingTour, setPendingTour] = useState<any>(null);
 
   const {
     content,
@@ -119,8 +122,14 @@ function App() {
                 {activeSection === 'home' && (
                   <>
                     <HeroCarousel slides={content.heroSlides} />
-                    <BestSellers tours={content.bestSellers} />
-                    <TourSpecialties specialties={content.tourSpecialties} />
+                    <BestSellers
+                      tours={content.bestSellers}
+                      onNavigateToTour={(tour) => {
+                        const extended = getDetailedTour(tour);
+                        setPendingTour(extended);
+                        setActiveSection('tours');
+                      }}
+                    />
                     <VideoGallery
                       videos={content.videoGallery || []}
                       config={content.siteConfig}
@@ -134,7 +143,10 @@ function App() {
 
                 {activeSection === 'tours' && (
                   <div className="min-h-screen bg-[#FAF7F2]">
-                    <TourSpecialties specialties={content.tourSpecialties} />
+                    <TourSpecialties
+                      specialties={content.tourSpecialties}
+                      initialSelectedTour={pendingTour}
+                    />
                     <BestSellers tours={content.bestSellers} />
                   </div>
                 )}
