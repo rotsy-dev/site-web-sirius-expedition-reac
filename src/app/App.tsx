@@ -136,7 +136,7 @@ function App() {
 
                 {activeSection === 'blogs' && (
                   <div className="pt-20">
-                    <Blogs posts={content.blogPosts} />
+                   <Blogs />
                   </div>
                 )}
 
