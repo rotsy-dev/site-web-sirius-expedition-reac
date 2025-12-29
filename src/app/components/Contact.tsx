@@ -740,7 +740,7 @@ export function Contact({ config }: ContactProps) {
                 className="flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
               >
                 <Facebook size={20} />
-                <span className="text-sm font-medium">Facebook</span>
+                <stepan className="text-sm font-medium">Facebook</stepan>
               </motion.a>
 
               <motion.a
