@@ -13,7 +13,8 @@ import {
     LogOut,
     Download,
     Upload,
-    RotateCcw
+    RotateCcw,
+    Film,
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
@@ -22,6 +23,7 @@ import { ReviewsEditor } from './sections/ReviewsEditor';
 import { BlogEditor } from './sections/BlogEditor';
 import { FAQEditor } from './sections/FAQEditor';
 import { ConfigEditor } from './sections/ConfigEditor';
+import VideoConfigEditor from './sections/VideoConfigEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -44,6 +46,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'blog', label: 'Articles Blog', icon: BookOpen },
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
+        { id: 'videos', label: 'Vidéos', icon: Film },
     ];
 
     const handleImport = () => {
@@ -224,6 +227,18 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                             <FAQEditor
                                 faqs={content.faqs}
                                 onSave={(faqs) => onUpdateSection('faqs', faqs)}
+                            />
+                        )}
+
+                        {activeTab === 'videos' && (
+                            <VideoConfigEditor
+                                videos={content.videoGallery}
+                                config={content.siteConfig.videos}
+                                onSaveVideos={(videos) => onUpdateSection('videoGallery', videos)}
+                                onSaveConfig={(config) => onUpdateSection('siteConfig', {
+                                    ...content.siteConfig,
+                                    videos: config
+                                })}
                             />
                         )}
 
