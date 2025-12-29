@@ -112,7 +112,7 @@ export function Blogs() {
                                             </div>
                                         </div>
 
-                                        <button className="flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border border-gray-200 text-[#1A1A1A] font-bold text-sm bg-white hover:bg-gray-50 transition-all group-hover:border-[#443C34] w-fit">
+                                        <button className="flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border border-gray-200 text-[#1A1A1A] font-bold text-sm bg-white hover:bg-gray-50 transition-all group-hover:border-[#443C34] w-fit cursor-pointer">
                                             Read Full Article
                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#443C34] group-hover:text-white transition-colors">
                                                 <ArrowRight size={16} />
@@ -183,7 +183,7 @@ export function Blogs() {
                                             </div>
 
                                             {/* Button */}
-                                            <button className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-200 text-sm font-bold text-[#1A1A1A] bg-transparent group-hover:bg-[#443C34] group-hover:text-white group-hover:border-[#443C34] transition-all w-fit">
+                                            <button className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-200 text-sm font-bold text-[#1A1A1A] bg-transparent group-hover:bg-[#443C34] group-hover:text-white group-hover:border-[#443C34] transition-all w-fit cursor-pointer">
                                                 Read More
                                                 <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-white/20 group-hover:text-white transition-colors">
                                                     <ArrowRight size={12} />
@@ -256,7 +256,7 @@ export function Blogs() {
 
                             {/* Share / Tags Placeholder */}
                             <div className="mt-20 pt-10 border-t border-gray-100 flex justify-between items-center">
-                                <span className="text-gray-400 font-medium">Share this article</span>
+                                <span className="text-gray-400 font-medium cursor-pointer">Share this article</span>
                                 <div className="flex gap-4">
                                     {/* Social icons placeholders */}
                                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-[#443C34] hover:text-white transition-colors cursor-pointer">

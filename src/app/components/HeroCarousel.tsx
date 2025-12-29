@@ -15,9 +15,10 @@ interface Slide {
 
 interface HeroCarouselProps {
   slides: Slide[];
+  onNavigateToContact?: () => void;
 }
 
-export function HeroCarousel({ slides }: HeroCarouselProps) {
+export function HeroCarousel({ slides, onNavigateToContact }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -138,7 +139,8 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             transition={{ delay: 0.5 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-4 bg-[#443C34] dark:bg-gray-700 text-white pl-1 pr-8 py-1 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
+            onClick={onNavigateToContact}
+            className="inline-flex items-center gap-4 bg-[#443C34] dark:bg-gray-700 text-white pl-1 pr-8 py-1 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors cursor-pointer"
           >
             <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden border-2 border-white/20 shrink-0">
               <img
@@ -147,7 +149,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                 className="w-full h-full object-cover"
               />
             </div>
-            <span className='text-lg sm:text-xl font-semibold'>Planifier un appel avec Dera</span>
+            <span className='text-lg sm:text-xl font-semibold'>Planifier un appel avec Nous</span>
           </motion.button>
         </motion.div>
 
