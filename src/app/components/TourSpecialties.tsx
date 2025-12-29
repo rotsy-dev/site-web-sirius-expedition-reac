@@ -69,6 +69,48 @@ export function TourSpecialties({ specialties }: TourSpecialtiesProps) {
           ))}
         </div>
 
+        {/* Custom Tour CTA Section */}
+        {/* <div className="mt-28">
+          <div className="bg-[] rounded-3xl p-12 md:p-16 text-center border-4 border-white">
+           
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="w-16 h-16 bg-[#443C34] rounded-lg transform -rotate-12"></div>
+                <div className="w-16 h-16 bg-[#D4C5B9] rounded-lg absolute top-0 left-4 transform rotate-12"></div>
+              </div>
+            </div>
+
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#443C34] mb-6">
+              Dream It. We'll Create It.
+            </h2>
+
+            
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-10">
+              Can't find your perfect adventure? Our expert team crafts bespoke journeys tailored to your wildest dreams and unique preferences.
+            </p>
+
+            
+            <button className="inline-flex items-center gap-3 bg-[#443C34] hover:bg-[#5a4f45] text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+              Request Custom Tour
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 17L17 7M17 7H7M17 7v10"
+                />
+              </svg>
+            </button>
+          </div>  
+        </div> */}
+
+
       </div>
     </section>
   );
