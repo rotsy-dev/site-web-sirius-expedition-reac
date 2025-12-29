@@ -121,7 +121,10 @@ function App() {
               <main>
                 {activeSection === 'home' && (
                   <>
-                    <HeroCarousel slides={content.heroSlides} />
+                    <HeroCarousel
+                      slides={content.heroSlides}
+                      onNavigateToContact={() => setActiveSection('contact')}
+                    />
                     <BestSellers
                       tours={content.bestSellers}
                       onNavigateToTour={() => {

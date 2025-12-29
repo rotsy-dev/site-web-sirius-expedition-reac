@@ -67,12 +67,12 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
           </motion.a>
 
           {/* Navigation au centre - Desktop */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white backdrop-blur-sm rounded-full px-4 py-2 absolute left-1/2 -translate-x-1/2">
+          <nav className="hidden lg:flex items-center gap-1 bg-white backdrop-blur-sm rounded-full px-4 py-2 absolute left-1/2 -translate-x-1/2 ">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`px-5 py-2 rounded-full text-md transition-all duration-300 ${activeSection === item.id
+                className={`px-5 py-2 rounded-full text-md transition-all duration-300 cursor-pointer ${activeSection === item.id
                   ? 'font-bold text-gray-900 dark:text-white'
                   : 'font-normal text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                   }`}

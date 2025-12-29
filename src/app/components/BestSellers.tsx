@@ -144,7 +144,7 @@ export function BestSellers({ tours, onNavigateToTour }: BestSellersProps) {
                           onMouseLeave={() => setHoveredButton(null)}
                           onClick={() => handleOpenModal(tour)}
                           className={`
-                          w-full py-5 px-8 rounded-2xl text-xl font-bold text-left transition-all duration-300
+                          w-full py-5 px-8 rounded-2xl text-xl font-bold text-left transition-all duration-300 cursor-pointer
                           ${isHovered
                               ? "bg-[#443C34] text-white"
                               : "bg-transparent text-[#1A1A1A] hover:bg-[#443C34] hover:text-white"

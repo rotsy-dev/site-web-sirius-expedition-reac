@@ -170,7 +170,7 @@ export function TourSpecialties({ specialties: _, initialSelectedTour }: TourSpe
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleOpenModal(specialty)}
-                      className="w-auto px-8 py-3 bg-[#443C34] text-white rounded-xl font-black text-lg transition-all duration-300 hover:w-full hover:bg-[#332C26] shadow-lg shadow-black/10 whitespace-nowrap overflow-hidden flex items-center justify-center"
+                      className="w-auto px-8 py-3 bg-[#443C34] text-white rounded-xl font-black text-lg transition-all duration-300 hover:w-full hover:bg-[#332C26] shadow-lg shadow-black/10 whitespace-nowrap overflow-hidden flex items-center justify-center cursor-pointer"
                     >
                       Discover More
                     </motion.button>
