@@ -65,44 +65,59 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md" : "bg-transparent"
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md" : "bg-transparent"
+      }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8  ">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="relative flex justify-between items-center h-20">
           {/* Logo à gauche */}
           <motion.a
             href="#home"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="flex flex-col cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer"
             onClick={(e) => {
               e.preventDefault()
               setActiveSection(SITE_SECTIONS.HOME)
             }}
             aria-label="Retour à l'accueil"
           >
-            <h1 className="text-2xl font-bold text-[#443C34] dark:text-white tracking-tight">{siteConfig.siteName}</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.tagline}</p>
+            {siteConfig.logo && (
+              <div className="relative h-14 w-14 flex-shrink-0">
+                <img 
+                  src={siteConfig.logo} 
+                  alt={`${siteConfig.siteName} logo`}
+                  className="h-full w-full object-cover rounded-full shadow-lg ring-2 ring-[#443C34]/10"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold text-[#443C34] dark:text-white tracking-tight">
+                {siteConfig.siteName}
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.tagline}</p>
+            </div>
           </motion.a>
 
           {/* Navigation au centre - Desktop */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white backdrop-blur-sm rounded-full px-4 py-2 absolute left-1/2 -translate-x-1/2 ">
+          <nav className="hidden lg:flex items-center gap-1 bg-white backdrop-blur-sm rounded-full px-4 py-2 absolute left-1/2 -translate-x-1/2">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
-                className={`px-5 py-2 rounded-full text-md transition-all duration-300 cursor-pointer ${activeSection === item.id
-                  ? "font-bold text-gray-900 dark:text-white"
-                  : "font-normal text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                  }`}
+                className={`px-5 py-2 rounded-full text-md transition-all duration-300 cursor-pointer ${
+                  activeSection === item.id
+                    ? "font-bold text-gray-900 dark:text-white"
+                    : "font-normal text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
                 aria-label={`Aller à ${item.label}`}
                 aria-current={activeSection === item.id ? "page" : undefined}
               >
-                <AnimatedNavLink
-                  label={item.label}
-                  isClicked={clickedId === item.id}
-                />
+                <AnimatedNavLink label={item.label} isClicked={clickedId === item.id} />
               </button>
             ))}
           </nav>
@@ -176,10 +191,11 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
                         setActiveSection(item.id)
                         setMobileMenuOpen(false)
                       }}
-                      className={`block w-full text-left px-4 py-3 rounded-lg text-sm transition-all ${activeSection === item.id
-                        ? "font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
-                        : "font-normal text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                        }`}
+                      className={`block w-full text-left px-4 py-3 rounded-lg text-sm transition-all ${
+                        activeSection === item.id
+                          ? "font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
+                          : "font-normal text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      }`}
                     >
                       {item.label}
                     </button>

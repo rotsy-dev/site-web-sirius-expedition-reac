@@ -141,12 +141,12 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours, c
           >
             <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden border-2 border-white/20 shrink-0">
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dera"
-                alt="Dera"
-                className="w-full h-full object-cover"
-              />
+            src="https://cdn-icons-png.flaticon.com/512/3059/3059502.png"
+            alt="Planifier un appel"
+            className="w-full h-full object-contain p-3 bg-[#443C34] rounded-full"
+          />
             </div>
-            <span className='text-lg sm:text-xl font-semibold'>Planifier un appel avec Nous</span>
+            <span className='text-lg sm:text-xl font-semibold'>Schedule a call with us</span>
           </motion.button>
         </motion.div>
 
