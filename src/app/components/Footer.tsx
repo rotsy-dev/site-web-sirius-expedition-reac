@@ -57,17 +57,17 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   }, []);
 
   const pageLinks = [
-    { id: 'home', label: t('nav.home') },
-    { id: 'tours', label: t('nav.tours') },
-    { id: 'blogs', label: t('nav.blog') },
-    { id: 'about', label: t('nav.about') },
+    { id: 'home', label: t('Home') },
+    { id: 'tours', label: t('Tours') },
+    { id: 'blogs', label: t('Blog') },
+    { id: 'about', label: t('About') },
   ]
 
   const corporateLinks = [
-    { label: t('footer.legalNotice') || 'Mentions légales', href: '#' },
-    { label: t('footer.termsOfUse') || "Conditions d'utilisation", href: '#' },
-    { label: t('footer.privacyPolicy') || 'Politique de confidentialité', href: '#' },
-    { label: t('footer.cookieManagement') || 'Gestion des cookies', href: '#' },
+    { label: t('Legal Notice') || 'Mentions légales', href: '#' },
+    { label: t('Terms Of Use') || "Conditions d'utilisation", href: '#' },
+    { label: t('Privacy Policy') || 'Politique de confidentialité', href: '#' },
+    { label: t('Cookie Management') || 'Gestion des cookies', href: '#' },
   ]
 
   return (
@@ -81,24 +81,24 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">{t('hero.subtitle')}</p>
+              <p className="text-sm text-white/60 mt-1">{t('Subtitle')}</p>
             </div>
 
             <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md">
-              {t('footer.description')}
+              {t('Description')}
             </p>
 
             {/* Newsletter */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-md">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#F5E6D3]" />
-                {t('footer.newsletter')}
+                {t('News letter')}
               </h3>
-              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
+              <p className="text-white/60 text-sm mb-4">{t('News letter Text')}</p>
               <div className="flex gap-3">
                 <input
                   type="email"
-                  placeholder={t('footer.emailPlaceholder')}
+                  placeholder={t('Email Placeholder')}
                   className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
                 />
                 <button className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]">
@@ -112,7 +112,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           <div className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
-                {t('footer.quickLinks')}
+                {t('Quick Links')}
               </h3>
               <nav className="space-y-4">
                 {pageLinks.map((link) => (
@@ -147,7 +147,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               {/* Réseaux sociaux */}
               <div>
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
-                  {t('footer.followUs')}
+                  {t('Follow Us')}
                 </h3>
                 <div className="flex gap-3">
                   <a
@@ -184,7 +184,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
         {/* Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 section-bas">
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. {t('footer.rights')}
+            © {currentYear} {config.siteName}. {t('Rights')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/70 text-sm">
