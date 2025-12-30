@@ -8,12 +8,22 @@ import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from "react"
 import { AnimatePresence } from 'framer-motion';
 import { TourModal, getDetailedTour, ExtendedTourSpecialty } from './TourModal';
+import { SectionHeader } from '@/components/common/SectionHeader';
 
 const { useRef, useState } = React
 
 interface BestSellersProps {
   tours: { id: number; image: string; title: string; location: string; duration: string }[]
   onNavigateToTour?: (tour: any) => void
+  content?: {
+    pageHeaders?: {
+      bestSellers?: {
+        badge?: string;
+        title?: string;
+        subtitle?: string;
+      };
+    };
+  };
 }
 
 const settings = {
@@ -46,7 +56,7 @@ const settings = {
   ]
 }
 
-export function BestSellers({ tours, onNavigateToTour }: BestSellersProps) {
+export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSellersProps) {
   const sliderRef = useRef<Slider>(null)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [hoveredButton, setHoveredButton] = useState<number | null>(null) // État pour gérer le survol du bouton
@@ -66,24 +76,11 @@ export function BestSellers({ tours, onNavigateToTour }: BestSellersProps) {
       <section className="py-12 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header simple */}
-          <div className="text-center mb-10 md:mb-20">
-            {/* Badge simple */}
-            <div className="mb-6">
-              <span className="text-xl text-[#443C34] dark:text-gray-400 font-semibold border-2 border-[#443C34] px-6 py-3 rounded-full">
-                Best Sellers
-              </span>
-            </div>
-
-            {/* Titre principal */}
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] dark:text-white leading-tight">
-              Most Popular Adventures
-            </h2>
-
-            {/* Sous-titre */}
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Handpicked experiences loved by thousands of travelers
-            </p>
-          </div>
+         <SectionHeader
+            badge={content.pageHeaders?.bestSellers?.badge || 'Best Sellers'}
+            title={content.pageHeaders?.bestSellers?.title || 'Most Popular Adventures'}
+            subtitle={content.pageHeaders?.bestSellers?.subtitle || 'Handpicked experiences...'}
+          />
 
           {/* Carousel avec cartes */}
           <Slider ref={sliderRef} {...settings}>

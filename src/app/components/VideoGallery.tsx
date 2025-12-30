@@ -3,6 +3,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Play, X, Film, Sparkles, Monitor, Award } from "lucide-react"
 import type { Video } from "../../types/content"
+import { SectionHeader } from "@/components/common/SectionHeader"
 
 interface VideoGalleryProps {
   videos: Video[]
@@ -12,32 +13,41 @@ interface VideoGalleryProps {
       channelUrl: string
     }
   }
+  content?: {
+    pageHeaders?: {
+      videos?: {
+        badge?: string;
+        title?: string;
+        subtitle?: string;
+      };
+    };
+  };
 }
 
-export function VideoGallery({ videos, config }: VideoGalleryProps) {
+export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps) {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
 
   return (
     <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#443C34] relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header simple */}
+        {/* En-tête */}
         <div className="text-center mb-16 sm:mb-20">
           {/* Badge simple */}
           <div className="mb-6">
             <span className="text-xl text-white border-2 border-white px-6 py-3 rounded-full">
-              Video Gallery
+             {content.pageHeaders?.videos?.badge || 'Video Gallery'}
             </span>
           </div>
 
           {/* Titre principal */}
           <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight">
-            See Madagascar Come Alive
+            {content.pageHeaders?.videos?.title || 'See Madagascar Come Alive'}
           </h2>
 
           {/* Sous-titre */}
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Immerse yourself in breathtaking adventures captured on film
+            {content.pageHeaders?.videos?.subtitle || 'Immerse yourself in breathtaking adventures captured on film'}
           </p>
         </div>
 

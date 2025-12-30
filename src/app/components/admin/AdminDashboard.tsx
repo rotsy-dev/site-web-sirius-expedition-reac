@@ -15,6 +15,7 @@ import {
     Upload,
     RotateCcw,
     Film,
+    Type
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
@@ -24,6 +25,7 @@ import { BlogEditor } from './sections/BlogEditor';
 import { FAQEditor } from './sections/FAQEditor';
 import { ConfigEditor } from './sections/ConfigEditor';
 import VideoConfigEditor from './sections/VideoConfigEditor';
+import { PageHeadersEditor } from './sections/PageHeadersEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -47,6 +49,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
         { id: 'videos', label: 'Vidéos', icon: Film },
+        { id: 'headers', label: 'Page Headers', icon: Type },
     ];
 
     const handleImport = () => {
@@ -188,6 +191,12 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                 {/* Contenu principal - AVEC PADDING ÉGAL */}
                 <main className="w-full p-8">
                     <div className="bg-card rounded-2xl border border-border p-6 min-h-[600px]">
+                        {activeTab === 'headers' && (
+                            <PageHeadersEditor
+                                headers={content.pageHeaders}
+                                onSave={(headers) => onUpdateSection('pageHeaders', headers)}
+                            />
+                        )}
                         {activeTab === 'hero' && (
                             <HeroEditor
                                 slides={content.heroSlides}

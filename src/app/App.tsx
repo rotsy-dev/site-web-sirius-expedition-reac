@@ -21,13 +21,6 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 
-// (si ces constantes existent déjà chez toi
-import { ErrorBoundary } from '../components/common/ErrorBoundary';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { SITE_SECTIONS } from '@/constants';
-
-import { getDetailedTour } from './components/TourModal';
-
 function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [pendingTour, setPendingTour] = useState<any>(null);
@@ -43,11 +36,10 @@ function App() {
     logout,
   } = useContentManager();
 
-  // UseEffect pour croller en haut à chaque changement de section
+  // UseEffect pour scroller en haut à chaque changement de section
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeSection]);
-
 
   return (
     <ToastProvider>
@@ -123,10 +115,12 @@ function App() {
                   <>
                     <HeroCarousel
                       slides={content.heroSlides}
+                      content={content}
                       onNavigateToContact={() => setActiveSection('contact')}
                     />
                     <BestSellers
                       tours={content.bestSellers}
+                      content={content}
                       onNavigateToTour={() => {
                         setActiveSection('tours');
                       }}
@@ -134,10 +128,12 @@ function App() {
                     <VideoGallery
                       videos={content.videoGallery || []}
                       config={content.siteConfig}
+                      content={content}
                     />
                     <Reviews
                       reviews={content.reviews}
                       config={content.siteConfig}
+                      content={content}
                     />
                   </>
                 )}
@@ -147,21 +143,31 @@ function App() {
                     <TourSpecialties
                       specialties={content.tourSpecialties}
                       initialSelectedTour={pendingTour}
+                      content={content}
                     />
-                    <BestSellers tours={content.bestSellers} />
+                    <BestSellers 
+                      tours={content.bestSellers}
+                      content={content}
+                    />
                   </div>
                 )}
 
                 {activeSection === 'blogs' && (
-                  <Blogs />
+                  <Blogs content={content} />
                 )}
 
                 {activeSection === 'contact' && (
-                  <Contact config={content.siteConfig} />
+                  <Contact 
+                    config={content.siteConfig}
+                    content={content}
+                  />
                 )}
 
                 {activeSection === 'about' && (
-                  <AboutUs config={content.siteConfig} />
+                  <AboutUs 
+                    config={content.siteConfig}
+                    content={content}
+                  />
                 )}
               </main>
 

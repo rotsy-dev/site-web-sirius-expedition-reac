@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Bird, Search, ChevronDown } from "lucide-react"
 import { TourModal, getDetailedTour, ExtendedTourSpecialty } from "./TourModal"
+import { SectionHeader } from "@/components/common/SectionHeader"
 
 // Types
 interface TourSpecialty {
@@ -15,6 +16,7 @@ interface TourSpecialty {
 interface TourSpecialtiesProps {
   specialties: TourSpecialty[]
   initialSelectedTour?: ExtendedTourSpecialty | null
+  content?: any
 }
 
 const IMAGES = [
@@ -33,7 +35,7 @@ const DEMO_SPECIALTIES = Array(6).fill(null).map((_, i) => ({
   image: IMAGES[i % IMAGES.length],
 }));
 
-export function TourSpecialties({ specialties: _, initialSelectedTour }: TourSpecialtiesProps) {
+export function TourSpecialties({ specialties: _, initialSelectedTour, content }: TourSpecialtiesProps) {
   const specialties = DEMO_SPECIALTIES;
   const [hoveredId, setHoveredId] = useState<number | null>(null)
 
@@ -74,24 +76,11 @@ export function TourSpecialties({ specialties: _, initialSelectedTour }: TourSpe
   return (
     <section className="py-20 sm:py-24 md:py-32 bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 sm:mb-20"
-        >
-          <div className="mb-6 mt-10 md:mt-20">
-            <span className="text-xl text-[#443C34] font-semibold border-2 border-[#443C34] px-6 py-3 rounded-full">
-              Our Expertise
-            </span>
-          </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] leading-tight">
-            Curated Experiences
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Bespoke adventures for the discerning explorer
-          </p>
-        </motion.div>
+        <SectionHeader
+          badge={content.pageHeaders?.specialties?.badge || 'Our Expertise'}
+          title={content.pageHeaders?.specialties?.title || 'Curated Experiences'}
+          subtitle={content.pageHeaders?.specialties?.subtitle || 'Bespoke adventures...'}
+        />
 
         {/* Filter UI */}
         <div className="max-w-4xl mx-auto mb-16 flex flex-col md:flex-row gap-4">

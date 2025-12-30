@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, MapPin, Calendar, Users, Star, Sparkles, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImageWithFallback } from '../../components/common/ImageWithFallback';
+import { SectionHeader } from '../../components/common/SectionHeader';
 
 interface Slide {
   id: number;
@@ -16,9 +17,18 @@ interface Slide {
 interface HeroCarouselProps {
   slides: Slide[];
   onNavigateToContact?: () => void;
+  content?: {
+    pageHeaders?: {
+      hero?: {
+        badge?: string;
+        title?: string;
+        subtitle?: string;
+      };
+    };
+  };
 }
 
-export function HeroCarousel({ slides, onNavigateToContact }: HeroCarouselProps) {
+export function HeroCarousel({ slides, onNavigateToContact, content = {} }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -94,45 +104,18 @@ export function HeroCarousel({ slides, onNavigateToContact }: HeroCarouselProps)
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 mt-12">
         {/* En-tête */}
+        <SectionHeader
+          badge={content.pageHeaders?.hero?.badge || 'Featured Destinations'}
+          title={content.pageHeaders?.hero?.title || 'Your Next Adventure Awaits'}
+          subtitle={content.pageHeaders?.hero?.subtitle || '3€ offerts immédiatement...'}
+        />
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-10 md:mb-20"
         >
-          {/* Badge simple */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-6 md:mb-6"
-          >
-            <span className="text-xl text-[#443C34] dark:text-gray-400 font-semibold bg-white px-10 py-3 rounded-full">
-              Featured Destinations
-            </span>
-          </motion.div>
-
-          {/* Titre principal */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] dark:text-white leading-tight"
-          >
-            Your Next Adventure Awaits
-          </motion.h2>
-
-          {/* Sous-titre */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8"
-          >
-            3€ offerts immédiatement et 5 points ajoutés à votre carte de fidélité.
-          </motion.p>
-
-          {/* Bouton CTA avec avatar */}
+         {/* Bouton CTA avec avatar */}
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

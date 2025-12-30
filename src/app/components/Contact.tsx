@@ -38,6 +38,7 @@ interface ContactProps {
       email: string;
     };
   };
+  content?: any;
 }
 
 interface ExtendedContactFormData {

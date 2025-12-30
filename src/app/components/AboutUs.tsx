@@ -14,6 +14,7 @@ interface AboutUsProps {
       email: string;
     };
   };
+   content?: any;
 }
 
 export function AboutUs({ config }: AboutUsProps) {

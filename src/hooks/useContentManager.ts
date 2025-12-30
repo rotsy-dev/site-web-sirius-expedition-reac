@@ -14,6 +14,48 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // ✅ STRUCTURE 100% COMPATIBLE AVEC VOS COMPOSANTS
 const defaultContent = {
+    pageHeaders: {
+        hero: {
+            badge: 'Featured Destinations',
+            title: 'Your Next Adventure Awaits',
+            subtitle: '3€ offerts immédiatement et 5 points ajoutés à votre carte de fidélité.'
+        },
+        bestSellers: {
+            badge: 'Best Sellers',
+            title: 'Most Popular Adventures',
+            subtitle: 'Handpicked experiences loved by thousands of travelers'
+        },
+        specialties: {
+            badge: 'Our Expertise',
+            title: 'Curated Experiences',
+            subtitle: 'Bespoke adventures for the discerning explorer'
+        },
+        reviews: {
+            badge: 'Testimonials',
+            title: 'Loved By Travelers',
+            subtitle: 'Real stories from adventurers who explored Madagascar with us'
+        },
+        videos: {
+            badge: 'Video Gallery',
+            title: 'See Madagascar Come Alive',
+            subtitle: 'Immerse yourself in breathtaking adventures captured on film'
+        },
+        blog: {
+            badge: 'Latest Story',
+            title: 'Our Blog',
+            subtitle: 'Expert insights, travel tips and stories from Madagascar'
+        },
+        about: {
+            badge: 'About',
+            title: 'About Sirius Expedition',
+            subtitle: 'Your trusted partner for unforgettable Madagascar adventures'
+        },
+        contact: {
+            badge: 'Get In Touch',
+            title: 'Contact Us',
+            subtitle: 'Get in touch with us to plan your Madagascar adventure'
+        }
+    },
     heroSlides: [
         {
             id: 1,
@@ -94,8 +136,9 @@ export function useContentManager() {
                 const fetchedContent: any = { ...defaultContent };
 
                 // ✅ Tout en parallèle (1 seul round-trip réseau)
-                const [configSnap, ...collectionSnapshots] = await Promise.all([
+                const [configSnap, pageHeadersSnap, ...collectionSnapshots] = await Promise.all([
                     getDoc(doc(db, 'siteConfig', 'main')),
+                    getDoc(doc(db, 'pageHeaders', 'main')),
                     ...collections.map(coll => 
                         getDocs(query(collection(db, coll), orderBy("id", "asc")))
                     )
@@ -105,6 +148,14 @@ export function useContentManager() {
                 collections.forEach((coll, index) => {
                     fetchedContent[coll] = collectionSnapshots[index].docs.map(d => d.data());
                 });
+
+                // ✅ Charger pageHeaders
+                if (pageHeadersSnap.exists()) {
+                    fetchedContent.pageHeaders = {
+                        ...defaultContent.pageHeaders,
+                        ...pageHeadersSnap.data()
+                    };
+                }
 
                 // ✅ Merge intelligent du siteConfig (ORDRE IMPORTANT)
                 if (configSnap.exists()) {
@@ -158,9 +209,12 @@ export function useContentManager() {
         try {
             const batch = writeBatch(db);
 
-            if (section === 'siteConfig') {
-                batch.set(doc(db, 'siteConfig', 'main'), data);
-            } else {
+            // ✅ Cas spéciaux pour les objets (siteConfig, pageHeaders)
+            if (section === 'siteConfig' || section === 'pageHeaders') {
+                batch.set(doc(db, section, 'main'), data);
+            } 
+            // ✅ Cas pour les collections (arrays)
+            else if (Array.isArray(data)) {
                 const snapshot = await getDocs(collection(db, section));
                 snapshot.docs.forEach(d => batch.delete(d.ref));
                 
@@ -196,6 +250,7 @@ export function useContentManager() {
                 });
             }
             batch.set(doc(db, 'siteConfig', 'main'), defaultContent.siteConfig);
+            batch.set(doc(db, 'pageHeaders', 'main'), defaultContent.pageHeaders);
             
             await batch.commit();
             alert('✅ Contenu réinitialisé !');
@@ -232,8 +287,8 @@ export function useContentManager() {
             const batch = writeBatch(db);
 
             for (const [key, value] of Object.entries(imported)) {
-                if (key === 'siteConfig') {
-                    batch.set(doc(db, 'siteConfig', 'main'), value);
+                if (key === 'siteConfig' || key === 'pageHeaders') {
+                    batch.set(doc(db, key, 'main'), value);
                 } else if (Array.isArray(value)) {
                     const snap = await getDocs(collection(db, key));
                     snap.docs.forEach(d => batch.delete(d.ref));

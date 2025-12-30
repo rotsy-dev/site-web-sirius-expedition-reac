@@ -5,6 +5,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { motion } from "framer-motion"
+import { SectionHeader } from '@/components/common/SectionHeader';
 
 interface Review {
   id: number;
@@ -25,9 +26,18 @@ interface ReviewsProps {
       google: string;
     };
   };
+ content?: {
+    pageHeaders?: {
+      reviews?: {
+        badge?: string;
+        title?: string;
+        subtitle?: string;
+      };
+    };
+  };
 }
 
-export function Reviews({ reviews, config }: ReviewsProps) {
+export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
   const sliderRef = useRef<Slider>(null);
 
   const settings = {
@@ -60,24 +70,11 @@ export function Reviews({ reviews, config }: ReviewsProps) {
     <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gray-50">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header simple */}
-        <div className="text-center mb-16 sm:mb-20">
-          {/* Badge simple */}
-          <div className="mb-6">
-            <span className="text-xl text-[#443C34] border-2 border-[#443C34] px-6 py-3 rounded-full font-semibold">
-              Testimonials
-            </span>
-          </div>
-
-          {/* Titre principal */}
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] leading-tight">
-            Loved By Travelers
-          </h2>
-
-          {/* Sous-titre */}
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Real stories from adventurers who explored Madagascar with us
-          </p>
-        </div>
+         <SectionHeader
+            badge={content.pageHeaders?.reviews?.badge || 'Testimonials'}
+            title={content.pageHeaders?.reviews?.title || 'Loved By Travelers'}
+            subtitle={content.pageHeaders?.reviews?.subtitle || 'Real stories from adventurers who explored Madagascar with us'}
+        />
 
         {/* Navigation simple */}
         <div className="flex justify-end gap-4 mb-12">
