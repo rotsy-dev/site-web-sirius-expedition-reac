@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Home",
+    "tours": "Tours",
+    "blog": "Blog",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login"
+  },
+  "hero": {
+    "featured": "Featured Destinations",
+    "title": "Your Next Adventure Awaits",
+    "subtitle": "Unforgettable adventures in Madagascar",
+    "cta": "Schedule a call with Dera"
+  },
+  "sections": {
+    "bestSellers": "Best Sellers",
+    "specialties": "Tour Specialties",
+    "reviews": "Customer Reviews",
+    "videos": "Video Gallery",
+    "blogs": "Our Blog",
+    "aboutUs": "About Us"
+  },
+  "footer": {
+    "description": "Discover the wonders of Madagascar with Sirius Expedition",
+    "quickLinks": "Quick Links",
+    "followUs": "Follow Us",
+    "contact": "Contact",
+    "rights": "All rights reserved"
+  },
+  "common": {
+    "learnMore": "Learn More",
+    "bookNow": "Book Now",
+    "readMore": "Read More",
+    "seeMore": "See More",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "footer": {
+    "description": "Your trusted partner for discovering the wonders of Madagascar. Expert guides, unforgettable experiences, lifetime memories.",
+    "quickLinks": "Quick Links",
+    "followUs": "Follow Us",
+    "contact": "Contact",
+    "rights": "All rights reserved",
+    "newsletter": "Newsletter",
+    "newsletterText": "Subscribe to receive our latest offers",
+    "subscribe": "Subscribe",
+    "emailPlaceholder": "Your email",
+    "legalNotice": "Legal Notice",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy",
+    "cookieManagement": "Cookie Management"
+  }
+
+}

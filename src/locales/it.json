@@ -1,0 +1,54 @@
+{
+  "nav": {
+    "home": "Home",
+    "tours": "Tour",
+    "blog": "Blog",
+    "about": "Chi siamo",
+    "contact": "Contatto",
+    "login": "Accedi"
+  },
+  "hero": {
+    "featured": "Destinazioni in primo piano",
+    "title": "La tua prossima avventura ti aspetta",
+    "subtitle": "Avventure indimenticabili in Madagascar",
+    "cta": "Pianifica una chiamata con Dera"
+  },
+  "sections": {
+    "bestSellers": "Più venduti",
+    "specialties": "Specialità dei tour",
+    "reviews": "Recensioni dei clienti",
+    "videos": "Galleria video",
+    "blogs": "Il nostro blog",
+    "aboutUs": "Chi siamo"
+  },
+  "footer": {
+    "description": "Scopri le meraviglie del Madagascar con Sirius Expedition",
+    "quickLinks": "Link rapidi",
+    "followUs": "Seguici",
+    "contact": "Contatto",
+    "rights": "Tutti i diritti riservati"
+  },
+  "common": {
+    "learnMore": "Scopri di più",
+    "bookNow": "Prenota ora",
+    "readMore": "Leggi di più",
+    "seeMore": "Vedi altro",
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore"
+  },
+    "footer": {
+        "description": "Il tuo partner di fiducia per scoprire le meraviglie del Madagascar. Guide esperte, esperienze indimenticabili, ricordi per tutta la vita.",
+        "quickLinks": "Link rapidi",
+        "followUs": "Seguici",
+        "contact": "Contatto",
+        "rights": "Tutti i diritti riservati",
+        "newsletter": "Newsletter",
+        "newsletterText": "Iscriviti per ricevere le nostre ultime offerte",
+        "subscribe": "Iscriviti",
+        "emailPlaceholder": "La tua email",
+        "legalNotice": "Avviso legale",
+        "termsOfUse": "Termini di utilizzo",
+        "privacyPolicy": "Politica sulla privacy",
+        "cookieManagement": "Gestione dei cookie"
+    }
+}

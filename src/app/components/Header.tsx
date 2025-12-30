@@ -2,6 +2,8 @@ import * as React from "react"
 import { useState, useEffect } from "react"
 import { Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '../components/shared/LanguageSwitcher'
 
 interface HeaderProps {
   activeSection: string
@@ -20,6 +22,7 @@ export function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,11 +33,11 @@ export function Header({
   }, [])
 
   const menuItems = [
-    { id: "home", label: "Home" },
-    { id: "tours", label: "Tours" },
-    { id: "blogs", label: "Blog" },
-    { id: "about", label: "About" },
-    { id: "contact", label: "Contact" },
+    { id: "home", label: t('nav.home') },
+    { id: "tours", label: t('nav.tours') },
+    { id: "blogs", label: t('nav.blog') },
+    { id: "about", label: t('nav.about') },
+    { id: "contact", label: t('nav.contact') },
   ]
 
   return (
@@ -86,15 +89,16 @@ export function Header({
             ))}
           </nav>
 
-          {/* Login Desktop */}
-          <div className="hidden lg:flex items-center">
+          {/* Language Switcher + Login Desktop */}
+          <div className="hidden lg:flex items-center gap-3">
+            <LanguageSwitcher />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveSection("admin")}
               className="px-8 py-2.5 bg-[#443C34] text-white rounded-full font-semibold hover:bg-gray-900 transition-colors"
             >
-              Login
+              {t('nav.login')}
             </motion.button>
           </div>
 
@@ -155,6 +159,11 @@ export function Header({
                   </button>
                 ))}
 
+                {/* Language Switcher Mobile */}
+                <div className="pt-2 pb-1 flex justify-center">
+                  <LanguageSwitcher />
+                </div>
+
                 <button
                   onClick={() => {
                     setActiveSection("admin")
@@ -162,7 +171,7 @@ export function Header({
                   }}
                   className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg text-sm font-medium mt-3 hover:bg-gray-900"
                 >
-                  Login
+                  {t('nav.login')}
                 </button>
               </div>
             </motion.nav>

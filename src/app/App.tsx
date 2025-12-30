@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+
+// Import de la configuration i18n (IMPORTANT: doit être importé avant tout)
+import '../i18n/config';
 
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
@@ -12,7 +16,7 @@ import { TourSpecialties } from './components/TourSpecialties';
 import { Reviews } from './components/Reviews';
 import { VideoGallery } from './components/VideoGallery';
 import { Blogs } from './components/Blogs';
-import {Contact} from './components/Contact';
+import { Contact } from './components/Contact';
 import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
 
@@ -23,6 +27,7 @@ import { useContentManager } from '../hooks/useContentManager';
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
+  const { t } = useTranslation();
 
   const {
     content,
@@ -35,11 +40,10 @@ function App() {
     logout,
   } = useContentManager();
 
-  // UseEffect pour croller en haut à chaque changement de section
+  // UseEffect pour scroller en haut à chaque changement de section
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeSection]);
-
 
   return (
     <ToastProvider>
@@ -69,6 +73,7 @@ function App() {
               >
                 SIRIUS EXPEDITION
               </motion.h2>
+              <p className="text-white/60 mt-2">{t('common.loading')}</p>
             </motion.div>
           ) : activeSection === 'admin' ? (
             /* --- 2. LOGIQUE ADMIN --- */
@@ -136,7 +141,7 @@ function App() {
 
                 {activeSection === 'blogs' && (
                   <div className="pt-20">
-                   <Blogs />
+                    <Blogs />
                   </div>
                 )}
 

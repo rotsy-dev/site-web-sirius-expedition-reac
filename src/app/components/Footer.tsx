@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Send, Linkedin } from 'lucide-react';
+import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Send, Linkedin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface FooterProps {
   setActiveSection: (section: string) => void;
@@ -26,21 +27,22 @@ interface FooterProps {
 }
 
 export function Footer({ setActiveSection, config }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
+  const { t } = useTranslation()
 
   const pageLinks = [
-    { id: 'home', label: 'Home' },
-    { id: 'tours', label: 'Tours' },
-    { id: 'blogs', label: 'Blog' },
-    { id: 'about', label: 'About Us' },
-  ];
+    { id: 'home', label: t('nav.home') },
+    { id: 'tours', label: t('nav.tours') },
+    { id: 'blogs', label: t('nav.blog') },
+    { id: 'about', label: t('nav.about') },
+  ]
 
   const corporateLinks = [
-    { label: 'Mentions légales', href: '#' },
-    { label: "Conditions d'utilisation", href: '#' },
-    { label: 'Politique de confidentialité', href: '#' },
-    { label: 'Gestion des cookies', href: '#' },
-  ];
+    { label: t('footer.legalNotice') || 'Mentions légales', href: '#' },
+    { label: t('footer.termsOfUse') || "Conditions d'utilisation", href: '#' },
+    { label: t('footer.privacyPolicy') || 'Politique de confidentialité', href: '#' },
+    { label: t('footer.cookieManagement') || 'Gestion des cookies', href: '#' },
+  ]
 
   return (
     <footer className="relative bg-[#443C34] text-white overflow-hidden">
@@ -53,24 +55,24 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">Discover Madagascar</p>
+              <p className="text-sm text-white/60 mt-1">{t('hero.subtitle')}</p>
             </div>
 
             <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md">
-              Your trusted partner for discovering the wonders of Madagascar.
-              Expert guides, unforgettable experiences, lifetime memories.
+              {t('footer.description')}
             </p>
 
             {/* Newsletter */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-md">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#F5E6D3]" />
-                Adresses Email
+                {t('footer.newsletter')}
               </h3>
+              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
               <div className="flex gap-3">
                 <input
                   type="email"
-                  placeholder="Your email"
+                  placeholder={t('footer.emailPlaceholder')}
                   className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
                 />
                 <button className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]">
@@ -83,7 +85,9 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           {/* Section navigation */}
           <div className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
-              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">PAGE</h3>
+              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
+                {t('footer.quickLinks')}
+              </h3>
               <nav className="space-y-4">
                 {pageLinks.map((link) => (
                   <button
@@ -99,7 +103,9 @@ export function Footer({ setActiveSection, config }: FooterProps) {
 
             {/* Section Corporate + Réseaux */}
             <div>
-              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">CORPORATE</h3>
+              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
+                CORPORATE
+              </h3>
               <nav className="space-y-4 mb-8">
                 {corporateLinks.map((link, idx) => (
                   <a
@@ -113,29 +119,34 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </nav>
 
               {/* Réseaux sociaux */}
-              <div className="flex gap-3">
-                <a
-                  href={config.social.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                >
-                  <Facebook className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                </a>
-                <a
-                  href={config.social.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                >
-                  <Youtube className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                </a>
-                <a
-                  href="#"
-                  className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                >
-                  <Linkedin className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                </a>
+              <div>
+                <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
+                  {t('footer.followUs')}
+                </h3>
+                <div className="flex gap-3">
+                  <a
+                    href={config.social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                  >
+                    <Facebook className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                  </a>
+                  <a
+                    href={config.social.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                  >
+                    <Youtube className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                  </a>
+                  <a
+                    href="#"
+                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                  >
+                    <Linkedin className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -147,7 +158,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
         {/* Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. Tous droits réservés.
+            © {currentYear} {config.siteName}. {t('footer.rights')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/70 text-sm">
@@ -166,5 +177,5 @@ export function Footer({ setActiveSection, config }: FooterProps) {
         </div>
       </div>
     </footer>
-  );
+  )
 }
