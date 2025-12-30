@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, X, MapPin, Clock, DollarSign, Star, Edit2 } from 'lucide-react';
 import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+import { ImageUploader } from '@/components/shared/ImageUploader';
 
 interface Tour {
     id: number;
@@ -130,7 +131,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
             id: newId,
             title: 'Nouveau Tour Incroyable',
             slug: 'nouveau-tour',
-            image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200',
+            image: '',
             duration: '7 jours',
             location: 'Madagascar',
             price: 'À partir de 2 500€',
@@ -252,12 +253,18 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                         <div className="flex items-center justify-between p-4 bg-card border-b border-border">
                             <div className="flex items-center gap-4">
                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                                    <img
-                                        src={tour.image}
-                                        alt={tour.title}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                    />
+                                    {tour.image ? (
+                                        <img
+                                            src={tour.image}
+                                            alt={tour.title}
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
+                                            <MapPin size={24} className="text-gray-400 dark:text-gray-500" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-foreground text-lg">{tour.title}</h3>
@@ -297,14 +304,16 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                         </div>
 
                         {/* Aperçu de l'image */}
-                        <div className="p-4 bg-muted/50 flex justify-center">
-                            <img
-                                src={tour.image}
-                                alt={tour.title}
-                                className="max-h-48 rounded-lg object-cover shadow-md"
-                                loading="lazy"
-                            />
-                        </div>
+                        {tour.image && (
+                            <div className="p-4 bg-muted/50 flex justify-center">
+                                <img
+                                    src={tour.image}
+                                    alt={tour.title}
+                                    className="max-h-48 rounded-lg object-cover shadow-md"
+                                    loading="lazy"
+                                />
+                            </div>
+                        )}
                     </motion.div>
                 ))}
             </div>
@@ -326,7 +335,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                             className="bg-card rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between">
+                            <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between z-10">
                                 <h3 className="text-2xl font-bold text-foreground">
                                     {editingTour.id > Math.max(...initialTours.map(t => t.id), 0)
                                         ? 'Ajouter un nouveau tour'
@@ -341,6 +350,21 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                             </div>
 
                             <div className="p-6 space-y-6">
+                                {/* ImageUploader pour l'image principale */}
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        Image principale du tour
+                                    </label>
+                                    <ImageUploader
+                                        value={editingTour.image}
+                                        onChange={(url:any) => handleChange(editingTour.id, 'image', url)}
+                                        aspectRatio="16/10"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        L'image sera automatiquement compressée et optimisée
+                                    </p>
+                                </div>
+
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-2">Titre du tour</label>
@@ -357,16 +381,6 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                             type="text"
                                             value={editingTour.slug}
                                             onChange={(e) => handleChange(editingTour.id, 'slug', e.target.value)}
-                                            className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
-                                        />
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium mb-2">Image principale (URL)</label>
-                                        <input
-                                            type="text"
-                                            value={editingTour.image}
-                                            onChange={(e) => handleChange(editingTour.id, 'image', e.target.value)}
                                             className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
                                         />
                                     </div>

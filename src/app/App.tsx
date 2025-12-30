@@ -117,6 +117,7 @@ function App() {
                       slides={content.heroSlides}
                       content={content}
                       onNavigateToContact={() => setActiveSection('contact')}
+                      onNavigateToTours={() => setActiveSection('tours')}
                     />
                     <BestSellers
                       tours={content.bestSellers}

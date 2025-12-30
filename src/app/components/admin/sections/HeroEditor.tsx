@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, Eye, Image, X, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Save, Eye, X, Edit2 } from 'lucide-react';
 import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+import { ImageUploader } from '@/components/shared/ImageUploader';
+
 
 interface HeroSlide {
     id: number;
@@ -67,7 +69,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
         const newId = Math.max(...slides.map(s => s.id), 0) + 1;
         const newSlide: HeroSlide = {
             id: newId,
-            image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920',
+            image: '',
             title: 'New Slide Title',
             subtitle: 'New description here',
             cta: 'Learn More',
@@ -209,14 +211,16 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                         </div>
 
                         {/* Aperçu miniature de l'image */}
-                        <div className="p-4 flex justify-center bg-muted/50">
-                            <img
-                                src={slide.image}
-                                alt="Preview"
-                                className="h-32 rounded-lg object-cover shadow-md"
-                                loading="lazy"
-                            />
-                        </div>
+                        {slide.image && (
+                            <div className="p-4 flex justify-center bg-muted/50">
+                                <img
+                                    src={slide.image}
+                                    alt="Preview"
+                                    className="h-32 rounded-lg object-cover shadow-md"
+                                    loading="lazy"
+                                />
+                            </div>
+                        )}
                     </motion.div>
                 ))}
             </div>
@@ -238,7 +242,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             className="bg-card rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
+                            <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between z-10">
                                 <h3 className="text-xl font-bold text-foreground">
                                     {editingSlide.id > Math.max(...initialSlides.map(s => s.id), 0)
                                         ? 'Ajouter une nouvelle slide'
@@ -253,30 +257,19 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </div>
 
                             <div className="p-6 space-y-5">
+                                {/* ImageUploader intégré */}
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">
-                                        URL de l'image
+                                        Image de la slide
                                     </label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={editingSlide.image}
-                                            onChange={(e) => handleChange(editingSlide.id, 'image', e.target.value)}
-                                            placeholder="https://..."
-                                            className="flex-1 px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                        />
-                                        {editingSlide.image && (
-                                            <a
-                                                href={editingSlide.image}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-                                                title="Voir l'image"
-                                            >
-                                                <Image size={20} className="text-foreground" />
-                                            </a>
-                                        )}
-                                    </div>
+                                    <ImageUploader
+                                        value={editingSlide.image}
+                                        onChange={(url:any) => handleChange(editingSlide.id, 'image', url)}
+                                        aspectRatio="16/9"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        L'image sera automatiquement compressée et stockée en Base64
+                                    </p>
                                 </div>
 
                                 <div>
@@ -339,7 +332,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                 )}
             </AnimatePresence>
 
-            {/* Modal preview (inchangée) */}
+            {/* Modal preview */}
             <AnimatePresence>
                 {previewSlide && (
                     <motion.div
@@ -363,22 +356,24 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                 <X size={20} />
                             </button>
 
-                            <div className="relative h-96">
-                                <img
-                                    src={previewSlide.image}
-                                    alt={previewSlide.title}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-                                <div className="absolute bottom-0 left-0 right-0 p-8 text-primary-foreground">
-                                    <h3 className="text-4xl font-bold mb-3">{previewSlide.title}</h3>
-                                    <p className="text-xl mb-4 opacity-90">{previewSlide.subtitle}</p>
-                                    <button className="px-6 py-3 bg-gradient-to-r from-primary to-accent rounded-xl font-semibold">
-                                        {previewSlide.cta}
-                                    </button>
+                            {previewSlide.image && (
+                                <div className="relative h-96">
+                                    <img
+                                        src={previewSlide.image}
+                                        alt={previewSlide.title}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-8 text-primary-foreground">
+                                        <h3 className="text-4xl font-bold mb-3">{previewSlide.title}</h3>
+                                        <p className="text-xl mb-4 opacity-90">{previewSlide.subtitle}</p>
+                                        <button className="px-6 py-3 bg-gradient-to-r from-primary to-accent rounded-xl font-semibold">
+                                            {previewSlide.cta}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}
