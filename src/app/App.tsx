@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-
-// Import de la configuration i18n (IMPORTANT: doit être importé avant tout)
-import '../i18n/config';
 
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
@@ -25,9 +21,16 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 
+// (si ces constantes existent déjà chez toi
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { SITE_SECTIONS } from '@/constants';
+
+import { getDetailedTour } from './components/TourModal';
+
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const { t } = useTranslation();
+  const [pendingTour, setPendingTour] = useState<any>(null);
 
   const {
     content,
@@ -40,10 +43,11 @@ function App() {
     logout,
   } = useContentManager();
 
-  // UseEffect pour scroller en haut à chaque changement de section
+  // UseEffect pour croller en haut à chaque changement de section
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeSection]);
+
 
   return (
     <ToastProvider>
@@ -58,7 +62,7 @@ function App() {
               className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#1A1A1A]"
             >
               <motion.div
-                animate={{ 
+                animate={{
                   scale: [1, 1.2, 1],
                   rotate: [0, 180, 360],
                   borderRadius: ["20%", "50%", "20%"]
@@ -66,26 +70,25 @@ function App() {
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 className="w-16 h-16 bg-gradient-to-br from-[#D4A373] to-[#A67C52] mb-6"
               />
-              <motion.h2 
+              <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-white font-bold tracking-[0.3em] text-2xl"
               >
                 SIRIUS EXPEDITION
               </motion.h2>
-              <p className="text-white/60 mt-2">{t('common.loading')}</p>
             </motion.div>
           ) : activeSection === 'admin' ? (
             /* --- 2. LOGIQUE ADMIN --- */
-            <motion.div 
-              key="admin" 
-              initial={{ opacity: 0 }} 
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="min-h-screen bg-muted/30"
             >
               {!isAuthenticated ? (
-                <AdminLogin onBack={() => setActiveSection('home')}/>
+                <AdminLogin onBack={() => setActiveSection('home')} />
               ) : (
                 <AdminDashboard
                   onLogout={() => {
@@ -118,9 +121,16 @@ function App() {
               <main>
                 {activeSection === 'home' && (
                   <>
-                    <HeroCarousel slides={content.heroSlides} />
-                    <BestSellers tours={content.bestSellers} />
-                    <TourSpecialties specialties={content.tourSpecialties} />
+                    <HeroCarousel
+                      slides={content.heroSlides}
+                      onNavigateToContact={() => setActiveSection('contact')}
+                    />
+                    <BestSellers
+                      tours={content.bestSellers}
+                      onNavigateToTour={() => {
+                        setActiveSection('tours');
+                      }}
+                    />
                     <VideoGallery
                       videos={content.videoGallery || []}
                       config={content.siteConfig}
@@ -133,28 +143,25 @@ function App() {
                 )}
 
                 {activeSection === 'tours' && (
-                  <div className="pt-20">
-                    <TourSpecialties specialties={content.tourSpecialties} />
+                  <div className="min-h-screen bg-[#FAF7F2]">
+                    <TourSpecialties
+                      specialties={content.tourSpecialties}
+                      initialSelectedTour={pendingTour}
+                    />
                     <BestSellers tours={content.bestSellers} />
                   </div>
                 )}
 
                 {activeSection === 'blogs' && (
-                  <div className="pt-20">
-                    <Blogs />
-                  </div>
+                  <Blogs />
                 )}
 
                 {activeSection === 'contact' && (
-                  <div className="pt-20">
-                    <Contact config={content.siteConfig} />
-                  </div>
+                  <Contact config={content.siteConfig} />
                 )}
 
                 {activeSection === 'about' && (
-                  <div className="pt-20">
-                    <AboutUs config={content.siteConfig} />
-                  </div>
+                  <AboutUs config={content.siteConfig} />
                 )}
               </main>
 

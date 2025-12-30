@@ -1,244 +1,209 @@
-import * as React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Sparkles, Zap, Award, Star, MapPin, Clock, Check, Heart } from 'lucide-react';
+import { Bird, Search, ChevronDown } from "lucide-react"
+import { TourModal, getDetailedTour, ExtendedTourSpecialty } from "./TourModal"
 
+// Types
 interface TourSpecialty {
-  id: number;
-  icon: string;
-  title: string;
-  slug: string;
-  description: string;
-  image: string;
-  link: string;
-  duration: string;
-  location: string;
-  price: string;
-  rating: number;
-  reviews: number;
-  highlights: string[];
-  isBestSeller: boolean; // Nouveau champ
+  id: number
+  title: string
+  description: string
+  image: string
+  category?: string
 }
 
 interface TourSpecialtiesProps {
-  specialties: TourSpecialty[];
+  specialties: TourSpecialty[]
+  initialSelectedTour?: ExtendedTourSpecialty | null
 }
 
-export function TourSpecialties({ specialties }: TourSpecialtiesProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+const IMAGES = [
+  "https://images.unsplash.com/photo-1659944975073-453265ccf3a6?w=800&q=80", // Baobab
+  "https://images.unsplash.com/photo-1700146606640-0202e6463425?w=800&q=80", // Lemur
+  "https://images.unsplash.com/photo-1679053806925-7f0f595fab31?w=800&q=80", // Beach
+  "https://images.unsplash.com/photo-1611611835759-e7d32033c6dc?w=800&q=80", // Bird
+  "https://images.unsplash.com/photo-1764933268558-3411b587f1e3?w=800&q=80", // Culture
+  "https://images.unsplash.com/photo-1677667495307-10e01bd9530f?w=800&q=80"  // Nature
+];
+
+const DEMO_SPECIALTIES = Array(6).fill(null).map((_, i) => ({
+  id: i + 1,
+  title: "Birdwatching",
+  description: "Discover over 250 endemic bird species in their natural habitats",
+  image: IMAGES[i % IMAGES.length],
+}));
+
+export function TourSpecialties({ specialties: _, initialSelectedTour }: TourSpecialtiesProps) {
+  const specialties = DEMO_SPECIALTIES;
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+
+  // Modal State
+  const [selectedTour, setSelectedTour] = useState<ExtendedTourSpecialty | null>(initialSelectedTour || null);
+
+  // Auto-open modal if initialSelectedTour is provided
+  useEffect(() => {
+    if (initialSelectedTour) {
+      setSelectedTour(initialSelectedTour);
+    }
+  }, [initialSelectedTour]);
+
+  // Filtering Logic
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("Tous")
+  const categories = ["Tous", "Nature", "Culture", "Aventure", "Photography"];
+
+  const smartSpecialties = specialties.map((s, i) => {
+    const titles = ["Birdwatching", "Lemur Safari", "Island Escape", "Birdwatching", "Cultural Tour", "Nature Trek"];
+    const cats = ["Nature", "Nature", "Aventure", "Nature", "Culture", "Aventure"];
+    return { ...s, title: titles[i], category: cats[i] };
+  });
+
+  const filteredSpecialties = smartSpecialties.filter(s => {
+    const matchSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchCat = selectedCategory === "Tous" || s.category === selectedCategory || (selectedCategory === "Photography" && s.title.includes("Photo"));
+    return matchSearch && matchCat;
+  });
+
+  const handleOpenModal = (specialty: any) => {
+    // Determine title for 'specific' content or random
+    const extended = getDetailedTour(specialty);
+    setSelectedTour(extended);
+  };
 
   return (
-    <section className="py-28 sm:py-32 md:py-40 px-6 lg:px-12 relative overflow-hidden bg-[#FAF7F2]">
-      {/* Background sophistiqué Sirius */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#F3E5AB_0%,transparent_40%)] opacity-30" />
-
-      {/* Grille de fond subtile */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* --- HEADER --- */}
+    <section className="py-20 sm:py-24 md:py-32 bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 1.2 }}
-          className="text-center mb-28"
+          className="text-center mb-16 sm:mb-20"
         >
-          {/* Badge Sirius */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            className="inline-block bg-[#F3E5AB] text-[#6F4E37] px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.4em] mb-12 shadow-sm border border-[#6F4E37]/10"
-          >
-            Our Expertise
-          </motion.div>
-
-          <h2 className="text-5xl md:text-7xl font-serif text-[#3D2B1F] mb-8 leading-tight">
-            Curated <span className="italic text-[#6F4E37] font-normal">Experiences</span>
-          </h2>
-
-          <div className="flex items-center justify-center gap-4 text-[#6F4E37]/60 max-w-2xl mx-auto">
-            <div className="h-[1px] w-12 bg-[#6F4E37]/20" />
-            <p className="font-light italic text-lg">Bespoke adventures for the discerning explorer</p>
-            <div className="h-[1px] w-12 bg-[#6F4E37]/20" />
+          <div className="mb-6 mt-10 md:mt-20">
+            <span className="text-xl text-[#443C34] font-semibold border-2 border-[#443C34] px-6 py-3 rounded-full">
+              Our Expertise
+            </span>
           </div>
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] leading-tight">
+            Curated Experiences
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Bespoke adventures for the discerning explorer
+          </p>
         </motion.div>
 
-        {/* --- GRID --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {specialties.map((specialty, index) => (
-            <motion.div
-              key={specialty.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 1 }}
-              onHoverStart={() => setHoveredId(specialty.id)}
-              onHoverEnd={() => setHoveredId(null)}
-              className="group cursor-pointer"
+        {/* Filter UI */}
+        <div className="max-w-4xl mx-auto mb-16 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-11 pr-4 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#443C34]/20 focus:border-[#443C34] transition-all text-lg"
+              placeholder="Recherche un produit..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="relative min-w-[200px]">
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="block w-full pl-6 pr-10 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#443C34]/20 focus:border-[#443C34] appearance-none cursor-pointer transition-all text-lg font-medium"
             >
-              <div className="relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl shadow-[#3D2B1F]/5 border border-[#6F4E37]/5 transition-all duration-700 group-hover:shadow-2xl group-hover:-translate-y-4">
-                {/* Image Section */}
-                <div className="relative h-72 overflow-hidden">
-                  <motion.img
-                    animate={hoveredId === specialty.id ? { scale: 1.1 } : { scale: 1 }}
-                    transition={{ duration: 2 }}
-                    src={specialty.image}
-                    alt={specialty.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#3D2B1F]/80 via-transparent to-transparent" />
-
-                  {/* Icon flottant */}
-                  <div className="absolute top-6 left-6 w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white">
-                    {specialty.icon}
-                  </div>
-
-                  {/* Badge Best Seller */}
-                  {specialty.isBestSeller && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.3, type: "spring" }}
-                      className="absolute top-6 right-6"
-                    >
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#F3E5AB] to-[#6F4E37] rounded-full blur-md opacity-70" />
-                        <div className="relative bg-gradient-to-r from-[#F3E5AB] to-[#D4AF37] px-4 py-2 rounded-full border border-[#6F4E37]/20 shadow-xl">
-                          <span className="text-[#3D2B1F] font-bold text-xs tracking-wider uppercase flex items-center gap-1.5">
-                            🏆 Best Seller
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Favorite button */}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="absolute bottom-6 left-6 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:bg-white transition-all"
-                  >
-                    <Heart size={18} className="text-[#3D2B1F]" />
-                  </motion.button>
-
-                  {/* Rating Badge */}
-                  <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-white">
-                    <div className="flex items-center gap-2">
-                      <Star size={16} className="text-[#F3E5AB]" fill="#F3E5AB" />
-                      <span className="font-bold text-sm text-[#3D2B1F]">{specialty.rating}</span>
-                      <span className="text-xs text-[#6F4E37]/60">({specialty.reviews})</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-10">
-                  <h3 className="text-2xl font-serif text-[#3D2B1F] mb-3 group-hover:text-[#6F4E37] transition-colors">
-                    {specialty.title}
-                  </h3>
-
-                  <p className="text-[#6F4E37]/70 font-light leading-relaxed mb-5 line-clamp-2 text-sm">
-                    {specialty.description}
-                  </p>
-
-                  {/* Highlights */}
-                  <div className="mb-6 space-y-2.5">
-                    {(specialty.highlights || []).slice(0, 3).map((highlight, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 * idx }}
-                        className="flex items-start gap-2.5 text-xs text-[#6F4E37]/70"
-                      >
-                        <div className="mt-0.5 p-1 bg-[#F3E5AB]/30 rounded-full flex-shrink-0">
-                          <Check size={12} className="text-[#6F4E37]" strokeWidth={3} />
-                        </div>
-                        <span className="line-clamp-2">{highlight}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Info Row */}
-                  <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-t border-[#6F4E37]/10 pt-6">
-                    <div className="flex items-center gap-2 text-xs text-[#6F4E37]/70">
-                      <div className="p-1.5 bg-[#F3E5AB]/20 rounded-lg">
-                        <MapPin size={14} className="text-[#6F4E37]" />
-                      </div>
-                      <span className="font-medium">{specialty.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-[#6F4E37]/70">
-                      <div className="p-1.5 bg-[#F3E5AB]/20 rounded-lg">
-                        <Clock size={14} className="text-[#6F4E37]" />
-                      </div>
-                      <span className="font-medium">{specialty.duration}</span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="mb-6">
-                    <div className="inline-block relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#F3E5AB] to-[#6F4E37] rounded-xl blur-sm opacity-50" />
-                      <div className="relative bg-gradient-to-r from-[#F3E5AB] to-[#D4AF37] px-5 py-2.5 rounded-xl">
-                        <span className="text-[#3D2B1F] font-bold text-xl">{specialty.price}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="group/btn relative w-full"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#6F4E37] to-[#3D2B1F] rounded-2xl blur-md opacity-0 group-hover/btn:opacity-50 transition-opacity" />
-                    <div className="relative bg-[#6F4E37] text-[#F3E5AB] py-4 rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:bg-[#3D2B1F]">
-                      Explore Tour
-                      <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={2.5} />
-                    </div>
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* --- BESPOKE CTA --- */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="mt-32 relative rounded-[3.5rem] bg-[#6F4E37] p-12 md:p-20 overflow-hidden text-center text-[#F3E5AB]"
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-4"
         >
-          {/* Décoration de fond */}
-          <div className="absolute top-0 right-0 opacity-5 -translate-y-1/4 translate-x-1/4">
-            <Star size={400} />
-          </div>
+          <AnimatePresence>
+            {filteredSpecialties.map((specialty) => (
+              <motion.div
+                layout
+                key={specialty.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                onHoverStart={() => setHoveredId(specialty.id)}
+                onHoverEnd={() => setHoveredId(null)}
+                className="group h-full"
+              >
+                <div className="bg-white rounded-2xl hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] transition-all duration-500 h-full flex flex-col border border-gray-100/50 overflow-hidden">
+                  <div className="relative h-60">
+                    <motion.img
+                      animate={hoveredId === specialty.id ? { scale: 1.05 } : { scale: 1 }}
+                      transition={{ duration: 0.6 }}
+                      src={specialty.image}
+                      alt={specialty.title}
+                      className="w-full h-full object-cover"
+                    />
 
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <Award size={48} strokeWidth={1} className="mx-auto mb-8 opacity-50" />
-            <h3 className="text-4xl md:text-5xl font-serif mb-6 leading-tight">
-              Tailor-Made <span className="italic font-normal">Privilege</span>
-            </h3>
-            <p className="text-white/70 text-lg font-light mb-12 leading-relaxed">
-              If your perfect journey isn't listed, our concierge team will design a bespoke expedition
-              exclusively for your desires.
-            </p>
+                    <div className="absolute -bottom-8 left-8 z-20 ">
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-gray-50 transition-transform duration-300 group-hover:scale-110">
+                        <Bird className="w-8 h-8 text-[#332C26]" />
+                      </div>
+                    </div>
+                  </div>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              className="bg-[#F3E5AB] text-[#6F4E37] px-10 py-5 rounded-full font-bold uppercase tracking-widest text-xs shadow-xl hover:bg-white transition-colors"
-            >
-              Request Custom Design
-            </motion.button>
-          </div>
+                  <div className="pt-14 p-8 md:p-10 flex-1 flex flex-col items-start bg-white mt-5">
+                    <h3 className="text-3xl font-black text-[#332C26] mb-4 tracking-tight leading-tight">
+                      {specialty.title}
+                    </h3>
+
+                    <p className="text-gray-500 leading-relaxed text-base font-medium mb-10 flex-1">
+                      {specialty.description}
+                    </p>
+
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleOpenModal(specialty)}
+                      className="w-auto px-8 py-3 bg-[#443C34] text-white rounded-xl font-black text-lg transition-all duration-300 hover:w-full hover:bg-[#332C26] shadow-lg shadow-black/10 whitespace-nowrap overflow-hidden flex items-center justify-center cursor-pointer"
+                    >
+                      Discover More
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
+
+        {/* Modal */}
+        <AnimatePresence>
+          {selectedTour && (
+            <TourModal tour={selectedTour} onClose={() => setSelectedTour(null)} />
+          )}
+        </AnimatePresence>
+
+        {filteredSpecialties.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-xl text-gray-500 mb-4">No experiences found matching your criteria.</p>
+            <button
+              onClick={() => { setSearchQuery(""); setSelectedCategory("Tous"); }}
+              className="text-[#443C34] font-bold underline text-lg hover:text-[#332C26]"
+            >
+              Reset filters
+            </button>
+          </motion.div>
+        )}
       </div>
     </section>
-  );
+  )
 }
