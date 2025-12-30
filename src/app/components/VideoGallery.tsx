@@ -32,24 +32,14 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
     <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#443C34] relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* En-tête */}
-        <div className="text-center mb-16 sm:mb-20">
-          {/* Badge simple */}
-          <div className="mb-6">
-            <span className="text-xl text-white border-2 border-white px-6 py-3 rounded-full">
-             {content.pageHeaders?.videos?.badge || 'Video Gallery'}
-            </span>
-          </div>
-
-          {/* Titre principal */}
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight">
-            {content.pageHeaders?.videos?.title || 'See Madagascar Come Alive'}
-          </h2>
-
-          {/* Sous-titre */}
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            {content.pageHeaders?.videos?.subtitle || 'Immerse yourself in breathtaking adventures captured on film'}
-          </p>
-        </div>
+        <SectionHeader
+          badge={content.pageHeaders?.videos?.badge || 'Video Gallery'}
+          title={content.pageHeaders?.videos?.title || 'See Madagascar Come Alive'}
+          subtitle={content.pageHeaders?.videos?.subtitle || 'Immerse yourself in breathtaking adventures captured on film'}
+          badgeColor="text-white border-white"
+          titleColor="text-white"
+          subtitleColor="text-white/80"
+        />
 
         {/* Featured Video Principal */}
         <motion.div

@@ -26,7 +26,7 @@ interface ReviewsProps {
       google: string;
     };
   };
- content?: {
+  content?: {
     pageHeaders?: {
       reviews?: {
         badge?: string;
@@ -70,113 +70,205 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
     <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gray-50">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header simple */}
-         <SectionHeader
-            badge={content.pageHeaders?.reviews?.badge || 'Testimonials'}
-            title={content.pageHeaders?.reviews?.title || 'Loved By Travelers'}
-            subtitle={content.pageHeaders?.reviews?.subtitle || 'Real stories from adventurers who explored Madagascar with us'}
+        <SectionHeader
+          badge={content.pageHeaders?.reviews?.badge || 'Testimonials'}
+          title={content.pageHeaders?.reviews?.title || 'Loved By Travelers'}
+          subtitle={content.pageHeaders?.reviews?.subtitle || 'Real stories from adventurers who explored Madagascar with us'}
         />
 
         {/* Navigation simple */}
-        <div className="flex justify-end gap-4 mb-12">
-          {[
-            { onClick: () => sliderRef.current?.slickPrev(), icon: ChevronLeft, label: 'Précédent' },
-            { onClick: () => sliderRef.current?.slickNext(), icon: ChevronRight, label: 'Suivant' }
-          ].map((btn, idx) => (
-            <motion.button
-              key={idx}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={btn.onClick}
-              className="p-4 bg-white border-2 border-[#443C34] rounded-full hover:bg-gray-50 transition-colors"
-              aria-label={btn.label}
+        {/* Mobile View - Vertical List */}
+        <div className="grid grid-cols-1 gap-6 lg:hidden mb-12">
+          {reviews.map((review, index) => (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.6 }}
+              className="h-full"
             >
-              <btn.icon size={24} className="text-[#443C34]" strokeWidth={2.5} />
-            </motion.button>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ staggerChildren: 0.1 }}
+                className="bg-white rounded-[2rem] p-8 relative flex flex-col border border-gray-200 overflow-hidden h-full"
+              >
+                {/* Quote icon décoratif */}
+                <div className="absolute top-8 right-8 opacity-10">
+                  <Quote size={80} fill="currentColor" className="text-[#443C34]" />
+                </div>
+
+                {/* Rating stars */}
+                <motion.div
+                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                  className="flex items-center gap-1.5 mb-6 relative z-10"
+                >
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Star key={i} size={22} fill="#f59e0b" className="text-amber-500" />
+                  ))}
+                </motion.div>
+
+                {/* Review Text */}
+                <motion.p
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                  className="text-gray-700 dark:text-gray-300 mb-6 italic text-lg leading-relaxed relative z-10 flex-1 font-medium"
+                >
+                  "{review.text}"
+                </motion.p>
+
+                {/* Tour Name Badge */}
+                <motion.div
+                  variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
+                  className="inline-block relative mb-6 z-10 self-start"
+                >
+                  <div className="bg-gray-100 border border-gray-300 px-5 py-2.5 rounded-2xl text-sm font-bold">
+                    <span className="flex items-center gap-2 text-[#443C34]">
+                      <CheckCircle size={16} />
+                      {review.tour}
+                    </span>
+                  </div>
+                </motion.div>
+
+                {/* Reviewer Info */}
+                <motion.div
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                  className="flex items-center gap-4 pt-6 border-t border-gray-200 relative z-10"
+                >
+                  <div className="relative">
+                    <img
+                      src={review.avatar}
+                      alt={review.name}
+                      className="w-16 h-16 rounded-full border-4 border-white object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-black text-gray-900 dark:text-white text-lg">{review.name}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span>🌍</span>
+                      <span className="font-semibold">{review.country}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">{review.date}</p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Carousel avec cartes premium */}
-        <Slider ref={sliderRef} {...settings}>
-          {reviews.map((review, index) => (
-            <div key={review.id} className="px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 60 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="h-full"
+        {/* Desktop View - Slider */}
+        <div className="hidden lg:block">
+          {/* Navigation simple */}
+          <div className="flex justify-end gap-4 mb-12">
+            {[
+              { onClick: () => sliderRef.current?.slickPrev(), icon: ChevronLeft, label: 'Précédent' },
+              { onClick: () => sliderRef.current?.slickNext(), icon: ChevronRight, label: 'Suivant' }
+            ].map((btn, idx) => (
+              <motion.button
+                key={idx}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={btn.onClick}
+                className="p-4 bg-white border-2 border-[#443C34] rounded-full hover:bg-gray-50 transition-colors"
+                aria-label={btn.label}
               >
+                <btn.icon size={24} className="text-[#443C34]" strokeWidth={2.5} />
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Carousel avec cartes premium */}
+          <Slider ref={sliderRef} {...settings}>
+            {reviews.map((review, index) => (
+              <div key={review.id} className="px-4">
                 <motion.div
-                  whileHover={{ y: -12, scale: 1.02 }}
-                  className="bg-white rounded-[2rem] transition-all duration-500 p-8 relative h-full flex flex-col border border-gray-200 overflow-hidden"
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  className="h-full"
                 >
-                  {/* Quote icon décoratif */}
-                  <div className="absolute top-8 right-8 opacity-10">
-                    <Quote size={80} fill="currentColor" className="text-[#443C34]" />
-                  </div>
-
-                  {/* Rating stars avec animation en cascade */}
-                  <div className="flex items-center gap-1.5 mb-6 relative z-10">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                        whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                        viewport={{ once: true }}
-                        transition={{
-                          delay: 0.5 + i * 0.1,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 15
-                        }}
-                        whileHover={{ scale: 1.3, rotate: 20 }}
-                      >
-                        <Star size={22} fill="#f59e0b" className="text-amber-500" />
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Review Text */}
-                  <p className="text-gray-700 dark:text-gray-300 mb-6 italic text-lg leading-relaxed relative z-10 flex-1 font-medium">
-                    "{review.text}"
-                  </p>
-
-                  {/* Tour Name Badge */}
-                  <div className="inline-block relative mb-6 z-10 self-start">
-                    <div className="bg-gray-100 border border-gray-300 px-5 py-2.5 rounded-2xl text-sm font-bold">
-                      <span className="flex items-center gap-2 text-[#443C34]">
-                        <CheckCircle size={16} />
-                        {review.tour}
-                      </span>
+                  <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    transition={{ staggerChildren: 0.1 }}
+                    whileHover={{ y: -12, scale: 1.02 }}
+                    className="bg-white rounded-[2rem] transition-all duration-500 p-8 relative h-full flex flex-col border border-gray-200 overflow-hidden"
+                  >
+                    {/* Quote icon décoratif */}
+                    <div className="absolute top-8 right-8 opacity-10">
+                      <Quote size={80} fill="currentColor" className="text-[#443C34]" />
                     </div>
-                  </div>
 
-                  {/* Reviewer Info */}
-                  <div className="flex items-center gap-4 pt-6 border-t border-gray-200 relative z-10">
-                    <div className="relative">
-                      <img
-                        src={review.avatar}
-                        alt={review.name}
-                        className="w-16 h-16 rounded-full border-4 border-white object-cover"
-                        loading="lazy"
-                      />
+                    {/* Rating stars avec animation en cascade */}
+                    <div className="flex items-center gap-1.5 mb-6 relative z-10">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          variants={{ hidden: { opacity: 0, scale: 0, rotate: -180 }, visible: { opacity: 1, scale: 1, rotate: 0 } }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 15
+                          }}
+                        >
+                          <Star size={22} fill="#f59e0b" className="text-amber-500" />
+                        </motion.div>
+                      ))}
                     </div>
-                    <div>
-                      <p className="font-black text-gray-900 dark:text-white text-lg">{review.name}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <span>🌍</span>
-                        <span className="font-semibold">{review.country}</span>
+
+                    {/* Review Text */}
+                    <motion.p
+                      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                      className="text-gray-700 dark:text-gray-300 mb-6 italic text-lg leading-relaxed relative z-10 flex-1 font-medium"
+                    >
+                      "{review.text}"
+                    </motion.p>
+
+                    {/* Tour Name Badge */}
+                    <motion.div
+                      variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
+                      className="inline-block relative mb-6 z-10 self-start"
+                    >
+                      <div className="bg-gray-100 border border-gray-300 px-5 py-2.5 rounded-2xl text-sm font-bold">
+                        <span className="flex items-center gap-2 text-[#443C34]">
+                          <CheckCircle size={16} />
+                          {review.tour}
+                        </span>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">{review.date}</p>
-                    </div>
-                  </div>
+                    </motion.div>
 
-
+                    {/* Reviewer Info */}
+                    <motion.div
+                      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                      className="flex items-center gap-4 pt-6 border-t border-gray-200 relative z-10"
+                    >
+                      <div className="relative">
+                        <img
+                          src={review.avatar}
+                          alt={review.name}
+                          className="w-16 h-16 rounded-full border-4 border-white object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-black text-gray-900 dark:text-white text-lg">{review.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <span>🌍</span>
+                          <span className="font-semibold">{review.country}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">{review.date}</p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            </div>
-          ))}
-        </Slider>
+              </div>
+            ))}
+          </Slider>
+        </div>
 
         {/* Review Platforms Section */}
         <motion.div
