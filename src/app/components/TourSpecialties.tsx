@@ -35,8 +35,7 @@ const DEMO_SPECIALTIES = Array(6).fill(null).map((_, i) => ({
   image: IMAGES[i % IMAGES.length],
 }));
 
-export function TourSpecialties({ specialties: _, initialSelectedTour, content }: TourSpecialtiesProps) {
-  const specialties = DEMO_SPECIALTIES;
+export function TourSpecialties({ specialties, initialSelectedTour, content }: TourSpecialtiesProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
 
   // Modal State
