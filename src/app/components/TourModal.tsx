@@ -232,7 +232,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                 </div>
 
                 {/* Footer sticky */}
-                <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 md:px-10 flex items-center justify-between rounded-b-[2rem] z-20">
+                {/* <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 md:px-10 flex items-center justify-between rounded-b-[2rem] z-20">
                     <div>
                         <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">À partir de</p>
                         <p className="text-3xl font-black text-[#332C26]">{tour.price} <span className="text-sm font-normal text-gray-500">/ personne</span></p>
@@ -240,7 +240,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                     <button className="bg-[#443C34] text-white px-6 py-2 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:bg-[#332C26] transition-colors shadow-lg shadow-[#443C34]/20">
                         Demander un devis
                     </button>
-                </div>
+                </div> */}
 
             </motion.div>
         </motion.div>
