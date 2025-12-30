@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ImageWithFallback } from '../../components/common/ImageWithFallback';
 import { SectionHeader } from '../../components/common/SectionHeader';
 
+
 interface Slide {
   id: number;
   image: string;
@@ -71,6 +72,8 @@ export function HeroCarousel({ slides, onNavigateToContact, content = {} }: Hero
     }
   };
 
+
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 overflow-hidden pt-24 pb-12 md:pt-32 md:pb-20">
       {/* Background animé */}
@@ -113,9 +116,9 @@ export function HeroCarousel({ slides, onNavigateToContact, content = {} }: Hero
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-10 md:mb-20"
+          className="text-center mb-0"
         >
-         {/* Bouton CTA avec avatar */}
+          {/* Bouton CTA avec avatar */}
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

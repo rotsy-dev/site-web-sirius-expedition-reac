@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle, Calendar, Users, Briefcase, Clock, Building, Linkedin, CheckSquare, Check } from 'lucide-react';
 import { motion } from "framer-motion";
+import ScrollReveal from 'scrollreveal';
 import emailjs from '@emailjs/browser';
 import { db } from '../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
@@ -39,7 +40,7 @@ interface ContactProps {
       email: string;
     };
   };
-   content?: {
+  content?: {
     pageHeaders?: {
       contact?: {
         badge?: string;
@@ -155,6 +156,21 @@ export function Contact({ config, content = {} }: ContactProps) {
     };
 
     fetchConfig();
+
+    // Init ScrollReveal
+    if (typeof ScrollReveal !== 'undefined') {
+      const sr = ScrollReveal({
+        reset: false,
+        distance: '40px',
+        duration: 800,
+        delay: 0,
+        easing: 'cubic-bezier(0.5, 0, 0, 1)',
+        mobile: true
+      });
+
+      sr.reveal('.reveal-left', { origin: 'left', distance: '60px', delay: 200 });
+      sr.reveal('.reveal-right', { origin: 'right', distance: '60px', delay: 400 });
+    }
   }, []);
 
   // Mettre à jour les dates disponibles quand un tour est sélectionné
@@ -332,22 +348,19 @@ export function Contact({ config, content = {} }: ContactProps) {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-       {/* Simple header  */}
+        {/* Simple header  */}
         <SectionHeader
-            badge={content.pageHeaders?.contact?.badge || 'Contact Us'}
-            title={content.pageHeaders?.contact?.title || 'Reach Out for Your Dream Trip'}
-            subtitle={content.pageHeaders?.contact?.subtitle || 'We are here to assist you with any inquiries or bookings.'}
+          badge={content.pageHeaders?.contact?.badge || 'Contact Us'}
+          title={content.pageHeaders?.contact?.title || 'Reach Out for Your Dream Trip'}
+          subtitle={content.pageHeaders?.contact?.subtitle || 'We are here to assist you with any inquiries or bookings.'}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-12">
           {/* Contact Form - 3 colonnes */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-3 bg-card p-8 md:p-10 rounded-3xl border-2 border-gray-50"
+          <div
+            className="lg:col-span-3 bg-card p-8 md:p-10 rounded-3xl border-2 border-gray-50 reveal-left"
           >
             <h3 className="text-4xl font-bold mb-2">Send Us a Message</h3>
             <p className="text-muted-foreground mb-8">
@@ -671,15 +684,12 @@ export function Contact({ config, content = {} }: ContactProps) {
                 )}
               </motion.button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Contact Information - 2 colonnes */}
           {/* Contact Information - 2 colonnes - REDESIGNED */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-2 pl-4"
+          <div
+            className="lg:col-span-2 pl-4 reveal-right"
           >
             {/* Contacts Section */}
             <div className="mb-12">
@@ -768,7 +778,7 @@ export function Contact({ config, content = {} }: ContactProps) {
               </ul>
             </div>
 
-          </motion.div>
+          </div>
         </div>
       </section>
     </div>

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Send, Linkedin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import ScrollReveal from 'scrollreveal'
 
 interface FooterProps {
   setActiveSection: (section: string) => void;
@@ -30,6 +31,31 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   const currentYear = new Date().getFullYear()
   const { t } = useTranslation()
 
+  React.useEffect(() => {
+    if (typeof ScrollReveal !== "undefined") {
+      const sr = ScrollReveal({
+        reset: false,
+        distance: "60px",
+        duration: 800,
+        delay: 0,
+        easing: "cubic-bezier(0.5, 0, 0, 1)",
+        mobile: true,
+      });
+
+      sr.reveal(".section-gauche", {
+        origin: "left",
+        distance: "50px",
+        delay: 300,
+      });
+
+      sr.reveal(".section-bas", {
+        origin: "bottom",
+        distance: "50px",
+        delay: 300,
+      });
+    }
+  }, []);
+
   const pageLinks = [
     { id: 'home', label: t('nav.home') },
     { id: 'tours', label: t('nav.tours') },
@@ -47,7 +73,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   return (
     <footer className="relative bg-[#443C34] text-white overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 section-gauche">
           {/* Section gauche */}
           <div className="space-y-8">
             {/* Logo */}
@@ -156,7 +182,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
         <div className="h-px bg-white/10 my-10"></div>
 
         {/* Copyright */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 section-bas">
           <p className="text-white/60 text-sm text-center md:text-left">
             © {currentYear} {config.siteName}. {t('footer.rights')}
           </p>

@@ -7,15 +7,15 @@ import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import { SectionHeader } from '../../components/common/SectionHeader';
 
 interface BlogProps {
-  content?: {
-    pageHeaders?: {
-      blog?: {
-        badge?: string;
-        title?: string;
-        subtitle?: string;
-      };
+    content?: {
+        pageHeaders?: {
+            blog?: {
+                badge?: string;
+                title?: string;
+                subtitle?: string;
+            };
+        };
     };
-  };
 }
 
 export function Blogs({ content = {} }: BlogProps) {
@@ -29,7 +29,7 @@ export function Blogs({ content = {} }: BlogProps) {
             // Tentative de récupération du cache
             const cachedPosts = localStorage.getItem('blog_posts_cache');
             const cachedSettings = localStorage.getItem('blog_settings_cache');
-            
+
             if (cachedPosts) setPosts(JSON.parse(cachedPosts));
             if (cachedSettings) setRemoteContent(JSON.parse(cachedSettings));
 
@@ -70,9 +70,9 @@ export function Blogs({ content = {} }: BlogProps) {
                     >
                         {/* 2. Utilisation de SectionHeader exactement comme dans HeroCarousel */}
                         <SectionHeader
-                          badge={content?.pageHeaders?.blog?.badge || 'Latest Story'}
-                          title={content?.pageHeaders?.blog?.title || 'Our Blog'}
-                          subtitle={content?.pageHeaders?.blog?.subtitle || 'Expert insights and stories'}
+                            badge={content?.pageHeaders?.blog?.badge || 'Latest Story'}
+                            title={content?.pageHeaders?.blog?.title || 'Our Blog'}
+                            subtitle={content?.pageHeaders?.blog?.subtitle || 'Expert insights and stories'}
                         />
 
                         {/* Reste du design (Featured Post & Grid) */}

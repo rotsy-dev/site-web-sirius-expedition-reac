@@ -237,7 +237,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                         <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">À partir de</p>
                         <p className="text-3xl font-black text-[#332C26]">{tour.price} <span className="text-sm font-normal text-gray-500">/ personne</span></p>
                     </div>
-                    <button className="bg-[#443C34] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#332C26] transition-colors shadow-lg shadow-[#443C34]/20">
+                    <button className="bg-[#443C34] text-white px-6 py-2 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:bg-[#332C26] transition-colors shadow-lg shadow-[#443C34]/20">
                         Demander un devis
                     </button>
                 </div>

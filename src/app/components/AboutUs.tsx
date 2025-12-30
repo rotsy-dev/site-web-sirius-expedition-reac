@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Award, Users, Globe, Heart, Shield, Clock, Star, CheckCircle, Leaf, Target, TrendingUp, Headphones, DollarSign, UserCheck } from 'lucide-react';
-import { motion } from "framer-motion"
 import { SectionHeader } from '@/components/common/SectionHeader';
+import ScrollReveal from 'scrollreveal'
 
 interface AboutUsProps {
   config: {
@@ -31,6 +31,26 @@ interface AboutUsProps {
 }
 
 export function AboutUs({ config, content = {} }: AboutUsProps) {
+  React.useEffect(() => {
+    if (typeof ScrollReveal !== 'undefined') {
+      const sr = ScrollReveal({
+        reset: false,
+        distance: '40px',
+        duration: 800,
+        delay: 0,
+        easing: 'cubic-bezier(0.5, 0, 0, 1)',
+        mobile: true
+      })
+
+      sr.reveal('.reveal-stats', { origin: 'bottom', interval: 100 })
+      sr.reveal('.reveal-left', { origin: 'left', distance: '60px' })
+      sr.reveal('.reveal-right', { origin: 'right', distance: '60px' })
+      sr.reveal('.reveal-bottom', { origin: 'bottom', distance: '60px' })
+      sr.reveal('.reveal-values', { origin: 'bottom', interval: 100 })
+      sr.reveal('.reveal-why', { origin: 'bottom', interval: 100 })
+    }
+  }, [])
+
   // Récupération des données dynamiques de l'histoire
   const story = content?.ourStory || {
     title: 'Our Story',
@@ -106,7 +126,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
 
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
       <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
         {/* Header */}
         <SectionHeader
@@ -116,20 +136,11 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
         />
 
         {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-24 lg:mb-48"
-        >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-24 lg:mb-48">
           {stats.map((stat, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className={`p-6 lg:p-8 rounded-2xl text-center flex flex-col items-center justify-center ${index === 1 || index === 3 ? 'bg-[#4A3931] text-white' : 'bg-[#F7EBD5] text-[#443C34]'
+              className={`reveal-stats p-6 lg:p-8 rounded-2xl text-center flex flex-col items-center justify-center ${index === 1 || index === 3 ? 'bg-[#4A3931] text-white' : 'bg-[#F7EBD5] text-[#443C34]'
                 }`}
             >
               <div className="mb-4 opacity-90">
@@ -139,19 +150,16 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                 {stat.number}
               </h3>
               <p className="text-sm opacity-80">{stat.label}</p>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Our Story with Video */}
         <div className="mb-24 lg:mb-48">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 mb-12 lg:mb-20 ">
             {/* Left: Story Text (MAINTENANT DYNAMIQUE) */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="flex flex-col justify-center"
+            <div
+              className="flex flex-col justify-center reveal-left"
             >
               <h3 className="text-5xl font-bold mb-6 text-[#443C34]">{story.title}</h3>
               {story.paragraphs.map((para, idx) => (
@@ -159,14 +167,10 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                   {para}
                 </p>
               ))}
-            </motion.div>
+            </div>
 
             {/* Right: YouTube Video */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <div className="reveal-right">
               <div className="rounded-2xl overflow-hidden ">
                 <div className="relative pb-[56.25%] h-0 bg-black">
                   <iframe
@@ -179,76 +183,67 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                   ></iframe>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Bottom Row: Photo left, Quote + Community card right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-15 lg:gap-14">
             {/* Left: Lemur Photo */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <div className="reveal-bottom">
               <img
                 src="https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&h=600&fit=crop"
                 alt="Madagascar lemur"
                 className="rounded-2xl w-full object-cover h-auto max-h-[310px]"
                 loading="lazy"
               />
-            </motion.div>
+            </div>
 
             {/* Right: Quote + Community Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex flex-col gap-6"
-            >
+            <div className="flex flex-col gap-6 reveal-bottom">
               <div className="bg-white rounded-2xl p-6 border border-gray-100 border-l-4 border-l-[#443C34]">
                 <p className="text-gray-600 italic text-base leading-relaxed">
-                  "{story.paragraphs[story.paragraphs.length - 1]}" 
+                  "{story.paragraphs[story.paragraphs.length - 1]}"
                 </p>
               </div>
 
-             <div className="bg-[#F5E6D3] rounded-[2rem] p-6 flex flex-col gap-3">
-  
-              <div className="bg-[#F5E6D3] rounded-2xl  flex flex-col gap-1">
-  
-              {/* LIGNE 1 : Hosting */}
-              <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
-                  Hosted by :
-                </span>
-                <span className="font-bold text-[#443C34] text-xs">
-                  {config.services.hosting.join(' & ')}
-                </span>
-              </div>
+              <div className="bg-[#F5E6D3] rounded-[2rem] p-6 flex flex-col gap-3">
 
-              {/* LIGNE 2 : Domaine */}
-              <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
-                  Domaine :
-                </span>
-                <span className="font-bold text-[#443C34] text-xs flex-1">
-                  {config.services.domain}
-                </span>
-              </div>
+                <div className="bg-[#F5E6D3] rounded-2xl  flex flex-col gap-1">
 
-              {/* LIGNE 3 : Email */}
-              <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
-                  Email by :
-                </span>
-                <span className="font-bold text-[#443C34] text-xs flex-1">
-                  {config.services.email}
-                </span>
-              </div>
+                  {/* LIGNE 1 : Hosting */}
+                  <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
+                      Hosted by :
+                    </span>
+                    <span className="font-bold text-[#443C34] text-xs">
+                      {config.services.hosting.join(' & ')}
+                    </span>
+                  </div>
 
+                  {/* LIGNE 2 : Domaine */}
+                  <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
+                      Domaine :
+                    </span>
+                    <span className="font-bold text-[#443C34] text-xs flex-1">
+                      {config.services.domain}
+                    </span>
+                  </div>
+
+                  {/* LIGNE 3 : Email */}
+                  <div className="bg-[#443C34]/5 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border border-[#443C34]/10">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#443C34]/60 w-20">
+                      Email by :
+                    </span>
+                    <span className="font-bold text-[#443C34] text-xs flex-1">
+                      {config.services.email}
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
             </div>
-
-            </div>
-            </motion.div>
           </div>
         </div>
 
@@ -259,14 +254,14 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {values.map((value, index) => (
-              <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}
-                className="group p-6 sm:p-8 rounded-3xl border border-gray-100 transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:bg-white flex flex-col items-start text-left">
+              <div key={index}
+                className="reveal-values group p-6 sm:p-8 rounded-3xl border border-gray-100 transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:bg-white flex flex-col items-start text-left">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-4 sm:mb-5 bg-white shadow-sm transition-all group-hover:bg-[#F5E6D3]">
                   <div className="text-[#443C34]">{value.icon}</div>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-gray-900 transition-colors group-hover:text-[#443C34]">{value.title}</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{value.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -277,14 +272,14 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {whyChooseUs.map((item, index) => (
-              <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}
-                className="group p-6 sm:p-8 rounded-3xl border border-gray-100 bg-gray-50 transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:shadow-2xl hover:bg-white flex flex-col items-start text-left">
+              <div key={index}
+                className="reveal-why group p-6 sm:p-8 rounded-3xl border border-gray-100 bg-gray-50 transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:shadow-2xl hover:bg-white flex flex-col items-start text-left">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-4 sm:mb-5 bg-white shadow-sm transition-all group-hover:bg-[#F5E6D3]">
                   <div className="text-[#443C34]">{item.icon}</div>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-gray-900 transition-colors group-hover:text-[#443C34]">{item.title}</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{item.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
