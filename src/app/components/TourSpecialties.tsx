@@ -79,7 +79,7 @@ export function TourSpecialties({ specialties: _, initialSelectedTour, content }
         <SectionHeader
           badge={content.pageHeaders?.specialties?.badge || 'Our Expertise'}
           title={content.pageHeaders?.specialties?.title || 'Curated Experiences'}
-          subtitle={content.pageHeaders?.specialties?.subtitle || 'Bespoke adventures...'}
+          subtitle={content.pageHeaders?.specialties?.subtitle || 'Bespoke adventures for the discerning explorer'}
         />
 
         {/* Filter UI */}

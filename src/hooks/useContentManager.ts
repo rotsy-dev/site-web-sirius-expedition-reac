@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// ✅ STRUCTURE 100% COMPATIBLE AVEC VOS COMPOSANTS
+// ✅ STRUCTURE MISE À JOUR AVEC "OUR STORY"
 const defaultContent = {
     pageHeaders: {
         hero: {
@@ -56,6 +56,13 @@ const defaultContent = {
             subtitle: 'Get in touch with us to plan your Madagascar adventure'
         }
     },
+    ourStory: {
+        title: 'Our Story',
+        paragraphs: [
+            "Sirius Expedition est née d'une passion profonde pour les paysages uniques et la culture riche de Madagascar.",
+            "Notre mission est de vous offrir des aventures authentiques et mémorables, en respectant la nature et les communautés locales."
+        ]
+    },
     heroSlides: [
         {
             id: 1,
@@ -75,7 +82,7 @@ const defaultContent = {
     siteConfig: {
         siteName: 'Sirius Expedition',
         tagline: 'Aventures authentiques à Madagascar',
-        logo: '', // Pour le Header
+        logo: '',
         contact: { 
             email: 'contact@siriusexpedition.com', 
             phone: '+261 34 00 000 00', 
@@ -90,8 +97,8 @@ const defaultContent = {
             google: 'https://g.page/siriusexpedition'
         },
         videos: { 
-            aboutUsVideoId: '', // ✅ Ajouté (pour AboutUs)
-            mainYouTubeId: '', // Pour VideoGallery
+            aboutUsVideoId: '',
+            mainYouTubeId: '',
             channelUrl: 'https://youtube.com/@siriusexpedition'
         },
         services: { 
@@ -107,7 +114,6 @@ export function useContentManager() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // ✅ CHARGEMENT PARALLÈLE OPTIMISÉ (Auth + Data en même temps)
     useEffect(() => {
         let authResolved = false;
         let dataResolved = false;
@@ -118,14 +124,12 @@ export function useContentManager() {
             }
         };
 
-        // 1. Surveillance auth (non-bloquante)
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setIsAuthenticated(!!user);
             authResolved = true;
             checkLoadingComplete();
         });
 
-        // 2. Chargement data (parallèle)
         const loadContent = async () => {
             try {
                 const collections = [
@@ -135,10 +139,11 @@ export function useContentManager() {
 
                 const fetchedContent: any = { ...defaultContent };
 
-                // ✅ Tout en parallèle (1 seul round-trip réseau)
-                const [configSnap, pageHeadersSnap, ...collectionSnapshots] = await Promise.all([
+                // ✅ CHARGEMENT PARALLÈLE (Inclus ourStory)
+                const [configSnap, pageHeadersSnap, storySnap, ...collectionSnapshots] = await Promise.all([
                     getDoc(doc(db, 'siteConfig', 'main')),
                     getDoc(doc(db, 'pageHeaders', 'main')),
+                    getDoc(doc(db, 'ourStory', 'main')), // <--- Récupération Histoire
                     ...collections.map(coll => 
                         getDocs(query(collection(db, coll), orderBy("id", "asc")))
                     )
@@ -149,47 +154,33 @@ export function useContentManager() {
                     fetchedContent[coll] = collectionSnapshots[index].docs.map(d => d.data());
                 });
 
-                // ✅ Charger pageHeaders
+                // ✅ Page Headers
                 if (pageHeadersSnap.exists()) {
-                    fetchedContent.pageHeaders = {
-                        ...defaultContent.pageHeaders,
-                        ...pageHeadersSnap.data()
-                    };
+                    fetchedContent.pageHeaders = { ...defaultContent.pageHeaders, ...pageHeadersSnap.data() };
                 }
 
-                // ✅ Merge intelligent du siteConfig (ORDRE IMPORTANT)
+                // ✅ Our Story
+                if (storySnap.exists()) {
+                    fetchedContent.ourStory = { ...defaultContent.ourStory, ...storySnap.data() };
+                }
+
+                // ✅ Site Config Merge
                 if (configSnap.exists()) {
                     const firebaseData = configSnap.data();
                     fetchedContent.siteConfig = {
-                        // 1. D'abord les propriétés simples
                         siteName: firebaseData.siteName || defaultContent.siteConfig.siteName,
                         tagline: firebaseData.tagline || defaultContent.siteConfig.tagline,
                         logo: firebaseData.logo || defaultContent.siteConfig.logo,
-                        
-                        // 2. Merge profond avec defaults TOUJOURS présents
-                        contact: {
-                            ...defaultContent.siteConfig.contact,
-                            ...(firebaseData.contact || {})
-                        },
-                        social: {
-                            ...defaultContent.siteConfig.social,
-                            ...(firebaseData.social || {})
-                        },
-                        videos: {
-                            ...defaultContent.siteConfig.videos,
-                            ...(firebaseData.videos || {})
-                        },
-                        services: {
-                            ...defaultContent.siteConfig.services,
-                            ...(firebaseData.services || {})
-                        }
+                        contact: { ...defaultContent.siteConfig.contact, ...(firebaseData.contact || {}) },
+                        social: { ...defaultContent.siteConfig.social, ...(firebaseData.social || {}) },
+                        videos: { ...defaultContent.siteConfig.videos, ...(firebaseData.videos || {}) },
+                        services: { ...defaultContent.siteConfig.services, ...(firebaseData.services || {}) }
                     };
                 }
 
                 setContent(fetchedContent);
             } catch (err) {
                 console.error('❌ Erreur chargement Firebase:', err);
-                // On garde les valeurs par défaut en cas d'erreur
             } finally {
                 dataResolved = true;
                 checkLoadingComplete();
@@ -197,11 +188,9 @@ export function useContentManager() {
         };
 
         loadContent();
-
         return () => unsubscribe();
     }, []);
 
-    // 3. Mise à jour ULTRA-RAPIDE avec WriteBatch (Optimistic UI)
     const updateSection = async (section: string, data: any) => {
         const previousContent = { ...content };
         setContent(prev => ({ ...prev, [section]: data }));
@@ -209,11 +198,11 @@ export function useContentManager() {
         try {
             const batch = writeBatch(db);
 
-            // ✅ Cas spéciaux pour les objets (siteConfig, pageHeaders)
-            if (section === 'siteConfig' || section === 'pageHeaders') {
+            // ✅ GESTION DES OBJETS UNIQUES (Inclus ourStory)
+            if (['siteConfig', 'pageHeaders', 'ourStory'].includes(section)) {
                 batch.set(doc(db, section, 'main'), data);
             } 
-            // ✅ Cas pour les collections (arrays)
+            // ✅ GESTION DES COLLECTIONS
             else if (Array.isArray(data)) {
                 const snapshot = await getDocs(collection(db, section));
                 snapshot.docs.forEach(d => batch.delete(d.ref));
@@ -227,14 +216,13 @@ export function useContentManager() {
             await batch.commit();
         } catch (err) {
             console.error('❌ Echec synchro Firebase:', err);
-            setContent(previousContent); // Rollback en cas d'erreur
-            alert('❌ Erreur de sauvegarde. Vérifiez votre connexion.');
+            setContent(previousContent);
+            alert('❌ Erreur de sauvegarde.');
         }
     };
 
-    // 4. Reset Complet
     const resetToDefaults = async () => {
-        if (!confirm('⚠️ Réinitialiser TOUT le contenu ? Cette action est irréversible.')) return;
+        if (!confirm('⚠️ Réinitialiser TOUT le contenu ?')) return;
         
         try {
             const batch = writeBatch(db);
@@ -243,25 +231,25 @@ export function useContentManager() {
             for (const coll of collections) {
                 const snap = await getDocs(collection(db, coll));
                 snap.docs.forEach(d => batch.delete(d.ref));
-                
                 const defaults = (defaultContent as any)[coll];
                 defaults.forEach((item: any) => {
                     batch.set(doc(db, coll, item.id.toString()), item);
                 });
             }
+
+            // Reset des documents uniques
             batch.set(doc(db, 'siteConfig', 'main'), defaultContent.siteConfig);
             batch.set(doc(db, 'pageHeaders', 'main'), defaultContent.pageHeaders);
+            batch.set(doc(db, 'ourStory', 'main'), defaultContent.ourStory); // <--- Reset Histoire
             
             await batch.commit();
             alert('✅ Contenu réinitialisé !');
             window.location.reload();
         } catch (err) {
             console.error('❌ Erreur reset:', err);
-            alert('❌ Erreur lors du reset');
         }
     };
 
-    // 5. Export JSON
     const exportContent = () => {
         const dataStr = JSON.stringify(content, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -270,24 +258,16 @@ export function useContentManager() {
         link.href = url;
         link.download = `backup-sirius-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
-        URL.revokeObjectURL(url);
     };
 
-    // 6. Import JSON
     const importContent = async (file: File) => {
         try {
             const text = await file.text();
             const imported = JSON.parse(text);
-            
-            // Validation basique
-            if (!imported.siteConfig || !Array.isArray(imported.heroSlides)) {
-                throw new Error('Format de fichier invalide');
-            }
-
             const batch = writeBatch(db);
 
             for (const [key, value] of Object.entries(imported)) {
-                if (key === 'siteConfig' || key === 'pageHeaders') {
+                if (['siteConfig', 'pageHeaders', 'ourStory'].includes(key)) {
                     batch.set(doc(db, key, 'main'), value);
                 } else if (Array.isArray(value)) {
                     const snap = await getDocs(collection(db, key));
@@ -298,11 +278,10 @@ export function useContentManager() {
                 }
             }
             await batch.commit();
-            alert('✅ Import réussi ! La page va se recharger.');
-            setTimeout(() => window.location.reload(), 1000);
+            alert('✅ Import réussi !');
+            window.location.reload();
         } catch (err) {
-            console.error('❌ Erreur import:', err);
-            alert('❌ Fichier invalide ou corrompu');
+            alert('❌ Fichier invalide');
         }
     };
 

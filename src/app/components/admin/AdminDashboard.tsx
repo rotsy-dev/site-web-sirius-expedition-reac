@@ -15,7 +15,8 @@ import {
     Upload,
     RotateCcw,
     Film,
-    Type
+    Type,
+    HistoryIcon
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
@@ -26,6 +27,7 @@ import { FAQEditor } from './sections/FAQEditor';
 import { ConfigEditor } from './sections/ConfigEditor';
 import VideoConfigEditor from './sections/VideoConfigEditor';
 import { PageHeadersEditor } from './sections/PageHeadersEditor';
+import { AboutEditor } from './sections/AboutEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -48,8 +50,9 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'blog', label: 'Articles Blog', icon: BookOpen },
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
-        { id: 'videos', label: 'Vidéos', icon: Film },
+        { id: 'videos', label: 'Videos', icon: Film },
         { id: 'headers', label: 'Page Headers', icon: Type },
+        { id: 'about', label: 'Our Story', icon: HistoryIcon },
     ];
 
     const handleImport = () => {
@@ -248,6 +251,13 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                                     ...content.siteConfig,
                                     videos: config
                                 })}
+                            />
+                        )}
+
+                        {activeTab === 'about' && (
+                            <AboutEditor 
+                                story={content.ourStory} 
+                                onSave={(story) => onUpdateSection('ourStory', story)} 
                             />
                         )}
 

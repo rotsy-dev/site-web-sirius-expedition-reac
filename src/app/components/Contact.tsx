@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import emailjs from '@emailjs/browser';
 import { db } from '../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
+import { SectionHeader } from '@/components/common/SectionHeader';
 
 interface TourDate {
   id: string;
@@ -38,7 +39,15 @@ interface ContactProps {
       email: string;
     };
   };
-  content?: any;
+   content?: {
+    pageHeaders?: {
+      contact?: {
+        badge?: string;
+        title?: string;
+        subtitle?: string;
+      };
+    };
+  };
 }
 
 interface ExtendedContactFormData {
@@ -70,7 +79,7 @@ const EMAILJS_CONFIG = {
   PUBLIC_KEY: 'zjVFV2WfPtjKiu0g-',
 };
 
-export function Contact({ config }: ContactProps) {
+export function Contact({ config, content = {} }: ContactProps) {
   const [formData, setFormData] = useState<ExtendedContactFormData>({
     name: '',
     email: '',
@@ -325,24 +334,12 @@ export function Contact({ config }: ContactProps) {
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 sm:mb-20"
-        >
-          <div className="mb-6 mt-10 md:mt-20">
-            <span className="text-xl text-[#443C34] dark:text-gray-400 font-semibold border-2 border-[#443C34] px-6 py-3 rounded-full">
-              Get In Touch
-            </span>
-          </div>
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-[#443C34] dark:text-white leading-tight">
-            Contact Us
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Get in touch with us to plan your Madagascar adventure
-          </p>
-        </motion.div>
+       {/* Simple header  */}
+        <SectionHeader
+            badge={content.pageHeaders?.contact?.badge || 'Contact Us'}
+            title={content.pageHeaders?.contact?.title || 'Reach Out for Your Dream Trip'}
+            subtitle={content.pageHeaders?.contact?.subtitle || 'We are here to assist you with any inquiries or bookings.'}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-12">
           {/* Contact Form - 3 colonnes */}
