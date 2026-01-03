@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Phone, LogIn } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { SITE_SECTIONS } from "../../constants"
 
@@ -14,34 +14,12 @@ interface HeaderProps {
   }
 }
 
-function AnimatedNavLink({ label, isClicked }: { label: string; isClicked: boolean }) {
-  return (
-    <span className="relative block overflow-hidden h-[1.5em] leading-[1.5em]">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={isClicked ? "clicked" : "static"}
-          initial={isClicked ? { y: "100%" } : undefined}
-          animate={{ y: 0 }}
-          exit={isClicked ? { y: "-100%" } : undefined}
-          transition={{ duration: 0.5, ease: [0.33, 1, 0.68, 1] }}
-          className="block whitespace-nowrap"
-        >
-          {label}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  )
-}
-
 export function Header({ activeSection, setActiveSection, siteConfig }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [clickedId, setClickedId] = useState<string | null>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
+    const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -54,166 +32,135 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
     { id: SITE_SECTIONS.CONTACT, label: "Contact" },
   ]
 
-  const handleItemClick = (id: string) => {
-    setClickedId(id)
-    setActiveSection(id)
-    setTimeout(() => setClickedId(null), 300)
-  }
-
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-md py-3" 
+          : "bg-transparent py-5"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="relative flex justify-between items-center h-20">
-          {/* Logo à gauche */}
-          <motion.a
-            href="#home"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault()
-              setActiveSection(SITE_SECTIONS.HOME)
-            }}
-            aria-label="Retour à l'accueil"
+        <div className="flex justify-between items-center h-16">
+          
+          {/* Logo Section */}
+          <div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => setActiveSection(SITE_SECTIONS.HOME)}
           >
-            {siteConfig.logo && (
-              <div className="relative h-14 w-14 flex-shrink-0">
-                <img 
-                  src={siteConfig.logo} 
-                  alt={`${siteConfig.siteName} logo`}
-                  className="h-full w-full object-cover rounded-full shadow-lg ring-2 ring-[#443C34]/10"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
-            <div className="flex flex-col">
-              <h1 className="text-2xl font-bold text-[#443C34] dark:text-white tracking-tight">
-                {siteConfig.siteName}
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{siteConfig.tagline}</p>
+            <div className="h-11 w-11 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm transition-transform group-hover:scale-105">
+              <img src={siteConfig.logo} alt="Logo" className="h-full w-full object-cover" />
             </div>
-          </motion.a>
+           <div className="flex flex-col ml-1">
+  {/* Nom du site : Un gris très foncé mais pas noir pur */}
+  <span className="text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-none">
+    {siteConfig.siteName}
+  </span>
+  
+  {/* Tagline : On utilise le Mocha du menu pour la cohérence et la lisibilité */}
+  <span className="text-[10px] text-[#4B3935]/80 dark:text-[#A68966] font-bold uppercase tracking-wider mt-1.5">
+    {siteConfig.tagline}
+  </span>
+</div>
+          </div>
 
-          {/* Navigation au centre - Desktop */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white backdrop-blur-sm rounded-full px-4 py-2 absolute left-1/2 -translate-x-1/2">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleItemClick(item.id)}
-                className={`px-5 py-2 rounded-full text-md transition-all duration-300 cursor-pointer ${
-                  activeSection === item.id
-                    ? "font-bold text-gray-900 dark:text-white"
-                    : "font-normal text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-                aria-label={`Aller à ${item.label}`}
-                aria-current={activeSection === item.id ? "page" : undefined}
-              >
-                <AnimatedNavLink label={item.label} isClicked={clickedId === item.id} />
-              </button>
-            ))}
+          {/* Navigation Desktop - L'élément ACTIVE est MOCHA */}
+          <nav className="hidden lg:flex items-center gap-1 bg-zinc-100/80 dark:bg-zinc-800/50 p-1.5 rounded-full border border-zinc-200/50 dark:border-white/5">
+            {menuItems.map((item) => {
+              const isActive = activeSection === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`relative px-5 py-2 text-sm font-medium transition-colors duration-300 rounded-full ${
+                    isActive 
+                      ? "text-[#F0E7D5]" // Texte Crème
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activePill"
+                      className="absolute inset-0 bg-[#4B3935]" // Fond Mocha
+                      style={{ borderRadius: 9999 }}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{item.label}</span>
+                </button>
+              )
+            })}
           </nav>
 
-          {/* Login à droite - Desktop */}
-          <div className="hidden lg:flex items-center">
+          {/* Boutons Actions */}
+          <div className="hidden lg:flex items-center gap-3">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveSection(SITE_SECTIONS.ADMIN)}
-              className="px-8 py-2.5 bg-[#443C34] dark:bg-gray-700 text-white rounded-full text-md font-semibold hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-              aria-label="Se connecter"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setActiveSection(SITE_SECTIONS.CONTACT)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#2fb5a3] text-white rounded-full text-sm font-semibold hover:bg-[#26a393] transition-all shadow-sm"
             >
+              <Phone size={14} strokeWidth={2.5} />
+              Contact
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setActiveSection(SITE_SECTIONS.ADMIN)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full text-sm font-semibold transition-all shadow-sm"
+            >
+              <LogIn size={14} />
               Login
             </motion.button>
           </div>
 
           {/* Menu Mobile Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="lg:hidden p-2 rounded-lg text-[#443C34] dark:text-white border border-[#443C34] bg-transparent"
+          <button
+            className="lg:hidden p-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 rounded-lg"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-menu"
           >
-            <AnimatePresence mode="wait">
-              {mobileMenuOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X size={24} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Menu size={24} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
         {/* Menu Mobile */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.nav
-              id="mobile-menu"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="lg:hidden overflow-hidden pb-4"
-              aria-label="Navigation mobile"
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="lg:hidden absolute left-6 right-6 mt-2 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-3 shadow-2xl"
             >
-              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-2xl p-4 mt-2">
-                <div className="space-y-1">
-                  {menuItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveSection(item.id)
-                        setMobileMenuOpen(false)
-                      }}
-                      className={`block w-full text-left px-4 py-3 rounded-lg text-sm transition-all ${
-                        activeSection === item.id
-                          ? "font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
-                          : "font-normal text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setActiveSection(SITE_SECTIONS.ADMIN)
-                    setMobileMenuOpen(false)
-                  }}
-                  className="w-full px-4 py-3 bg-gray-800 dark:bg-gray-700 text-white rounded-lg text-sm font-medium mt-3 hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
-                  aria-label="Se connecter"
+              <div className="flex flex-col gap-1">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id)
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`w-full text-left px-5 py-3.5 rounded-2xl text-sm transition-all ${
+                      activeSection === item.id
+                        ? "bg-[#4B3935] text-[#F0E7D5] font-bold" // Active Mocha Mobile
+                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800 my-2" />
+                <button 
+                  onClick={() => setActiveSection(SITE_SECTIONS.ADMIN)}
+                  className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl text-sm font-bold flex items-center justify-center gap-2"
                 >
-                  Login
+                  <LogIn size={16} /> Login
                 </button>
               </div>
-            </motion.nav>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

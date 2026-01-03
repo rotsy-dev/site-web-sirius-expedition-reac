@@ -1,9 +1,16 @@
 "use client"
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Play, X, Film, Sparkles, Monitor, Award } from "lucide-react"
-import type { Video } from "../../types/content"
-import { SectionHeader } from "@/components/common/SectionHeader"
+import { useState, useRef } from "react"
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion"
+import { Play, X, ArrowRight, Clapperboard, Award } from "lucide-react"
+
+// Types
+interface Video {
+  id: string
+  youtubeId: string
+  thumbnail: string
+  title: string
+  category: string
+}
 
 interface VideoGalleryProps {
   videos: Video[]
@@ -16,153 +23,253 @@ interface VideoGalleryProps {
   content?: {
     pageHeaders?: {
       videos?: {
-        badge?: string;
-        title?: string;
-        subtitle?: string;
-      };
-    };
-  };
+        badge?: string
+        title?: string
+        subtitle?: string
+      }
+    }
+  }
 }
 
 export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps) {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  })
+
+  const videoScale = useTransform(scrollYProgress, [0, 0.3], [0.9, 1])
+  const smoothScale = useSpring(videoScale, { stiffness: 100, damping: 30 })
 
   return (
-    <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#443C34] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* En-tête */}
-        <SectionHeader
-          badge={content.pageHeaders?.videos?.badge || 'Video Gallery'}
-          title={content.pageHeaders?.videos?.title || 'See Madagascar Come Alive'}
-          subtitle={content.pageHeaders?.videos?.subtitle || 'Immerse yourself in breathtaking adventures captured on film'}
-          badgeColor="text-white border-white"
-          titleColor="text-white"
-          subtitleColor="text-white/80"
-        />
-
-        {/* Featured Video Principal */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
+    <section 
+      ref={containerRef} 
+      className="relative py-24 overflow-hidden min-h-screen flex flex-col items-center bg-[#3D2F2B]"
+    >
+      {/* TITRE DE LA SECTION */}
+      <div className="z-10 text-center mb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="mb-12"
+          className="flex flex-col items-center gap-4"
         >
-          <div className="relative group/main">
-            {/* Container */}
-            <motion.div
-              whileHover={{ y: -12 }}
-              className="relative bg-white/5 backdrop-blur-xl rounded-[3rem] overflow-hidden border border-white/10"
-            >
-              {/* Video embed */}
-              <div className="relative pb-[56.25%] h-0">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${config.videos.mainYouTubeId}`}
-                  title="Sirius Expedition - Main Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
-
-              {/* Badge Featured premium */}
-              <motion.div
-                initial={{ x: -100, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="absolute top-8 left-8"
-              >
-                <div className="relative group/badge-main">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.5, 0.8, 0.5],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                    className="absolute inset-0 bg-red-500 rounded-full blur-lg"
-                  />
-                  <div className="relative bg-red-500 px-6 py-3 rounded-2xl shadow-2xl overflow-hidden border border-red-200/50">
-                    <motion.div
-                      animate={{ x: ["-100%", "200%"] }}
-                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
-                      className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
-                    />
-                    <span className="relative text-white font-black text-base flex items-center gap-2">
-                      <Award size={20} className="fill-white" />
-                      Featured Video
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Corners décoratifs */}
-              {[
-                { top: "2rem", left: "2rem", rotate: 0 },
-                { top: "2rem", right: "2rem", rotate: 90 },
-                { bottom: "2rem", left: "2rem", rotate: -90 },
-                { bottom: "2rem", right: "2rem", rotate: 180 },
-              ].map((pos, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 + i * 0.1 }}
-                  className="absolute w-8 h-8 border-t-4 border-l-4 border-red-400"
-                  style={{ ...pos, transform: `rotate(${pos.rotate}deg)` }}
-                />
-              ))}
-            </motion.div>
+          <div className="p-3 bg-[#EBE3D5]/10 rounded-full">
+            <Clapperboard className="text-[#EBE3D5]" size={32} />
           </div>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-[#EBE3D5]">
+            SIRIUS <span className="text-[#A68966]">GALLERY</span>
+          </h2>
+          <div className="h-1 w-20 bg-[#A68966] rounded-full" />
+          <p className="text-[10px] font-bold tracking-[0.6em] uppercase text-[#EBE3D5]/40 mt-2">
+            {content.pageHeaders?.videos?.subtitle || 'The Madagascan adventure on the move'}
+          </p>
         </motion.div>
+      </div>
 
-        {/* Grid de vidéos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {videos.map((video, index) => (
+      <div className="max-w-7xl mx-auto px-6 w-full z-10">
+        
+        {/* BLOC PRINCIPAL (VIDÉO YOUTUBE + CARTE VANILLA) */}
+        <div className="relative flex flex-col lg:flex-row items-center justify-center mb-40">
+          
+          {/* ZONE VIDÉO : YouTube Iframe en mode Background */}
+          <motion.div 
+            style={{ scale: smoothScale }}
+            className="relative w-full lg:w-3/4 aspect-video rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] z-10 border border-white/10 bg-black"
+          >
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
+              <iframe
+                className="w-full h-full scale-[1.35]" 
+                src={`https://www.youtube.com/embed/${config.videos.mainYouTubeId}?autoplay=1&mute=1&loop=1&playlist=${config.videos.mainYouTubeId}&controls=0&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
+                allow="autoplay; encrypted-media"
+                title="Background Video"
+              />
+            </div>
+            
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#3D2F2B]/60 via-transparent to-transparent" />
+
+            {/* Badge Featured avec animations spectaculaires */}
             <motion.div
-              key={video.id}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ x: -100, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.15, duration: 0.6 }}
-              className="group/card cursor-pointer"
-              onClick={() => setSelectedVideo(video.youtubeId)}
-              onMouseEnter={() => setHoveredVideo(String(video.id))}
-              onMouseLeave={() => setHoveredVideo(null)}
+              transition={{ delay: 0.3 }}
+              className="absolute top-8 left-8 z-30"
             >
-              <div className="relative h-full">
-                {/* Card */}
+              <div className="relative group/badge">
                 <motion.div
-                  whileHover={{ y: -12, scale: 1.02 }}
-                  className="relative bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 group-hover/card:border-red-500/50 transition-all duration-500 h-full"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.8, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                  }}
+                  className="absolute inset-0 bg-[#A68966] rounded-full blur-lg"
+                />
+                <div className="relative bg-[#A68966] px-6 py-3 rounded-2xl shadow-2xl overflow-hidden border border-[#EBE3D5]/50">
+                  <motion.div
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
+                    className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+                  />
+                  <span className="relative text-[#EBE3D5] font-black text-base flex items-center gap-2">
+                    <Award size={20} className="fill-[#EBE3D5]" />
+                    Featured Video
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Bouton Play Sirius avec animations */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setSelectedVideo(config.videos.mainYouTubeId)}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+            >
+              <div className="relative">
+                {/* Rings pulsants */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 0, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                  }}
+                  className="absolute inset-0 bg-[#EBE3D5] rounded-full"
+                />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.7, 0, 0.7],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    delay: 0.5,
+                  }}
+                  className="absolute inset-0 bg-[#A68966] rounded-full"
+                />
+                
+                {/* Button principal */}
+                <div className="relative w-24 h-24 bg-[#EBE3D5] text-[#3D2F2B] rounded-full flex items-center justify-center shadow-2xl border-4 border-[#A68966] overflow-hidden">
+                  <motion.div
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
+                    className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-[#A68966]/30 to-transparent skew-x-12"
+                  />
+                  <Play fill="currentColor" size={32} className="ml-1 relative z-10" />
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Corners décoratifs */}
+            {[
+              { top: "2rem", left: "2rem", rotate: 0 },
+              { top: "2rem", right: "2rem", rotate: 90 },
+              { bottom: "2rem", left: "2rem", rotate: -90 },
+              { bottom: "2rem", right: "2rem", rotate: 180 },
+            ].map((pos, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 + i * 0.1 }}
+                className="absolute w-8 h-8 border-t-4 border-l-4 border-[#A68966]"
+                style={{ ...pos, transform: `rotate(${pos.rotate}deg)` }}
+              />
+            ))}
+          </motion.div>
+
+          {/* CARTE TEXTE VANILLA (Chevauche la vidéo à droite) */}
+          <motion.div 
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative w-full lg:w-[480px] lg:-ml-32 mt-[-50px] lg:mt-0 bg-[#EBE3D5] p-10 md:p-14 rounded-[2.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.3)] z-20"
+          >
+            <span className="text-[#A68966] font-bold uppercase tracking-widest text-xs mb-6 block">
+              Sirius Experience
+            </span>
+            <h3 className="text-[#3D2F2B] text-3xl md:text-5xl font-black leading-tight mb-8">
+              An authentic <br /> <span className="italic font-serif font-medium">immersion.</span>
+            </h3>
+            <p className="text-[#3D2F2B]/70 text-lg leading-relaxed mb-10">
+              Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants.
+            </p>
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-4 bg-[#3D2F2B] text-[#EBE3D5] px-10 py-5 rounded-full font-bold text-lg hover:bg-[#2A201D] transition-all group w-full justify-center lg:w-auto"
+            >
+              Contact us 
+              <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            </motion.button>
+          </motion.div>
+        </div>
+
+        {/* CAROUSEL DES VIDÉOS YOUTUBE */}
+        <div className="relative">
+          <div className="overflow-hidden">
+            <motion.div 
+              className="flex gap-8"
+              animate={{
+                x: [0, -((videos.length * 400) + (videos.length * 32))],
+              }}
+              transition={{
+                x: {
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "loop",
+                  duration: videos.length * 8,
+                  ease: "linear",
+                },
+              }}
+            >
+              {[...videos, ...videos, ...videos].map((v, index) => (
+                <motion.div 
+                  key={`${v.id}-${index}`}
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: (index % videos.length) * 0.15, duration: 0.6 }}
+                  whileHover={{ y: -12, scale: 1.05 }}
+                  className="cursor-pointer group flex-shrink-0 w-[400px]" 
+                  onClick={() => setSelectedVideo(v.youtubeId)}
+                  onMouseEnter={() => setHoveredVideo(`${v.id}-${index}`)}
+                  onMouseLeave={() => setHoveredVideo(null)}
                 >
-                  <div className="relative h-64 overflow-hidden">
-                    {/* Image */}
-                    <motion.img
-                      animate={hoveredVideo === String(video.id) ? { scale: 1.15 } : { scale: 1 }}
+                  <div className="relative aspect-video rounded-3xl overflow-hidden mb-6 shadow-xl border border-white/5 bg-black/20">
+                    <motion.img 
+                      animate={hoveredVideo === `${v.id}-${index}` ? { scale: 1.15 } : { scale: 1 }}
                       transition={{ duration: 0.7 }}
-                      src={video.thumbnail}
-                      alt={video.title}
+                      src={v.thumbnail} 
+                      alt={v.title} 
                       className="w-full h-full object-cover"
                     />
-
+                    
                     {/* Gradients */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={hoveredVideo === String(video.id) ? { opacity: 0.4 } : { opacity: 0 }}
-                      className="absolute inset-0 bg-gradient-to-br from-red-500/50 via-purple-500/50 to-red-500/50"
+                      animate={hoveredVideo === `${v.id}-${index}` ? { opacity: 0.4 } : { opacity: 0 }}
+                      className="absolute inset-0 bg-gradient-to-br from-[#A68966]/50 via-[#8B7355]/50 to-[#A68966]/50"
                     />
-
+                    
                     {/* Play Button spectaculaire */}
                     <motion.div
                       animate={{
-                        scale: hoveredVideo === String(video.id) ? 1.3 : 1,
-                        rotate: hoveredVideo === String(video.id) ? 360 : 0,
+                        scale: hoveredVideo === `${v.id}-${index}` ? 1.3 : 1,
+                        rotate: hoveredVideo === `${v.id}-${index}` ? 360 : 0,
                       }}
                       transition={{
                         type: "spring",
@@ -183,7 +290,7 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                             duration: 2,
                             repeat: Number.POSITIVE_INFINITY,
                           }}
-                          className="absolute inset-0 bg-white rounded-full"
+                          className="absolute inset-0 bg-[#EBE3D5] rounded-full"
                         />
                         <motion.div
                           animate={{
@@ -195,47 +302,34 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                             repeat: Number.POSITIVE_INFINITY,
                             delay: 0.5,
                           }}
-                          className="absolute inset-0 bg-red-500 rounded-full"
+                          className="absolute inset-0 bg-[#A68966] rounded-full"
                         />
 
                         {/* Button principal */}
-                        <div className="relative w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-red-500 overflow-hidden">
+                        <div className="relative w-16 h-16 bg-[#EBE3D5] rounded-full flex items-center justify-center shadow-2xl border-4 border-[#A68966] overflow-hidden">
                           <motion.div
                             animate={{ x: ["-100%", "200%"] }}
                             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
-                            className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-red-200/50 to-transparent skew-x-12"
+                            className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-[#A68966]/50 to-transparent skew-x-12"
                           />
-                          <Play size={32} className="text-red-600 ml-1 relative z-10" fill="currentColor" />
+                          <Play size={24} className="text-[#3D2F2B] ml-1 relative z-10" fill="currentColor" />
                         </div>
                       </div>
                     </motion.div>
 
-                    {/* Contenu */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                      <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        whileInView={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="inline-block bg-gradient-to-r from-red-500/90 to-purple-500/90 backdrop-blur-xl px-4 py-2 rounded-full text-sm text-white font-bold mb-3 border border-white/20 shadow-lg"
-                      >
-                        {video.category}
-                      </motion.div>
-                      <h3 className="text-white font-black text-xl leading-tight drop-shadow-lg">{video.title}</h3>
-                    </div>
-
                     {/* Particules explosives */}
                     <AnimatePresence>
-                      {hoveredVideo === String(video.id) && (
+                      {hoveredVideo === `${v.id}-${index}` && (
                         <div className="absolute inset-0 pointer-events-none">
-                          {[...Array(16)].map((_, i) => (
+                          {[...Array(12)].map((_, i) => (
                             <motion.div
                               key={i}
                               initial={{ opacity: 0, scale: 0 }}
                               animate={{
                                 opacity: [0, 1, 0],
                                 scale: [0, 1.5, 0],
-                                x: Math.cos((i / 16) * Math.PI * 2) * 120,
-                                y: Math.sin((i / 16) * Math.PI * 2) * 120,
+                                x: Math.cos((i / 12) * Math.PI * 2) * 100,
+                                y: Math.sin((i / 12) * Math.PI * 2) * 100,
                               }}
                               exit={{ opacity: 0 }}
                               transition={{
@@ -244,7 +338,7 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                                 repeat: Number.POSITIVE_INFINITY,
                                 repeatDelay: 0.5,
                               }}
-                              className="absolute top-1/2 left-1/2 w-2 h-2 bg-red-400 rounded-full shadow-lg"
+                              className="absolute top-1/2 left-1/2 w-2 h-2 bg-[#A68966] rounded-full shadow-lg"
                             />
                           ))}
                         </div>
@@ -252,7 +346,7 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                     </AnimatePresence>
 
                     {/* Frame corners */}
-                    {hoveredVideo === String(video.id) && (
+                    {hoveredVideo === `${v.id}-${index}` && (
                       <>
                         {[
                           { top: "1rem", left: "1rem", rotate: 0 },
@@ -265,48 +359,39 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
-                            className="absolute w-6 h-6 border-t-3 border-l-3 border-red-400"
+                            className="absolute w-6 h-6 border-t-3 border-l-3 border-[#A68966]"
                             style={{ ...pos, transform: `rotate(${pos.rotate}deg)` }}
                           />
                         ))}
                       </>
                     )}
                   </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
 
-        {/* YouTube CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <motion.a
-            href={config.videos.channelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-block"
-          >
-            <div className="bg-[#F5E6D3] text-[#443C34] px-8 py-4 rounded-xl font-bold text-sm hover:bg-[#EBD8C0] transition-colors">
-              Visit Our YouTube Channel
-            </div>
-          </motion.a>
-        </motion.div>
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                    className="inline-block bg-gradient-to-r from-[#A68966]/90 to-[#8B7355]/90 backdrop-blur-xl px-4 py-2 rounded-full text-sm text-[#EBE3D5] font-bold mb-3 border border-white/20 shadow-lg"
+                  >
+                    {v.category}
+                  </motion.div>
+                  <h4 className="font-bold text-2xl text-[#EBE3D5] mb-2">{v.title}</h4>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* Modal Video */}
+      {/* MODAL LECTEUR VIDÉO */}
       <AnimatePresence>
         {selectedVideo && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/97 backdrop-blur-2xl"
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12"
             onClick={() => setSelectedVideo(null)}
           >
             {/* Vignette effect */}
@@ -325,28 +410,27 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
               <motion.button
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setSelectedVideo(null)}
-                className="absolute -top-20 right-0 z-10"
+                className="absolute -top-20 right-0 z-10 transition-all duration-300"
               >
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-red-600 border-4 border-red-500">
+                <div className="w-16 h-16 bg-[#EBE3D5] rounded-full flex items-center justify-center text-[#3D2F2B] border-4 border-[#A68966]">
                   <X size={32} strokeWidth={3} />
                 </div>
               </motion.button>
 
               {/* Video container */}
               <div className="relative">
-                <div className="relative bg-black rounded-3xl overflow-hidden border-4 border-red-500/50">
+                <div className="relative bg-black rounded-[2rem] overflow-hidden border-4 border-[#A68966]/50 shadow-2xl">
                   <div className="relative pb-[56.25%] h-0">
                     <iframe
                       className="absolute top-0 left-0 w-full h-full"
                       src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`}
                       title="Video Player"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allow="autoplay; encrypted-media"
                       allowFullScreen
-                    ></iframe>
+                    />
                   </div>
                 </div>
 
@@ -362,7 +446,7 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 + i * 0.1 }}
-                    className="absolute w-12 h-12 border-t-4 border-l-4 border-red-400"
+                    className="absolute w-12 h-12 border-t-4 border-l-4 border-[#A68966]"
                     style={{ ...pos, transform: `rotate(${pos.rotate}deg)` }}
                   />
                 ))}
@@ -373,4 +457,41 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
       </AnimatePresence>
     </section>
   )
+}
+
+// Données de démonstration
+const demoVideos: Video[] = [
+  {
+    id: "1",
+    youtubeId: "dQw4w9WgXcQ",
+    thumbnail: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
+    title: "Baobab Avenue at Sunset",
+    category: "Landscape"
+  },
+  {
+    id: "2",
+    youtubeId: "dQw4w9WgXcQ",
+    thumbnail: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80",
+    title: "Lemur Wildlife Safari",
+    category: "Wildlife"
+  },
+  {
+    id: "3",
+    youtubeId: "dQw4w9WgXcQ",
+    thumbnail: "https://images.unsplash.com/photo-1588392382834-a891154bca4d?w=800&q=80",
+    title: "Tsingy de Bemaraha Adventure",
+    category: "Adventure"
+  }
+]
+
+const demoConfig = {
+  videos: {
+    mainYouTubeId: "dQw4w9WgXcQ",
+    channelUrl: "https://youtube.com/@sirius"
+  }
+}
+
+// Rendu avec données de démo
+function App() {
+  return <VideoGallery videos={demoVideos} config={demoConfig} />
 }
