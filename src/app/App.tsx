@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUp } from 'lucide-react';
 
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
@@ -24,6 +25,7 @@ import { useContentManager } from '../hooks/useContentManager';
 function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [pendingTour, setPendingTour] = useState<any>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const {
     content,
@@ -40,6 +42,21 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeSection]);
+
+  // UseEffect pour détecter le scroll et afficher/masquer le bouton
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fonction pour scroller en haut de la page
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <ToastProvider>
@@ -117,6 +134,7 @@ function App() {
                       slides={content.heroSlides}
                       content={content}
                       onNavigateToContact={() => setActiveSection('contact')}
+                      onNavigateToTours={() => setActiveSection('tours')}
                     />
                     <BestSellers
                       tours={content.bestSellers}
@@ -175,6 +193,23 @@ function App() {
                 setActiveSection={setActiveSection}
                 config={content.siteConfig}
               />
+
+              {/* BOUTON SCROLL TO TOP */}
+              <AnimatePresence>
+                {showScrollTop && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0, y: 20 }}
+                    onClick={scrollToTop}
+                    className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#A68966] text-white rounded-full shadow-2xl hover:bg-[#8B7355] transition-all flex items-center justify-center group"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <ArrowUp size={24} className="group-hover:-translate-y-1 transition-transform" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>

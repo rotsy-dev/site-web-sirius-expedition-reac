@@ -36,7 +36,12 @@ const settings = {
   centerMode: true,
   centerPadding: "0px",
   arrows: false,
-  responsive: []
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: { slidesToShow: 2 }
+    }
+  ]
 }
 
 export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSellersProps) {
@@ -50,25 +55,11 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
         reset: false,
         distance: '60px',
         duration: 800,
-        delay: 0,
         easing: 'cubic-bezier(0.5, 0, 0, 1)',
-        mobile: true
       })
 
-      // Section Header Animation
-      sr.reveal('.section-header', {
-        origin: 'top',
-        distance: '40px',
-        interval: 100
-      })
-
-      // Cards Content Animation
-      sr.reveal('.animate-card', {
-        origin: 'bottom',
-        distance: '60px',
-        interval: 200,
-        delay: 200
-      })
+      sr.reveal('.section-header', { origin: 'top' })
+      sr.reveal('.animate-card', { origin: 'bottom', interval: 200 })
     }
   }, [])
 
@@ -84,57 +75,62 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
     const isHovered = hoveredButton === tour.id
 
     return (
-      <div className="bg-white rounded-[32px] overflow-hidden border border-gray-100 flex flex-col h-full animate-card">
-        <div className="relative h-56 overflow-hidden rounded-t-[32px]">
+      <div className="bg-[#F0E7D5] rounded-[32px] overflow-hidden border border-[#4B3935]/10 flex flex-col h-full animate-card shadow-sm">
+        {/* Image avec Overlay léger */}
+        <div className="relative h-64 overflow-hidden rounded-t-[32px]">
           <ImageWithFallback
             src={tour.image || "/placeholder.svg"}
             alt={tour.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#4B3935]/20 to-transparent" />
         </div>
 
-        <div className="p-6 flex flex-col flex-1">
-          <h3 className="text-xl font-bold mb-2">{tour.title}</h3>
+        <div className="p-8 flex flex-col flex-1">
+          <h3 className="text-2xl font-bold text-[#4B3935] mb-2">{tour.title}</h3>
 
-          <p className="text-gray-500 mb-6">
+          <p className="text-[#4B3935]/70 mb-6 text-sm leading-relaxed">
             Explore the iconic Avenue of the Baobabs and the unique Tsingy formations
           </p>
 
-          <div className="text-3xl font-bold mb-6">1 299 €</div>
+          <div className="text-3xl font-bold text-[#4B3935] mb-6">1 299 €</div>
 
+          {/* Location & Duration avec points Mocha */}
           <div className="space-y-3 mb-8">
-            <div className="flex items-center gap-3 font-bold">
-              <div className="w-2 h-2 rounded-full bg-black" />
+            <div className="flex items-center gap-3 font-semibold text-[#4B3935]">
+              <div className="w-2 h-2 rounded-full bg-[#2fb5a3]" />
               {tour.location}
             </div>
-            <div className="flex items-center gap-3 font-bold">
-              <div className="w-2 h-2 rounded-full bg-black" />
+            <div className="flex items-center gap-3 font-semibold text-[#4B3935]">
+              <div className="w-2 h-2 rounded-full bg-[#2fb5a3]" />
               {tour.duration}
             </div>
           </div>
 
-          <div className="space-y-3 mb-8">
+          {/* Liste des points avec icônes Mocha */}
+          <div className="space-y-3 mb-8 border-t border-[#4B3935]/10 pt-6">
             {[
               "Expérience du coucher de soleil",
               "Site du patrimoine mondial",
-              "Visite de villages malgaches locaux",
+              "Visite de villages locaux",
             ].map((item, i) => (
-              <div key={i} className="flex gap-3">
-                <Check size={16} />
+              <div key={i} className="flex gap-3 items-center text-[#4B3935]/80 text-sm">
+                <Check size={16} className="text-[#2fb5a3]" />
                 <span>{item}</span>
               </div>
             ))}
           </div>
 
+          {/* Bouton style Mocha / Vanilla */}
           <button
             onMouseEnter={() => setHoveredButton(tour.id)}
             onMouseLeave={() => setHoveredButton(null)}
             onClick={() => handleOpenModal(tour)}
             className={`
-              mt-auto py-4 px-6 rounded-2xl font-bold text-left transition
+              mt-auto py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300
               ${isHovered
-                ? "bg-[#443C34] text-white"
-                : "hover:bg-[#443C34] hover:text-white"
+                ? "bg-[#2fb5a3] text-white shadow-lg"
+                : "bg-[#4B3935] text-[#F0E7D5]"
               }
             `}
           >
@@ -147,10 +143,11 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
 
   return (
     <>
-      <section className="py-16 px-4 bg-white">
+      {/* Background de la section en Vanilla clair pour faire ressortir les cartes */}
+      <section className="py-24 px-4 bg-[#F0E7D5]/30">
         <div className="max-w-7xl mx-auto">
 
-          <div className="section-header">
+          <div className="section-header mb-12">
             <SectionHeader
               badge={content.pageHeaders?.bestSellers?.badge || 'Best Sellers'}
               title={content.pageHeaders?.bestSellers?.title || 'Most Popular Adventures'}
@@ -158,29 +155,36 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             />
           </div>
 
-          {/* ✅ MOBILE / TABLET → LISTE */}
-          <div className="grid gap-8 lg:hidden mt-8">
+          {/* MOBILE / TABLET */}
+          <div className="grid gap-8 lg:hidden">
             {tours.map(tour => (
               <Card key={tour.id} tour={tour} />
             ))}
           </div>
 
-          {/* ✅ DESKTOP → SLIDER */}
-          <div className="hidden lg:block mt-8">
-            <Slider ref={sliderRef} {...settings}>
+          {/* DESKTOP → SLIDER */}
+          <div className="hidden lg:block">
+            <Slider ref={sliderRef} {...settings} className="best-sellers-slider">
               {tours.map(tour => (
-                <div key={tour.id} className="px-4 h-full">
+                <div key={tour.id} className="px-4 py-4 h-full">
                   <Card tour={tour} />
                 </div>
               ))}
             </Slider>
 
-            <div className="flex justify-end mt-10 gap-3">
-              <button onClick={() => sliderRef.current?.slickPrev()} className="p-4 border rounded-full hover:bg-gray-50 transition">
-                <ChevronLeft />
+            {/* Navigation Arrows avec couleurs Mocha */}
+            <div className="flex justify-center lg:justify-end mt-12 gap-4">
+              <button 
+                onClick={() => sliderRef.current?.slickPrev()} 
+                className="p-4 border-2 border-[#4B3935]/20 rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300"
+              >
+                <ChevronLeft size={24} />
               </button>
-              <button onClick={() => sliderRef.current?.slickNext()} className="p-4 border rounded-full hover:bg-gray-50 transition">
-                <ChevronRight />
+              <button 
+                onClick={() => sliderRef.current?.slickNext()} 
+                className="p-4 border-2 border-[#4B3935]/20 rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300"
+              >
+                <ChevronRight size={24} />
               </button>
             </div>
           </div>
