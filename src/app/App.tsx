@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, MessageCircle } from 'lucide-react';
+import { ContactModal } from './components/ContactModal';
 
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
@@ -26,6 +27,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [pendingTour, setPendingTour] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const {
     content,
@@ -48,7 +50,7 @@ function App() {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -163,7 +165,7 @@ function App() {
                       initialSelectedTour={pendingTour}
                       content={content}
                     />
-                    <BestSellers 
+                    <BestSellers
                       tours={content.bestSellers}
                       content={content}
                     />
@@ -175,14 +177,14 @@ function App() {
                 )}
 
                 {activeSection === 'contact' && (
-                  <Contact 
+                  <Contact
                     config={content.siteConfig}
                     content={content}
                   />
                 )}
 
                 {activeSection === 'about' && (
-                  <AboutUs 
+                  <AboutUs
                     config={content.siteConfig}
                     content={content}
                   />
@@ -210,6 +212,31 @@ function App() {
                   </motion.button>
                 )}
               </AnimatePresence>
+
+              {/* FLOATING CONTACT BUTTON */}
+              <AnimatePresence>
+                {!isContactModalOpen && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0, y: 20 }}
+                    onClick={() => setIsContactModalOpen(true)}
+                    className={`fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
+                    {/* Pulse indicator */}
+                    <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <ContactModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+                config={content.siteConfig}
+              />
             </motion.div>
           )}
         </AnimatePresence>

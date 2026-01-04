@@ -1,5 +1,21 @@
 import * as React from 'react'
-import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Send, Linkedin } from 'lucide-react'
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+
+  </svg>
+)
+import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ScrollReveal from 'scrollreveal'
 
@@ -18,6 +34,8 @@ interface FooterProps {
       youtube: string;
       tripadvisor: string;
       google: string;
+      instagram?: string;
+      tiktok?: string;
     };
     services: {
       hosting: string[];
@@ -99,7 +117,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 <input
                   type="email"
                   placeholder={t('Email Placeholder')}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl  md:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white text-center"
                 />
                 <button className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]">
                   <ArrowUpRight className="w-4 h-4" />
@@ -149,7 +167,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
                   {t('Follow Us')}
                 </h3>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-3 sm:flex gap-3">
                   <a
                     href={config.social.facebook}
                     target="_blank"
@@ -172,6 +190,26 @@ export function Footer({ setActiveSection, config }: FooterProps) {
                   >
                     <Linkedin className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
                   </a>
+
+                  <a
+                    href={config.social.instagram || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                  >
+                    <Instagram className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                  </a>
+
+                  <a
+                    href={config.social.tiktok || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                  >
+                    <TikTokIcon className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                  </a>
+
+
                 </div>
               </div>
             </div>

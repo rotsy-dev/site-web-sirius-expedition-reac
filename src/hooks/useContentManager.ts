@@ -83,26 +83,27 @@ const defaultContent = {
         siteName: 'Sirius Expedition',
         tagline: 'Aventures authentiques à Madagascar',
         logo: '',
-        contact: { 
-            email: 'contact@siriusexpedition.com', 
-            phone: '+261 34 00 000 00', 
+        contact: {
+            email: 'contact@siriusexpedition.com',
+            phone: '+261 34 00 000 00',
             address: 'Antananarivo, Madagascar',
             whatsapp: '+261340000000'
         },
-        social: { 
-            facebook: 'https://facebook.com/siriusexpedition', 
-            youtube: 'https://youtube.com/@siriusexpedition', 
+        social: {
+            facebook: 'https://facebook.com/siriusexpedition',
+            youtube: 'https://youtube.com/@siriusexpedition',
             instagram: 'https://instagram.com/siriusexpedition',
             tripadvisor: 'https://tripadvisor.com/siriusexpedition',
-            google: 'https://g.page/siriusexpedition'
+            google: 'https://g.page/siriusexpedition',
+            tiktok: 'https://tiktok.com/@siriusexpedition'
         },
-        videos: { 
+        videos: {
             aboutUsVideoId: '',
             mainYouTubeId: '',
             channelUrl: 'https://youtube.com/@siriusexpedition'
         },
-        services: { 
-            hosting: ['Hébergement 5*', 'Bungalows', 'Camping'], 
+        services: {
+            hosting: ['Hébergement 5*', 'Bungalows', 'Camping'],
             domain: 'siriusexpedition.com',
             email: 'reservation@siriusexpedition.com'
         },
@@ -133,7 +134,7 @@ export function useContentManager() {
         const loadContent = async () => {
             try {
                 const collections = [
-                    'heroSlides', 'bestSellers', 'tourSpecialties', 
+                    'heroSlides', 'bestSellers', 'tourSpecialties',
                     'reviews', 'blogPosts', 'faqs', 'videoGallery'
                 ];
 
@@ -144,7 +145,7 @@ export function useContentManager() {
                     getDoc(doc(db, 'siteConfig', 'main')),
                     getDoc(doc(db, 'pageHeaders', 'main')),
                     getDoc(doc(db, 'ourStory', 'main')), // <--- Récupération Histoire
-                    ...collections.map(coll => 
+                    ...collections.map(coll =>
                         getDocs(query(collection(db, coll), orderBy("id", "asc")))
                     )
                 ]);
@@ -201,12 +202,12 @@ export function useContentManager() {
             // ✅ GESTION DES OBJETS UNIQUES (Inclus ourStory)
             if (['siteConfig', 'pageHeaders', 'ourStory'].includes(section)) {
                 batch.set(doc(db, section, 'main'), data);
-            } 
+            }
             // ✅ GESTION DES COLLECTIONS
             else if (Array.isArray(data)) {
                 const snapshot = await getDocs(collection(db, section));
                 snapshot.docs.forEach(d => batch.delete(d.ref));
-                
+
                 data.forEach((item: any) => {
                     const ref = doc(db, section, item.id.toString());
                     batch.set(ref, item);
@@ -223,7 +224,7 @@ export function useContentManager() {
 
     const resetToDefaults = async () => {
         if (!confirm('⚠️ Réinitialiser TOUT le contenu ?')) return;
-        
+
         try {
             const batch = writeBatch(db);
             const collections = ['heroSlides', 'bestSellers', 'tourSpecialties', 'reviews', 'blogPosts', 'faqs', 'videoGallery'];
@@ -241,7 +242,7 @@ export function useContentManager() {
             batch.set(doc(db, 'siteConfig', 'main'), defaultContent.siteConfig);
             batch.set(doc(db, 'pageHeaders', 'main'), defaultContent.pageHeaders);
             batch.set(doc(db, 'ourStory', 'main'), defaultContent.ourStory); // <--- Reset Histoire
-            
+
             await batch.commit();
             alert('✅ Contenu réinitialisé !');
             window.location.reload();

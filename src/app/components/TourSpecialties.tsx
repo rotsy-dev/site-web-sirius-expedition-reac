@@ -91,16 +91,16 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
+            className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-black text-white mb-4 tracking-tight"
           >
-           {content?.pageHeaders?.specialties?.title || 'Curated Experiences'}
+            {content?.pageHeaders?.specialties?.title || 'Curated Experiences'}
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto mb-8 leading-relaxed"
+            className="text-sm md:text-base lg:text-xl text-white/90 font-light max-w-2xl mx-auto mb-8 leading-relaxed"
           >
             {content?.pageHeaders?.specialties?.subtitle || 'Vivez des aventures exceptionnelles au cœur de la biodiversité unique de Madagascar'}
           </motion.p>
@@ -177,11 +177,11 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
                     </div>
 
                     <div className="pt-14 p-8 md:p-10 flex-1 flex flex-col items-start bg-white mt-5">
-                      <h3 className="text-3xl font-black text-[#332C26] mb-4 tracking-tight leading-tight">
+                      <h3 className="text-2xl md:text-3xl font-black text-[#332C26] mb-4 tracking-tight leading-tight">
                         {specialty.title}
                       </h3>
 
-                      <p className="text-gray-500 leading-relaxed text-base font-medium mb-10 flex-1">
+                      <p className="text-gray-500 leading-relaxed text-sm md:text-base font-medium mb-10 flex-1">
                         {specialty.description}
                       </p>
 
@@ -202,7 +202,7 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
           {/* Modal */}
           <AnimatePresence>
             {selectedTour && (
-              <TourModal tour={selectedTour} onClose={() => setSelectedTour(null) } />
+              <TourModal tour={selectedTour} onClose={() => setSelectedTour(null)} />
             )}
           </AnimatePresence>
 
