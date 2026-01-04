@@ -126,7 +126,7 @@ export function HeroCarousel({ slides, onNavigateToContact, content = {} }: Hero
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onNavigateToContact}
-            className="inline-flex items-center gap-4 bg-[#443C34] dark:bg-gray-700 text-white pl-1 pr-8 py-1 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-4 bg-mocha dark:bg-gray-700 text-white pl-1 pr-8 py-1 rounded-full font-medium hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors cursor-pointer"
           >
             <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 overflow-hidden border-2 border-white/20 shrink-0">
               <img
