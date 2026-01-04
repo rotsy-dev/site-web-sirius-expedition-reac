@@ -19,23 +19,7 @@ interface TourSpecialtiesProps {
   content?: any
 }
 
-const IMAGES = [
-  "https://images.unsplash.com/photo-1659944975073-453265ccf3a6?w=800&q=80", // Baobab
-  "https://images.unsplash.com/photo-1700146606640-0202e6463425?w=800&q=80", // Lemur
-  "https://images.unsplash.com/photo-1679053806925-7f0f595fab31?w=800&q=80", // Beach
-  "https://images.unsplash.com/photo-1611611835759-e7d32033c6dc?w=800&q=80", // Bird
-  "https://images.unsplash.com/photo-1764933268558-3411b587f1e3?w=800&q=80", // Culture
-  "https://images.unsplash.com/photo-1677667495307-10e01bd9530f?w=800&q=80"  // Nature
-];
-
 const HERO_IMAGE = "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1600&q=80";
-
-const DEMO_SPECIALTIES = Array(6).fill(null).map((_, i) => ({
-  id: i + 1,
-  title: "Birdwatching",
-  description: "Discover over 250 endemic bird species in their natural habitats",
-  image: IMAGES[i % IMAGES.length],
-}));
 
 export function TourSpecialties({ specialties, initialSelectedTour, content }: TourSpecialtiesProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
@@ -55,11 +39,11 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
   const [selectedCategory, setSelectedCategory] = useState("Tous")
   const categories = ["Tous", "Nature", "Culture", "Aventure", "Photography"];
 
-  const smartSpecialties = specialties.map((s, i) => {
-    const titles = ["Birdwatching", "Lemur Safari", "Island Escape", "Birdwatching", "Cultural Tour", "Nature Trek"];
-    const cats = ["Nature", "Nature", "Aventure", "Nature", "Culture", "Aventure"];
-    return { ...s, title: titles[i], category: cats[i] };
-  });
+  // Use Firebase data directly with fallback for category
+  const smartSpecialties = specialties.map((specialty) => ({
+    ...specialty,
+    category: specialty.category || "Nature"
+  }));
 
   const filteredSpecialties = smartSpecialties.filter(s => {
     const matchSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,7 +53,6 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
   });
 
   const handleOpenModal = (specialty: any) => {
-    // Determine title for 'specific' content or random
     const extended = getDetailedTour(specialty);
     setSelectedTour(extended);
   };
