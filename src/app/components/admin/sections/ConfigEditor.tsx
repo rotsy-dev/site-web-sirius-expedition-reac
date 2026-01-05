@@ -7,8 +7,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface TourDate {
     id: string;
-    date: string; // Format: YYYY-MM-DD
-    time: string; // Format: HH:MM
+    date: string;
+    time: string;
 }
 
 interface Tour {
@@ -43,7 +43,6 @@ interface ConfigEditorProps {
     onSave: (config: SiteConfig) => void;
 }
 
-// Valeurs par défaut pour éviter tout "undefined"
 const defaultConfig: SiteConfig = {
     siteName: 'Sirius Expedition',
     tagline: 'Aventures inoubliables à Madagascar',
@@ -70,7 +69,6 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
     const [isCompressing, setIsCompressing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Chargement sécurisé depuis Firestore
     useEffect(() => {
         const fetchConfig = async () => {
             try {
@@ -92,7 +90,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                 }
             } catch (err) {
                 console.error('Erreur chargement configuration Firebase :', err);
-                setConfig(defaultConfig); // Fallback sécurisé
+                setConfig(defaultConfig);
             } finally {
                 setIsLoading(false);
             }
@@ -122,7 +120,6 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
         setHasChanges(true);
     };
 
-    // Gestion des tours
     const addTour = () => {
         const newTour: Tour = {
             id: `tour_${Date.now()}`,
@@ -157,7 +154,6 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
         setHasChanges(true);
     };
 
-    // Gestion des dates pour un tour
     const addDateToTour = (tourId: string) => {
         const newDate: TourDate = {
             id: `date_${Date.now()}`,
@@ -218,7 +214,6 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
         }
     };
 
-    // Compression d'image (ton code excellent, légèrement optimisé)
     const compressImage = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -308,24 +303,27 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
 
     return (
         <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* ==================== HEADER RESPONSIVE ==================== */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
                 <div>
                     <h2 className="text-3xl font-bold text-foreground">Configuration du Site</h2>
                     <p className="text-muted-foreground mt-1">Personnalisez les informations globales de Sirius Expedition</p>
                 </div>
-                <div className="flex items-center gap-4">
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     {hasChanges && (
-                        <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-medium">
-                            Modifications en attente
-                        </span>
+                        <div className="self-start sm:self-center">
+                            <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-medium">
+                                Modifications en attente
+                            </span>
+                        </div>
                     )}
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleSave}
                         disabled={!hasChanges}
-                        className="flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <Save size={20} />
                         Sauvegarder
@@ -333,9 +331,10 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                 </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
+            {/* ==================== GRILLE PRINCIPALE ==================== */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Informations Générales */}
-                <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+                <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
                     <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
                         <Globe size={24} className="text-primary" />
                         Informations Générales
@@ -368,8 +367,8 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                             <label className="block text-sm font-medium text-foreground mb-3">Logo du site</label>
                             <div className="space-y-4">
                                 {config.logo ? (
-                                    <div className="flex items-center gap-4 p-4 bg-background rounded-xl border border-border">
-                                        <div className="w-20 h-20 bg-white rounded-xl overflow-hidden shadow-md flex items-center justify-center">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-background rounded-xl border border-border">
+                                        <div className="w-20 h-20 bg-white rounded-xl overflow-hidden shadow-md flex items-center justify-center flex-shrink-0">
                                             {config.logo.startsWith('data:') || config.logo.startsWith('http') ? (
                                                 <img src={config.logo} alt="Logo" className="w-full h-full object-contain" />
                                             ) : (
@@ -427,7 +426,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                 </div>
 
                 {/* Contact */}
-                <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+                <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
                     <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
                         <Mail size={24} className="text-primary" />
                         Coordonnées
@@ -480,14 +479,14 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                     </div>
                 </div>
 
-                {/* Réseaux sociaux */}
-                <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-8 shadow-sm">
+                {/* Réseaux sociaux - pleine largeur sur mobile */}
+                <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
                     <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
                         <Facebook size={24} className="text-primary" />
                         Réseaux Sociaux
                     </h3>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-2">Facebook</label>
                             <input
@@ -546,9 +545,9 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                 </div>
             </div>
 
-            {/* Section Tours et Dates */}
-            <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
+            {/* ==================== SECTION TOURS ET DATES ==================== */}
+            <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
                     <div>
                         <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
                             <MapPin size={24} className="text-primary" />
@@ -562,7 +561,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={addTour}
-                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
                     >
                         <Plus size={20} />
                         Nouveau Tour
@@ -586,11 +585,11 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                 animate={{ opacity: 1, y: 0 }}
                                 className="border-2 border-border rounded-xl p-6 bg-background/50"
                             >
-                                {/* En-tête du Tour */}
-                                <div className="flex items-start justify-between mb-6">
+                                {/* En-tête du Tour - responsive */}
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
                                     <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary font-bold rounded-lg">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                            <span className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary font-bold rounded-lg flex-shrink-0">
                                                 {tourIndex + 1}
                                             </span>
                                             <div className="flex-1">
@@ -625,7 +624,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => removeTour(tour.id)}
-                                        className="ml-4 p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-all"
+                                        className="self-start p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-all"
                                         title="Supprimer ce tour"
                                     >
                                         <Trash2 size={20} />
@@ -634,7 +633,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
 
                                 {/* Section Dates */}
                                 <div className="bg-card border border-border rounded-xl p-6">
-                                    <div className="flex items-center justify-between mb-5">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                                         <div className="flex items-center gap-3">
                                             <Calendar size={20} className="text-primary" />
                                             <h4 className="font-bold text-foreground">
@@ -648,7 +647,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => addDateToTour(tour.id)}
-                                            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
+                                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md"
                                         >
                                             <Plus size={18} />
                                             Ajouter une date
@@ -663,19 +662,19 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                             </p>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             {tour.dates.map((tourDate, dateIndex) => (
                                                 <motion.div
                                                     key={tourDate.id}
                                                     initial={{ opacity: 0, x: -20 }}
                                                     animate={{ opacity: 1, x: 0 }}
-                                                    className="flex items-center gap-4 p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-all"
+                                                    className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-all"
                                                 >
-                                                    <span className="flex items-center justify-center w-8 h-8 bg-primary/10 text-primary text-sm font-bold rounded-lg">
+                                                    <span className="flex items-center justify-center w-8 h-8 bg-primary/10 text-primary text-sm font-bold rounded-lg flex-shrink-0">
                                                         {dateIndex + 1}
                                                     </span>
 
-                                                    <div className="flex-1 grid grid-cols-2 gap-4">
+                                                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                                                         <div>
                                                             <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
                                                                 <Calendar size={14} />
@@ -707,7 +706,7 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
                                                         onClick={() => removeDateFromTour(tour.id, tourDate.id)}
-                                                        className="p-2.5 text-destructive hover:bg-destructive/10 rounded-lg transition-all"
+                                                        className="self-start sm:self-center p-2.5 text-destructive hover:bg-destructive/10 rounded-lg transition-all"
                                                         title="Supprimer cette date"
                                                     >
                                                         <Trash2 size={18} />

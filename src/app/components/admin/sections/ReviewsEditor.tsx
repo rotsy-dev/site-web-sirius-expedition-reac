@@ -28,11 +28,9 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // États pour la modale
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingReview, setEditingReview] = useState<Review | null>(null);
 
-    // Chargement depuis Firestore
     useEffect(() => {
         const fetchReviews = async () => {
             try {
@@ -61,7 +59,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
         ));
         setHasChanges(true);
 
-        // Mise à jour dans la modale
         if (editingReview && editingReview.id === id) {
             setEditingReview({ ...editingReview, [field]: value });
         }
@@ -147,41 +144,50 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* ==================== HEADER RESPONSIVE ==================== */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">Témoignages Clients</h2>
                     <p className="text-muted-foreground">Gérez les avis de vos clients</p>
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    {/* Indicateur de changements */}
                     {hasChanges && (
-                        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                            Non sauvegardé
-                        </span>
+                        <div className="self-start sm:self-center">
+                            <span className="text-sm text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-3 py-1.5 rounded-lg font-medium">
+                                Non sauvegardé
+                            </span>
+                        </div>
                     )}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleAddReview}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium"
-                    >
-                        <Plus size={18} />
-                        Ajouter Témoignage
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSave}
-                        disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <Save size={18} />
-                        Sauvegarder
-                    </motion.button>
+
+                    {/* Boutons d'action */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddReview}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
+                        >
+                            <Plus size={18} />
+                            Ajouter Témoignage
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSave}
+                            disabled={!hasChanges}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            <Save size={18} />
+                            Sauvegarder
+                        </motion.button>
+                    </div>
                 </div>
             </div>
 
-            {/* Liste des témoignages (cartes compactes) */}
+            {/* ==================== LISTE DES TÉMOIGNAGES ==================== */}
             <div className="grid gap-4">
                 {reviews.map((review, index) => (
                     <motion.div
@@ -191,12 +197,13 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                         transition={{ delay: index * 0.1 }}
                         className="bg-muted/30 rounded-xl border border-border overflow-hidden"
                     >
-                        <div className="flex items-center justify-between p-4 bg-card border-b border-border">
+                        {/* Header de la carte - adapté mobile */}
+                        <div className="p-4 bg-card border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <img
                                     src={review.avatar}
                                     alt={review.name}
-                                    className="w-12 h-12 rounded-full object-cover"
+                                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                                     loading="lazy"
                                 />
                                 <div>
@@ -206,7 +213,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                             <CheckCircle size={16} className="text-accent fill-accent" />
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mt-1">
                                         <span className="flex items-center gap-1">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
@@ -221,17 +228,19 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+
+                            {/* Boutons Modifier / Supprimer */}
+                            <div className="flex items-center gap-2 self-start sm:self-center">
                                 <button
                                     onClick={() => openEditModal(review)}
-                                    className="flex items-center gap-1 px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium"
+                                    className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
                                 >
                                     <Edit2 size={16} />
                                     Modifier
                                 </button>
                                 <button
                                     onClick={() => handleDeleteReview(review.id)}
-                                    className="p-2 hover:bg-destructive/10 rounded-lg"
+                                    className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
                                     title="Supprimer"
                                 >
                                     <Trash2 size={18} className="text-destructive" />
@@ -239,7 +248,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                             </div>
                         </div>
 
-                        {/* Aperçu du texte */}
+                        {/* Texte du témoignage */}
                         <div className="p-4 bg-muted/20 text-foreground text-sm italic">
                             "{review.text}"
                         </div>
@@ -247,7 +256,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                 ))}
             </div>
 
-            {/* Modale d'édition / ajout */}
+            {/* ==================== MODALE D'ÉDITION ==================== */}
             <AnimatePresence>
                 {isEditModalOpen && editingReview && (
                     <motion.div
@@ -279,8 +288,7 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                             </div>
 
                             <div className="p-6 space-y-5">
-                                <div className="grid md:grid-cols-2 gap-5">
-                                    {/* Nom */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Nom complet</label>
                                         <input
@@ -291,7 +299,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         />
                                     </div>
 
-                                    {/* Pays */}
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Pays</label>
                                         <input
@@ -302,7 +309,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         />
                                     </div>
 
-                                    {/* Note */}
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Note (1-5)</label>
                                         <input
@@ -316,7 +322,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         />
                                     </div>
 
-                                    {/* Date */}
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Date</label>
                                         <input
@@ -328,7 +333,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         />
                                     </div>
 
-                                    {/* Tour */}
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Nom du tour</label>
                                         <input
@@ -339,7 +343,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         />
                                     </div>
 
-                                    {/* Plateforme */}
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">Plateforme</label>
                                         <select
@@ -354,7 +357,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         </select>
                                     </div>
 
-                                    {/* Vérifié */}
                                     <div className="md:col-span-2 flex items-center gap-3">
                                         <input
                                             type="checkbox"
@@ -368,7 +370,6 @@ export function ReviewsEditor({ reviews: initialReviews, onSave }: ReviewsEditor
                                         </label>
                                     </div>
 
-                                    {/* Témoignage */}
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-foreground mb-2">Témoignage</label>
                                         <textarea

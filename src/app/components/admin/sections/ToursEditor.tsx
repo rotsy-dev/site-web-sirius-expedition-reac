@@ -35,11 +35,9 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // États pour la modale d'édition
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingTour, setEditingTour] = useState<Tour | null>(null);
 
-    // Chargement depuis Firestore
     useEffect(() => {
         const fetchTours = async () => {
             try {
@@ -69,7 +67,6 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
         ));
         setHasChanges(true);
 
-        // Mise à jour synchrone dans la modale
         if (editingTour && editingTour.id === id) {
             setEditingTour(prev => prev ? { ...prev, [field]: value } : null);
         }
@@ -206,41 +203,48 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* ==================== HEADER RESPONSIVE ==================== */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">Best Sellers Tours</h2>
                     <p className="text-muted-foreground">Gérez vos tours populaires affichés sur la page d'accueil</p>
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     {hasChanges && (
-                        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                            Modifications non sauvegardées
-                        </span>
+                        <div className="self-start sm:self-center">
+                            <span className="text-sm text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-3 py-1.5 rounded-lg font-medium">
+                                Modifications non sauvegardées
+                            </span>
+                        </div>
                     )}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleAddTour}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
-                    >
-                        <Plus size={18} />
-                        Ajouter Tour
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSave}
-                        disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        <Save size={18} />
-                        Sauvegarder
-                    </motion.button>
+
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddTour}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
+                        >
+                            <Plus size={18} />
+                            Ajouter Tour
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSave}
+                            disabled={!hasChanges}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            <Save size={18} />
+                            Sauvegarder
+                        </motion.button>
+                    </div>
                 </div>
             </div>
 
-            {/* Liste des tours (cartes compactes) */}
+            {/* ==================== LISTE DES TOURS ==================== */}
             <div className="grid gap-6">
                 {tours.map((tour, index) => (
                     <motion.div
@@ -250,8 +254,9 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                         transition={{ delay: index * 0.1 }}
                         className="bg-muted/30 rounded-xl border border-border overflow-hidden"
                     >
-                        <div className="flex items-center justify-between p-4 bg-card border-b border-border">
-                            <div className="flex items-center gap-4">
+                        {/* Header de la carte - responsive */}
+                        <div className="p-4 bg-card border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                                     {tour.image ? (
                                         <img
@@ -266,9 +271,10 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                         </div>
                                     )}
                                 </div>
+
                                 <div>
                                     <h3 className="font-semibold text-foreground text-lg">{tour.title}</h3>
-                                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-2">
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mt-2">
                                         <span className="flex items-center gap-1">
                                             <MapPin size={14} /> {tour.location}
                                         </span>
@@ -285,7 +291,9 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+
+                            {/* Boutons d'action */}
+                            <div className="flex items-center gap-2 self-start sm:self-center">
                                 <button
                                     onClick={() => openEditModal(tour)}
                                     className="flex items-center gap-1 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
@@ -303,13 +311,13 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                             </div>
                         </div>
 
-                        {/* Aperçu de l'image */}
+                        {/* Aperçu image grande (optionnel) */}
                         {tour.image && (
                             <div className="p-4 bg-muted/50 flex justify-center">
                                 <img
                                     src={tour.image}
                                     alt={tour.title}
-                                    className="max-h-48 rounded-lg object-cover shadow-md"
+                                    className="max-h-48 rounded-lg object-cover shadow-md max-w-full"
                                     loading="lazy"
                                 />
                             </div>
@@ -318,7 +326,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                 ))}
             </div>
 
-            {/* Modale d'édition / ajout */}
+            {/* ==================== MODALE D'ÉDITION ==================== */}
             <AnimatePresence>
                 {isEditModalOpen && editingTour && (
                     <motion.div
@@ -350,14 +358,13 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                             </div>
 
                             <div className="p-6 space-y-6">
-                                {/* ImageUploader pour l'image principale */}
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">
                                         Image principale du tour
                                     </label>
                                     <ImageUploader
                                         value={editingTour.image}
-                                        onChange={(url:any) => handleChange(editingTour.id, 'image', url)}
+                                        onChange={(url: any) => handleChange(editingTour.id, 'image', url)}
                                         aspectRatio="16/10"
                                     />
                                     <p className="text-xs text-muted-foreground mt-2">
@@ -365,7 +372,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                     </p>
                                 </div>
 
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-2">Titre du tour</label>
                                         <input
@@ -403,6 +410,7 @@ export function ToursEditor({ tours: initialTours, onSave }: ToursEditorProps) {
                                             className="w-full px-4 py-2 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary"
                                         />
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium mb-2">Prix</label>
                                         <input
