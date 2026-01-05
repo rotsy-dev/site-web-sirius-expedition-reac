@@ -3,7 +3,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -24,24 +23,63 @@ export function LoadingSpinner({
 }: LoadingSpinnerProps) {
   const content = (
     <div className="flex flex-col items-center justify-center gap-4">
+      {/* Spinner amélioré avec animation de pulsation */}
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        className={sizeClasses[size]}
+        className="relative"
+        animate={{
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
       >
-        <Loader2 className="w-full h-full text-primary" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          className={`${sizeClasses[size]} relative`}
+        >
+          {/* Cercle extérieur */}
+          <div className="absolute inset-0 rounded-full border-4 border-[#D4A574]/20" />
+          {/* Cercle animé */}
+          <motion.div
+            className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#D4A574] border-r-[#D4A574]"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+          />
+          {/* Cercle intérieur */}
+          <motion.div
+            className="absolute inset-2 rounded-full border-2 border-transparent border-b-[#4B3935] border-l-[#4B3935]"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: 'linear' }}
+          />
+        </motion.div>
       </motion.div>
+      
       {text && (
-        <p className="text-sm text-muted-foreground animate-pulse">{text}</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-sm text-[#8B7355] font-medium animate-pulse"
+        >
+          {text}
+        </motion.p>
       )}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 flex items-center justify-center bg-white/95 dark:bg-zinc-900/95 z-50"
+      >
         {content}
-      </div>
+      </motion.div>
     );
   }
 

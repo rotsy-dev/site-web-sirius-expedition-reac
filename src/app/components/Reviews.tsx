@@ -4,8 +4,10 @@ import { useRef, useState, useCallback } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle, Verified } from 'lucide-react';
+import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle, Verified, Loader2 } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion"
+import { useTranslatedContent } from '../../hooks/useTranslatedContent';
+import { useTranslation } from 'react-i18next';
 
 interface Review {
   id: number;
@@ -21,7 +23,8 @@ interface Review {
 
 interface ReviewsProps {
   reviews: Review[];
-  config: { social: { tripadvisor: string; google: string; }; };
+  // On garde un type souple ici pour accepter la structure réelle de siteConfig
+  config: any;
   content?: { pageHeaders?: { reviews?: { badge?: string; title?: string; subtitle?: string; }; }; };
 }
 
@@ -281,8 +284,26 @@ function ReviewStats({ reviews }: { reviews: Review[] }) {
 }
 
 export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
+  const { t } = useTranslation();
   const sliderRef = useRef<Slider>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Traduire automatiquement les reviews
+  const { translatedContent: translatedReviews, isLoading: isTranslatingReviews } = useTranslatedContent(
+    reviews,
+    ['text', 'tour']
+  );
+
+  // Traduire automatiquement les headers de la section
+  const { translatedContent: translatedReviewsHeader } = useTranslatedContent(
+    content?.pageHeaders?.reviews ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const displayReviews = (translatedReviews || reviews) as Review[];
+  const header = (translatedReviewsHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content?.pageHeaders?.reviews
+    || {};
 
   const settings = {
     dots: true,
@@ -324,26 +345,26 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
             whileHover={{ scale: 1.05 }}
           >
             <span className="bg-gradient-to-r from-[#A68966] to-[#4B3935] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.3em]">
-              {content.pageHeaders?.reviews?.badge || 'Témoignages'}
+              {header.badge || t('sections.reviews')}
             </span>
           </motion.div>
           <h2 className="text-6xl font-black text-[#4B3935] mb-6 tracking-tight">
-            {content.pageHeaders?.reviews?.title || 'Expériences Sirius'}
+            {header.title || t('sections.reviews')}
           </h2>
           <p className="text-xl text-[#4B3935]/60 max-w-2xl mx-auto font-medium">
-            {content.pageHeaders?.reviews?.subtitle || 'Chaque aventure est une histoire que nous écrivons ensemble.'}
+            {header.subtitle || t('sections.reviewsSubtitle')}
           </p>
         </motion.div>
 
         {/* Statistiques */}
-        <ReviewStats reviews={reviews} />
+        <ReviewStats reviews={displayReviews} />
 
         {/* Carousel */}
         <div className="mt-20">
           {/* Desktop/Tablet Slider */}
           <div className="hidden md:block">
             <Slider ref={sliderRef} {...settings} className="reviews-slider overflow-visible">
-              {reviews.map((review, idx) => (
+              {displayReviews.map((review, idx) => (
                 <ReviewCard key={review.id} review={review} index={idx} />
               ))}
             </Slider>
@@ -393,12 +414,20 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
 
           {/* Mobile Vertical Stack */}
           <div className="md:hidden flex flex-col gap-8">
-            {reviews.map((review, idx) => (
+            {displayReviews.map((review, idx) => (
               <div key={review.id} className="h-full">
                 <ReviewCard review={review} index={idx} />
               </div>
             ))}
           </div>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingReviews && (
+            <div className="flex items-center justify-center gap-2 mt-8 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </div>
       </div>
 

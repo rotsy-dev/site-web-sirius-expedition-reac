@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, ChevronUp, X, Clock, MapPin, Users, Calendar, Check, CheckCircle, XCircle, Car, TrendingUp } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { SITE_SECTIONS } from "../../constants"
 
 // Types compatibles avec Firebase
 export interface TourSpecialty {
@@ -65,9 +67,17 @@ export const getDetailedTour = (base: TourSpecialty): ExtendedTourSpecialty => {
 };
 
 // Modal Component
-export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onClose: () => void }) {
+export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: ExtendedTourSpecialty; onClose: () => void; onNavigateToQuote?: () => void }) {
+  const { t } = useTranslation();
   const [openDay, setOpenDay] = useState<number | null>(0);
   const [isItineraryOpen, setIsItineraryOpen] = useState(true);
+
+  const handleAskQuote = () => {
+    onClose();
+    if (onNavigateToQuote) {
+      onNavigateToQuote();
+    }
+  };
 
   return (
     <motion.div
@@ -104,11 +114,11 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
               alt={tour.title} 
               className="w-full h-full object-cover" 
             />
-            {tour.isBestSeller && (
-              <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2">
-                🏆 Best Seller
-              </div>
-            )}
+                {tour.isBestSeller && (
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2">
+                    🏆 {t('tourSpecialties.bestSeller')}
+                  </div>
+                )}
           </div>
 
           {/* Content Column */}
@@ -130,28 +140,28 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 text-gray-400 mb-1">
                   <Clock size={16} /> 
-                  <span className="text-[10px] uppercase font-bold tracking-wider">Durée</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.duration')}</span>
                 </div>
                 <span className="font-bold text-[#332C26] text-sm">{tour.duration}</span>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 text-gray-400 mb-1">
                   <MapPin size={16} /> 
-                  <span className="text-[10px] uppercase font-bold tracking-wider">Localisation</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.location')}</span>
                 </div>
                 <span className="font-bold text-[#332C26] text-sm">{tour.location}</span>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 text-gray-400 mb-1">
                   <Users size={16} /> 
-                  <span className="text-[10px] uppercase font-bold tracking-wider">Groupe</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.group')}</span>
                 </div>
                 <span className="font-bold text-[#332C26] text-sm">{tour.groupSize || '4-8 pers.'}</span>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 text-gray-400 mb-1">
                   <Car size={16} /> 
-                  <span className="text-[10px] uppercase font-bold tracking-wider">Transport</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.transport')}</span>
                 </div>
                 <span className="font-bold text-[#332C26] text-sm">{tour.transport || '4x4'}</span>
               </div>
@@ -162,7 +172,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
               <div className="mb-10 bg-gradient-to-br from-[#D4A574]/10 to-[#F0E7D5]/30 p-6 rounded-2xl border border-[#D4A574]/20">
                 <h3 className="text-xl font-bold text-[#332C26] mb-3 flex items-center gap-2">
                   <TrendingUp size={20} className="text-[#D4A574]" />
-                  Pourquoi nous choisir ?
+                  {t('tourSpecialties.modal.whyUs')}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">{tour.whyUs}</p>
               </div>
@@ -171,7 +181,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
             {/* Highlights */}
             {tour.highlights && tour.highlights.length > 0 && (
               <div className="mb-10">
-                <h3 className="text-xl font-bold text-[#332C26] mb-6">Points forts</h3>
+                <h3 className="text-xl font-bold text-[#332C26] mb-6">{t('tourSpecialties.modal.highlights')}</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {tour.highlights.map((point, i) => (
                     <div key={i} className="flex items-start gap-3">
@@ -192,7 +202,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                   className="flex items-center justify-between mb-6 cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => setIsItineraryOpen(!isItineraryOpen)}
                 >
-                  <h3 className="text-xl font-bold text-[#332C26]">Itinéraire jour par jour</h3>
+                  <h3 className="text-xl font-bold text-[#332C26]">{t('tourSpecialties.modal.itinerary')}</h3>
                   <motion.div
                     animate={{ rotate: isItineraryOpen ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -250,7 +260,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
               <div className="grid grid-cols-1 gap-8 mb-8 border-t border-gray-100 pt-8">
                 {tour.included && tour.included.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-bold text-[#332C26] mb-4">Inclus</h3>
+                    <h3 className="text-lg font-bold text-[#332C26] mb-4">{t('tourSpecialties.modal.included')}</h3>
                     <ul className="space-y-3">
                       {tour.included.map((item, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
@@ -263,7 +273,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                 )}
                 {tour.excluded && tour.excluded.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-bold text-[#332C26] mb-4">Non inclus</h3>
+                    <h3 className="text-lg font-bold text-[#332C26] mb-4">{t('tourSpecialties.modal.excluded')}</h3>
                     <ul className="space-y-3">
                       {tour.excluded.map((item, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
@@ -292,7 +302,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                 />
                 {tour.isBestSeller && (
                   <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-xl flex items-center gap-2">
-                    🏆 Best Seller
+                    🏆 {t('tourSpecialties.bestSeller')}
                   </div>
                 )}
               </div>
@@ -309,7 +319,7 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
                     </div>
                   </div>
                   {tour.reviews > 0 && (
-                    <p className="text-sm text-gray-600">{tour.reviews} avis</p>
+                    <p className="text-sm text-gray-600">{tour.reviews} {t('tourSpecialties.modal.reviews')}</p>
                   )}
                 </div>
               )}
@@ -320,15 +330,20 @@ export function TourModal({ tour, onClose }: { tour: ExtendedTourSpecialty; onCl
         {/* Footer sticky avec prix */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 md:px-10 flex items-center justify-between rounded-b-[2rem] z-20">
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">À partir de</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('tourSpecialties.modal.from')}</p>
             <p className="text-3xl font-black text-[#332C26]">
               {tour.price} 
-              <span className="text-sm font-normal text-gray-500"> / personne</span>
+              <span className="text-sm font-normal text-gray-500"> {t('tourSpecialties.modal.perPerson')}</span>
             </p>
           </div>
-          <button className="bg-gradient-to-r from-[#8B7355] to-[#6B5744] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:shadow-xl transition-all shadow-lg">
-            Demander un devis
-          </button>
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleAskQuote}
+            className="bg-gradient-to-r from-[#8B7355] to-[#6B5744] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:shadow-xl transition-all shadow-lg"
+          >
+            {t('tourSpecialties.modal.askQuote')}
+          </motion.button>
         </div>
       </motion.div>
     </motion.div>

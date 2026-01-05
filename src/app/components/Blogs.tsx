@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
-import { SectionHeader } from '../../components/common/SectionHeader';
+import { useTranslatedContent } from '../../hooks/useTranslatedContent';
+import { useTranslation } from 'react-i18next';
 
 interface BlogProps {
     content?: {
@@ -21,10 +21,41 @@ interface BlogProps {
 const HERO_IMAGE = "https://images.unsplash.com/photo-1659944984855-776187144baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW9iYWIlMjB0cmVlcyUyME1hZGFnYXNjYXIlMjBzdW5zZXR8ZW58MXx8fHwxNzY0NTkxODc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
 export function Blogs({ content = {} }: BlogProps) {
+    const { t } = useTranslation();
     const [posts, setPosts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const [selectedPost, setSelectedPost] = useState<any | null>(null);
-    const [remoteContent, setRemoteContent] = useState<any>(content);
+    const [_remoteContent, setRemoteContent] = useState<any>(content);
+    const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+
+    // Préchargement de l'image hero
+    useEffect(() => {
+        if (HERO_IMAGE) {
+            const img = new Image();
+            img.onload = () => setHeroImageLoaded(true);
+            img.onerror = () => setHeroImageLoaded(true);
+            img.src = HERO_IMAGE;
+        } else {
+            setHeroImageLoaded(true);
+        }
+    }, []);
+
+    // Traduire automatiquement les posts de blog
+    const { translatedContent: translatedPosts, isLoading: isTranslatingPosts } = useTranslatedContent(
+        posts,
+        ['title', 'excerpt', 'content', 'author']
+    );
+
+    // Traduire automatiquement les headers de la section
+    const { translatedContent: translatedBlogHeader } = useTranslatedContent(
+        content?.pageHeaders?.blog ?? null,
+        ['badge', 'title', 'subtitle']
+    );
+
+    const displayPosts = (translatedPosts || posts) as any[];
+    const header = (translatedBlogHeader as { badge?: string; title?: string; subtitle?: string } | null)
+        || content?.pageHeaders?.blog
+        || {};
 
     useEffect(() => {
         const load = async () => {
@@ -60,7 +91,7 @@ export function Blogs({ content = {} }: BlogProps) {
         window.scrollTo({ top: 0, behavior: 'auto' });
     }, [selectedPost]);
 
-    const featuredPost = posts[0];
+    const featuredPost = displayPosts[0];
 
     return (
         <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 min-h-screen font-sans">
@@ -76,14 +107,27 @@ export function Blogs({ content = {} }: BlogProps) {
                             <motion.div
                                 initial={{ scale: 1.1 }}
                                 animate={{ scale: 1 }}
-                                transition={{ duration: 1.5 }}
-                                className="absolute inset-0"
+                                transition={{ duration: 1.2, ease: "easeOut" }}
+                                className="absolute inset-0 overflow-hidden"
                             >
-                                <img
-                                    src={HERO_IMAGE}
-                                    alt="Madagascar Blog"
-                                    className="w-full h-full object-cover"
-                                />
+                                {HERO_IMAGE ? (
+                                    <>
+                                        <img
+                                            src={HERO_IMAGE}
+                                            alt="Madagascar Blog"
+                                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                                                heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                                            }`}
+                                            loading="eager"
+                                            fetchPriority="high"
+                                        />
+                                        {!heroImageLoaded && (
+                                            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
                             </motion.div>
 
@@ -95,7 +139,7 @@ export function Blogs({ content = {} }: BlogProps) {
                                     className="mb-4"
                                 >
                                     <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-                                        {content?.pageHeaders?.blog?.badge || 'Latest Story'}
+                                        {header.badge || t('sections.blogs')}
                                     </span>
                                 </motion.div>
 
@@ -105,7 +149,7 @@ export function Blogs({ content = {} }: BlogProps) {
                                     transition={{ duration: 0.6, delay: 0.3 }}
                                     className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-black text-white mb-4 tracking-tight"
                                 >
-                                    {content?.pageHeaders?.blog?.title || 'Our Blog'}
+                                    {header.title || t('sections.blogs')}
                                 </motion.h1>
 
                                 <motion.p
@@ -114,8 +158,16 @@ export function Blogs({ content = {} }: BlogProps) {
                                     transition={{ duration: 0.6, delay: 0.4 }}
                                     className="text-sm md:text-base lg:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
                                 >
-                                    {content?.pageHeaders?.blog?.subtitle || 'Expert insights and stories'}
+                                    {header.subtitle || t('sections.blogsSubtitle')}
                                 </motion.p>
+                                
+                                {/* Indicateur de chargement de traduction */}
+                                {isTranslatingPosts && (
+                                    <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span>{t('common.loading')}</span>
+                                    </div>
+                                )}
                             </div>
                         </section>
 
@@ -165,7 +217,7 @@ export function Blogs({ content = {} }: BlogProps) {
                                 )}
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                    {posts.slice(1).map((post, idx) => (
+                                    {displayPosts.slice(1).map((post, idx) => (
                                         <motion.article
                                             key={post.id}
                                             initial={{ y: 40, opacity: 0 }}

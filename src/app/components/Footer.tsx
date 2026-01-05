@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { motion } from 'framer-motion'
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -15,9 +15,8 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 
   </svg>
 )
-import { Facebook, Youtube, Mail, Phone, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
+import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import ScrollReveal from 'scrollreveal'
 
 interface FooterProps {
   setActiveSection: (section: string) => void;
@@ -49,98 +48,169 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   const currentYear = new Date().getFullYear()
   const { t } = useTranslation()
 
-  React.useEffect(() => {
-    if (typeof ScrollReveal !== "undefined") {
-      const sr = ScrollReveal({
-        reset: false,
-        distance: "60px",
-        duration: 800,
-        delay: 0,
-        easing: "cubic-bezier(0.5, 0, 0, 1)",
-        mobile: true,
-      });
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      },
+    },
+  };
 
-      sr.reveal(".section-gauche", {
-        origin: "left",
-        distance: "50px",
-        delay: 300,
-      });
+  const itemVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
 
-      sr.reveal(".section-bas", {
-        origin: "bottom",
-        distance: "50px",
-        delay: 300,
-      });
-    }
-  }, []);
+  const bottomVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
+  const linkVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.4,
+      },
+    }),
+  };
+
+  const socialVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: i * 0.08,
+        duration: 0.4,
+        type: "spring" as const,
+        stiffness: 200,
+        damping: 15,
+      },
+    }),
+  };
 
   const pageLinks = [
-    { id: 'home', label: t('Home') },
-    { id: 'tours', label: t('Tours') },
-    { id: 'blogs', label: t('Blog') },
-    { id: 'about', label: t('About') },
+    { id: 'home', label: t('nav.home') },
+    { id: 'tours', label: t('nav.tours') },
+    { id: 'blogs', label: t('nav.blog') },
+    { id: 'about', label: t('nav.about') },
   ]
 
   const corporateLinks = [
-    { label: t('Legal Notice') || 'Mentions légales', href: '#' },
-    { label: t('Terms Of Use') || "Conditions d'utilisation", href: '#' },
-    { label: t('Privacy Policy') || 'Politique de confidentialité', href: '#' },
-    { label: t('Cookie Management') || 'Gestion des cookies', href: '#' },
+    { label: t('footer.legalNotice'), href: '#' },
+    { label: t('footer.termsOfUse'), href: '#' },
+    { label: t('footer.privacyPolicy'), href: '#' },
+    { label: t('footer.cookieManagement'), href: '#' },
   ]
 
   return (
     <footer className="relative bg-[#443C34] text-white overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 section-gauche">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16"
+        >
           {/* Section gauche */}
-          <div className="space-y-8">
+          <motion.div variants={itemVariants} className="space-y-8">
             {/* Logo */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">{t('Subtitle')}</p>
-            </div>
+              <p className="text-sm text-white/60 mt-1">{t('footer.description')}</p>
+            </motion.div>
 
-            <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md">
-              {t('Description')}
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md"
+            >
+              {t('footer.description')}
+            </motion.p>
 
             {/* Newsletter */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-md">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-md"
+            >
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#F5E6D3]" />
-                {t('News letter')}
+                {t('footer.newsletter')}
               </h3>
-              <p className="text-white/60 text-sm mb-4">{t('News letter Text')}</p>
+              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
               <div className="flex gap-3">
-                <input
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
                   type="email"
-                  placeholder={t('Email Placeholder')}
+                  placeholder={t('footer.emailPlaceholder')}
                   className="flex-1 bg-white/5 border border-white/10 rounded-xl  md:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white text-center"
                 />
-                <button className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]"
+                >
                   <ArrowUpRight className="w-4 h-4" />
-                </button>
+                </motion.button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Section navigation */}
-          <div className="grid grid-cols-2 gap-8 lg:gap-12">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
-                {t('Quick Links')}
+                {t('footer.quickLinks')}
               </h3>
               <nav className="space-y-4">
-                {pageLinks.map((link) => (
-                  <button
+                {pageLinks.map((link, i) => (
+                  <motion.button
                     key={link.id}
+                    custom={i}
+                    variants={linkVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    whileHover={{ x: 5, scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveSection(link.id)}
-                    className="block text-white/80 hover:text-white hover:translate-x-1 transition-all duration-200 text-left"
+                    className="block text-white/80 hover:text-white transition-all duration-200 text-left"
                   >
                     {link.label}
-                  </button>
+                  </motion.button>
                 ))}
               </nav>
             </div>
@@ -152,93 +222,107 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </h3>
               <nav className="space-y-4 mb-8">
                 {corporateLinks.map((link, idx) => (
-                  <a
+                  <motion.a
                     key={idx}
+                    custom={idx}
+                    variants={linkVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    whileHover={{ x: 5, scale: 1.05 }}
                     href={link.href}
-                    className="block text-white/80 hover:text-white hover:translate-x-1 transition-all duration-200"
+                    className="block text-white/80 hover:text-white transition-all duration-200"
                   >
                     {link.label}
-                  </a>
+                  </motion.a>
                 ))}
               </nav>
 
               {/* Réseaux sociaux */}
               <div>
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
-                  {t('Follow Us')}
+                  {t('footer.followUs')}
                 </h3>
                 <div className="grid grid-cols-3 sm:flex gap-3">
-                  <a
-                    href={config.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                  >
-                    <Facebook className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                  </a>
-                  <a
-                    href={config.social.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                  >
-                    <Youtube className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                  </a>
-                  <a
-                    href="#"
-                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                  >
-                    <Linkedin className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                  </a>
-
-                  <a
-                    href={config.social.instagram || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                  >
-                    <Instagram className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                  </a>
-
-                  <a
-                    href={config.social.tiktok || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
-                  >
-                    <TikTokIcon className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
-                  </a>
-
-
+                  {[
+                    { href: config.social.facebook, icon: Facebook, index: 0 },
+                    { href: config.social.youtube, icon: Youtube, index: 1 },
+                    { href: '#', icon: Linkedin, index: 2 },
+                    { href: config.social.instagram || '#', icon: Instagram, index: 3 },
+                    { href: config.social.tiktok || '#', icon: TikTokIcon, index: 4 },
+                  ].map(({ href, icon: Icon, index }) => (
+                    <motion.a
+                      key={index}
+                      custom={index}
+                      variants={socialVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true }}
+                      whileHover={{ scale: 1.15, rotate: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      href={href}
+                      target={href !== '#' ? "_blank" : undefined}
+                      rel={href !== '#' ? "noopener noreferrer" : undefined}
+                      className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                    >
+                      <Icon className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                    </motion.a>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Séparateur */}
-        <div className="h-px bg-white/10 my-10"></div>
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="h-px bg-white/10 my-10 origin-left"
+        />
 
         {/* Copyright */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 section-bas">
+        <motion.div
+          variants={bottomVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="flex flex-col md:flex-row items-center justify-between gap-6"
+        >
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. {t('Rights')}
+            © {currentYear} {config.siteName}. {t('footer.rights')}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/70 text-sm">
-            <a
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/70 text-sm"
+          >
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               href={`mailto:${config.contact.email}`}
               className="flex items-center gap-2 hover:text-white transition-colors"
             >
               <Mail className="w-4 h-4" />
               <span>{config.contact.email}</span>
-            </a>
-            <div className="flex items-center gap-2">
+            </motion.a>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex items-center gap-2"
+            >
               <MapPin className="w-4 h-4" />
               <span>{config.contact.address}</span>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </footer>
   )

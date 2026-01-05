@@ -50,6 +50,11 @@ const defaultContent = {
             title: 'About Sirius Expedition',
             subtitle: 'Your trusted partner for unforgettable Madagascar adventures'
         },
+        quote: {
+            badge: 'Ask a quote',
+            title: 'Get your personalized quote',
+            subtitle: 'Share your travel dates and preferences, we take care of the rest.'
+        },
         contact: {
             badge: 'Get In Touch',
             title: 'Contact Us',
@@ -79,6 +84,7 @@ const defaultContent = {
     blogPosts: [],
     faqs: [],
     videoGallery: [],
+    imageGallery: [],
     siteConfig: {
         siteName: 'Sirius Expedition',
         tagline: 'Aventures authentiques à Madagascar',
@@ -135,7 +141,7 @@ export function useContentManager() {
             try {
                 const collections = [
                     'heroSlides', 'bestSellers', 'tourSpecialties',
-                    'reviews', 'blogPosts', 'faqs', 'videoGallery'
+                    'reviews', 'blogPosts', 'faqs', 'videoGallery', 'imageGallery'
                 ];
 
                 const fetchedContent: any = { ...defaultContent };
@@ -152,7 +158,13 @@ export function useContentManager() {
 
                 // Traitement des collections
                 collections.forEach((coll, index) => {
-                    fetchedContent[coll] = collectionSnapshots[index].docs.map(d => d.data());
+                    const docs = collectionSnapshots[index].docs.map(d => d.data());
+                    fetchedContent[coll] = docs;
+                    // Debug pour imageGallery
+                    if (coll === 'imageGallery') {
+                        console.log('useContentManager - imageGallery chargé:', docs);
+                        console.log('useContentManager - nombre d\'images:', docs.length);
+                    }
                 });
 
                 // ✅ Page Headers
@@ -227,7 +239,7 @@ export function useContentManager() {
 
         try {
             const batch = writeBatch(db);
-            const collections = ['heroSlides', 'bestSellers', 'tourSpecialties', 'reviews', 'blogPosts', 'faqs', 'videoGallery'];
+            const collections = ['heroSlides', 'bestSellers', 'tourSpecialties', 'reviews', 'blogPosts', 'faqs', 'videoGallery', 'imageGallery'];
 
             for (const coll of collections) {
                 const snap = await getDocs(collection(db, coll));

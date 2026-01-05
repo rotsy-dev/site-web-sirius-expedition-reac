@@ -1,49 +1,17 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle, Calendar, Users, Briefcase, Clock, Building, Linkedin, CheckSquare, Check, Instagram, Twitter } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle, Linkedin, Check, Instagram, Twitter } from 'lucide-react';
 import { motion } from "framer-motion";
 import ScrollReveal from 'scrollreveal';
 import emailjs from '@emailjs/browser';
-import { db } from '../../firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
+import { useTranslatedContent } from '../../hooks/useTranslatedContent';
+import { Loader2 } from 'lucide-react';
 
-interface TourDate {
-  id: string;
-  date: string;
-  time: string;
-}
-
-interface Tour {
-  id: string;
-  name: string;
-  description: string;
-  dates: TourDate[];
-}
 
 interface ContactProps {
-  config: {
-    contact: {
-      email: string;
-      phone: string;
-      address: string;
-    };
-    social: {
-      facebook: string;
-      youtube: string;
-      tripadvisor: string;
-      google: string;
-      instagram: string;
-      twitter: string;
-      linkedin: string;
-      pinterest: string;
-      tiktok: string;
-    };
-    services: {
-      hosting: string[];
-      domain: string;
-      email: string;
-    };
-  };
+  // On accepte la structure réelle de siteConfig pour rester compatible
+  config: any;
   content?: {
     pageHeaders?: {
       contact?: {
@@ -58,24 +26,9 @@ interface ContactProps {
 interface ExtendedContactFormData {
   name: string;
   email: string;
-  phone: string;
-  country: string;
   message: string;
-  interestedTour?: string;
-  travelDate?: string;
-  travelTime?: string;
-  participants?: string;
-  contactInfo?: string;
-  physicalAddress?: string;
-  alternatePhone?: string;
-  professionalEmail?: string;
-  preferredHours?: string;
 }
 
-const COUNTRIES = [
-  'Madagascar', 'France', 'United States', 'Canada', 'United Kingdom',
-  'Germany', 'Italy', 'Spain', 'Belgium', 'Switzerland', 'Other'
-];
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1763477080227-6e591f5017ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxNYWRhZ2FzY2FyJTIwbGFuZHNjYXBlJTIwYWR2ZW50dXJlfGVufDF8fHx8MTc2NDU5MTg4MHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
@@ -86,49 +39,40 @@ const EMAILJS_CONFIG = {
 };
 
 export function Contact({ config, content = {} }: ContactProps) {
+  const { t } = useTranslation();
+  
+  // Traduire automatiquement les headers de la section contact
+  const { translatedContent: translatedContactHeader, isLoading: isTranslatingHeader } = useTranslatedContent(
+    content?.pageHeaders?.contact ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const header = (translatedContactHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content?.pageHeaders?.contact
+    || {};
+
   const [formData, setFormData] = useState<ExtendedContactFormData>({
-    name: '', email: '', phone: '', country: '', message: '',
-    interestedTour: '', travelDate: '', travelTime: '', participants: '', contactInfo: '',
-    physicalAddress: '', alternatePhone: '', professionalEmail: '', preferredHours: ''
+    name: '', email: '', message: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showOptionalFields, setShowOptionalFields] = useState(false);
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [preferredHours, setPreferredHours] = useState<string[]>([]);
-  const [availableDates, setAvailableDates] = useState<TourDate[]>([]);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+
+  // Préchargement de l'image hero
+  useEffect(() => {
+    if (HERO_IMAGE) {
+      const img = new Image();
+      img.onload = () => setHeroImageLoaded(true);
+      img.onerror = () => setHeroImageLoaded(true);
+      img.src = HERO_IMAGE;
+    } else {
+      setHeroImageLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchConfig = async () => {
-      setIsLoadingConfig(true);
-      try {
-        const configDoc = doc(db, 'siteConfig', 'main');
-        const docSnap = await getDoc(configDoc);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.tours && Array.isArray(data.tours)) {
-            setTours(data.tours);
-          }
-          if (data.preferredContactHours && Array.isArray(data.preferredContactHours)) {
-            setPreferredHours(data.preferredContactHours);
-          } else {
-            setPreferredHours(['08:00 - 10:00', '10:00 - 12:00', '14:00 - 16:00', '16:00 - 18:00', 'Flexible']);
-          }
-        }
-      } catch (err) {
-        console.error('Erreur chargement configuration:', err);
-        setPreferredHours(['08:00 - 10:00', '10:00 - 12:00', '14:00 - 16:00', '16:00 - 18:00', 'Flexible']);
-      } finally {
-        setIsLoadingConfig(false);
-      }
-    };
-
-    fetchConfig();
-
     if (typeof ScrollReveal !== 'undefined') {
       const sr = ScrollReveal({
         reset: false, distance: '40px', duration: 800, delay: 0,
@@ -139,33 +83,14 @@ export function Contact({ config, content = {} }: ContactProps) {
     }
   }, []);
 
-  useEffect(() => {
-    if (formData.interestedTour) {
-      const selectedTour = tours.find(tour => tour.id === formData.interestedTour);
-      if (selectedTour && selectedTour.dates) {
-        const validDates = selectedTour.dates.filter(date =>
-          date.date && date.time && date.date.trim() !== '' && date.time.trim() !== ''
-        );
-        setAvailableDates(validDates);
-        setFormData(prev => ({ ...prev, travelDate: '', travelTime: '' }));
-      } else {
-        setAvailableDates([]);
-      }
-    } else {
-      setAvailableDates([]);
-    }
-  }, [formData.interestedTour, tours]);
-
   const validateForm = (): string[] => {
     const newErrors: string[] = [];
-    if (!formData.name.trim()) newErrors.push('Full name is required');
-    if (!formData.email.trim()) newErrors.push('Email is required');
+    if (!formData.name.trim()) newErrors.push(t('contact.fullNameRequired'));
+    if (!formData.email.trim()) newErrors.push(t('contact.emailRequired'));
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.push('Email is not valid');
+      newErrors.push(t('contact.emailInvalid'));
     }
-    if (!formData.phone.trim()) newErrors.push('Phone number is required');
-    if (!formData.country) newErrors.push('Country is required');
-    if (!formData.message.trim()) newErrors.push('Message is required');
+    if (!formData.message.trim()) newErrors.push(t('contact.messageRequired'));
     return newErrors;
   };
 
@@ -182,41 +107,14 @@ export function Contact({ config, content = {} }: ContactProps) {
     }
 
     try {
-      const selectedTour = tours.find(t => t.id === formData.interestedTour);
-      const tourName = selectedTour ? selectedTour.name : 'Not specified';
-
-      let travelDateTime = 'Not specified';
-      if (formData.travelDate && formData.travelTime) {
-        const selectedDate = availableDates.find(date =>
-          date.id === `${formData.travelDate}_${formData.travelTime}`
-        );
-        if (selectedDate) {
-          const dateFormatted = new Date(selectedDate.date).toLocaleDateString('en-US', {
-            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-          });
-          travelDateTime = `${dateFormatted} at ${selectedDate.time}`;
-        }
-      }
-
       const templateParams = {
         to_email: config.contact.email,
         name: formData.name,
         reply_to: formData.email,
-        phone: formData.phone,
-        country: formData.country,
         message: formData.message,
         time: new Date().toLocaleString('fr-FR', {
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
         }),
-        interested_tour: tourName,
-        tour_id: formData.interestedTour || 'Not specified',
-        travel_date_time: travelDateTime,
-        participants: formData.participants || 'Not specified',
-        preferred_hours: formData.preferredHours || 'Not specified',
-        physical_address: formData.physicalAddress || 'Not specified',
-        alternate_phone: formData.alternatePhone || 'Not specified',
-        professional_email: formData.professionalEmail || 'Not specified',
-        additional_info: formData.contactInfo || 'None',
       };
 
       const response = await emailjs.send(
@@ -232,16 +130,13 @@ export function Contact({ config, content = {} }: ContactProps) {
       setTimeout(() => {
         setSubmitted(false);
         setFormData({
-          name: '', email: '', phone: '', country: '', message: '',
-          interestedTour: '', travelDate: '', travelTime: '', participants: '', contactInfo: '',
-          physicalAddress: '', alternatePhone: '', professionalEmail: '', preferredHours: ''
+          name: '', email: '', message: ''
         });
-        setShowOptionalFields(false);
       }, 3000);
 
     } catch (error: any) {
       console.error('Email sending failed:', error);
-      setErrors(['Failed to send message. Please try again or contact us directly at ' + config.contact.email]);
+      setErrors([t('contact.failedToSend') + ' ' + config.contact.email]);
     } finally {
       setIsSubmitting(false);
     }
@@ -253,29 +148,6 @@ export function Contact({ config, content = {} }: ContactProps) {
     if (errors.length > 0) setErrors([]);
   };
 
-  const handleDateSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value) {
-      const [dateId, timeId] = value.split('_');
-      const selectedDate = availableDates.find(date => date.id === `${dateId}_${timeId}`);
-      if (selectedDate) {
-        setFormData(prev => ({ ...prev, travelDate: dateId, travelTime: timeId }));
-      }
-    } else {
-      setFormData(prev => ({ ...prev, travelDate: '', travelTime: '' }));
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
@@ -284,14 +156,27 @@ export function Contact({ config, content = {} }: ContactProps) {
         <motion.div
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0"
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0 overflow-hidden"
         >
-          <img
-            src={HERO_IMAGE}
-            alt="Contact Sirius Expedition"
-            className="w-full h-full object-cover"
-          />
+          {HERO_IMAGE ? (
+            <>
+              <img
+                src={HERO_IMAGE}
+                alt="Contact Sirius Expedition"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                  heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="eager"
+                fetchPriority="high"
+              />
+              {!heroImageLoaded && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
         </motion.div>
 
@@ -303,7 +188,14 @@ export function Contact({ config, content = {} }: ContactProps) {
             className="mb-4"
           >
             <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-              {content?.pageHeaders?.contact?.badge || 'CONTACT US'}
+              {isTranslatingHeader ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {t('contact.title')}
+                </span>
+              ) : (
+                header?.badge || t('contact.title')
+              )}
             </span>
           </motion.div>
 
@@ -313,7 +205,14 @@ export function Contact({ config, content = {} }: ContactProps) {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
           >
-            {content?.pageHeaders?.contact?.title || 'Get In Touch'}
+            {isTranslatingHeader ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('contact.title')}
+              </span>
+            ) : (
+              header?.title || t('contact.title')
+            )}
           </motion.h1>
 
           <motion.p
@@ -322,7 +221,14 @@ export function Contact({ config, content = {} }: ContactProps) {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
           >
-            {content?.pageHeaders?.contact?.subtitle || 'We are here to assist you with any inquiries or bookings'}
+            {isTranslatingHeader ? (
+              <span className="flex items-center gap-2 justify-center">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('contact.subtitle')}
+              </span>
+            ) : (
+              header?.subtitle || t('contact.subtitle')
+            )}
           </motion.p>
         </div>
       </section>
@@ -332,9 +238,9 @@ export function Contact({ config, content = {} }: ContactProps) {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-12">
           {/* Contact Form - Thème Mocha & Vanilla */}
           <div className="lg:col-span-3 bg-white p-8 md:p-10 rounded-3xl border-4 border-[#D4A574] shadow-2xl reveal-left">
-            <h3 className="text-4xl font-bold mb-2 text-[#443C34]">Send Us a Message</h3>
+            <h3 className="text-4xl font-bold mb-2 text-[#443C34]">{t('contact.sendUsMessage')}</h3>
             <p className="text-[#8B7355] mb-8 font-medium">
-              We'll get back to you within 24 hours
+              {t('contact.getBackWithin24')}
             </p>
 
             <div className="space-y-6">
@@ -346,7 +252,7 @@ export function Contact({ config, content = {} }: ContactProps) {
                 >
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-red-600 mb-1">Validation errors:</p>
+                    <p className="text-sm font-medium text-red-600 mb-1">{t('contact.validationErrors')}</p>
                     <ul className="text-sm text-red-600 space-y-1">
                       {errors.map((error, index) => (
                         <li key={index}>• {error}</li>
@@ -357,78 +263,41 @@ export function Contact({ config, content = {} }: ContactProps) {
               )}
 
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Full Name <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="John Doe"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Email Address <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="john@example.com"
-                    />
-                  </div>
+                <div>
+                  <label htmlFor="name" className="block mb-2 text-sm font-bold text-[#443C34]">
+                    {t('contact.name')} <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
+                    placeholder="John Doe"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="phone" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Phone Number <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="+261 34 00 000 00"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="country" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Country <span className="text-red-600">*</span>
-                    </label>
-                    <select
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                    >
-                      <option value="">Select a country</option>
-                      {COUNTRIES.map(country => (
-                        <option key={country} value={country}>{country}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label htmlFor="email" className="block mb-2 text-sm font-bold text-[#443C34]">
+                    {t('contact.email')} <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
+                    placeholder="john@example.com"
+                  />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block mb-2 text-sm font-bold text-[#443C34]">
-                    Your Message <span className="text-red-600">*</span>
+                    {t('contact.message')} <span className="text-red-600">*</span>
                   </label>
                   <textarea
                     id="message"
@@ -438,186 +307,10 @@ export function Contact({ config, content = {} }: ContactProps) {
                     required
                     rows={6}
                     className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all resize-none text-[#443C34] placeholder:text-[#8B7355]/50"
-                    placeholder="Tell us about your dream Madagascar adventure..."
+                    placeholder={t('contact.messagePlaceholder')}
                   />
                 </div>
               </div>
-
-              <div className="pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowOptionalFields(!showOptionalFields)}
-                  className="text-[#443C34] hover:text-[#8B7355] font-bold text-sm flex items-center gap-2 transition-colors"
-                >
-                  {showOptionalFields ? '▼' : '▶'} Additional Information (optional)
-                </button>
-              </div>
-
-              {showOptionalFields && (
-                <div className="space-y-6 pt-4 border-t-2 border-[#D4A574]/20">
-                  <h4 className="text-lg font-bold text-[#443C34] flex items-center gap-2">
-                    <span className="bg-[#D4A574] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-                    Additional Information
-                  </h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="interestedTour" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Briefcase size={16} className="text-[#D4A574]" />
-                        Interested Tour
-                      </label>
-                      {isLoadingConfig ? (
-                        <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355] flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                          Loading tours...
-                        </div>
-                      ) : tours.length === 0 ? (
-                        <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355]">
-                          No tours available at the moment.
-                        </div>
-                      ) : (
-                        <select
-                          id="interestedTour"
-                          name="interestedTour"
-                          value={formData.interestedTour}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                        >
-                          <option value="">Select a tour</option>
-                          {tours.map(tour => (
-                            <option key={tour.id} value={tour.id}>
-                              {tour.name}
-                              {tour.dates && tour.dates.length > 0 && ` (${tour.dates.length} dates available)`}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                      {formData.interestedTour && (
-                        <p className="mt-2 text-xs text-[#8B7355]">
-                          {tours.find(t => t.id === formData.interestedTour)?.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {formData.interestedTour && (
-                      <div>
-                        <label htmlFor="travelDate" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                          <Calendar size={16} className="text-[#D4A574]" />
-                          Preferred Travel Date & Time
-                        </label>
-                        {availableDates.length === 0 ? (
-                          <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355]">
-                            No dates available for this tour
-                          </div>
-                        ) : (
-                          <select
-                            id="travelDate"
-                            value={formData.travelDate && formData.travelTime ? `${formData.travelDate}_${formData.travelTime}` : ''}
-                            onChange={handleDateSelection}
-                            className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                          >
-                            <option value="">Select a date and time</option>
-                            {availableDates
-                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                              .map(dateObj => {
-                                const displayDate = formatDate(dateObj.date);
-                                return (
-                                  <option key={dateObj.id} value={dateObj.id}>
-                                    {displayDate} at {dateObj.time}
-                                  </option>
-                                );
-                              })}
-                          </select>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="participants" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Users size={16} className="text-[#D4A574]" />
-                        Number of Participants
-                      </label>
-                      <input
-                        type="number"
-                        id="participants"
-                        name="participants"
-                        value={formData.participants}
-                        onChange={handleChange}
-                        min="1"
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="2"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="physicalAddress" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                      <Building size={16} className="text-[#D4A574]" />
-                      Physical Address
-                    </label>
-                    <input
-                      type="text"
-                      id="physicalAddress"
-                      name="physicalAddress"
-                      value={formData.physicalAddress}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="123 Example Street, Paris"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="alternatePhone" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Phone size={16} className="text-[#D4A574]" />
-                        Alternate Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        id="alternatePhone"
-                        name="alternatePhone"
-                        value={formData.alternatePhone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="+33 6 00 00 00 00"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="professionalEmail" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Mail size={16} className="text-[#D4A574]" />
-                        Professional Email
-                      </label>
-                      <input
-                        type="email"
-                        id="professionalEmail"
-                        name="professionalEmail"
-                        value={formData.professionalEmail}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="john@company.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="contactInfo" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Additional Contact Information
-                    </label>
-                    <textarea
-                      id="contactInfo"
-                      name="contactInfo"
-                      value={formData.contactInfo}
-                      onChange={handleChange}
-                      rows={3}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all resize-none text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="Any other useful information..."
-                    />
-                  </div>
-                </div>
-              )}
 
               <motion.button
                 whileHover={{ scale: submitted || isSubmitting ? 1 : 1.02 }}
@@ -629,16 +322,16 @@ export function Contact({ config, content = {} }: ContactProps) {
                 {submitted ? (
                   <>
                     <CheckCircle size={20} />
-                    Message sent successfully!
+                    {t('contact.success')}
                   </>
                 ) : isSubmitting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending...
+                    {t('contact.sending')}
                   </>
                 ) : (
                   <>
-                    Send Your Message
+                    {t('contact.send')}
                     <Send size={20} />
                   </>
                 )}
@@ -650,7 +343,7 @@ export function Contact({ config, content = {} }: ContactProps) {
           <div className="lg:col-span-2 reveal-right">
             {/* Contacts Section */}
             <div className="mb-10">
-              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">Contacts</h3>
+              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">{t('contact.contacts')}</h3>
               <div className="space-y-5">
                 <div className="flex items-center gap-3 group">
                   <div className="w-10 h-10 bg-[#443C34] rounded-full flex items-center justify-center text-white flex-shrink-0 group-hover:bg-[#8B7355] transition-all">
@@ -680,7 +373,7 @@ export function Contact({ config, content = {} }: ContactProps) {
 
             {/* Social Media Section */}
             <div className="mb-10">
-              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">Social Media</h3>
+              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">{t('contact.socialMedia')}</h3>
 
               <div className="flex gap-3 mb-6">
                 <a href="#" className="w-10 h-10 border-2 border-[#443C34] rounded-full flex items-center justify-center text-[#443C34] hover:bg-[#443C34] hover:text-white transition-all">
@@ -729,8 +422,8 @@ export function Contact({ config, content = {} }: ContactProps) {
 
             {/* Map Section */}
             <div className="mb-10">
-              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">Our Location</h3>
-              <div className="rounded-2xl overflow-hidden border-2 border-[#D4A574] shadow-lg">
+              <h3 className="text-3xl font-bold mb-6 text-[#443C34]">{t('contact.ourLocation')}</h3>
+              <div className="rounded-2xl overflow-hidden border-2 border-[#D4A574] shadow-lg relative">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3774.2158729582705!2d47.52166931490035!3d-18.91368598716587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x21f07e3e7f4f5c5d%3A0x4e9d6b8f5a5c5c5c!2sAntananarivo%2C%20Madagascar!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s"
                   width="100%"
@@ -741,6 +434,47 @@ export function Contact({ config, content = {} }: ContactProps) {
                   referrerPolicy="no-referrer-when-downgrade"
                   className="grayscale hover:grayscale-0 transition-all duration-500"
                 ></iframe>
+                {/* Marqueur de position personnalisé */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                    className="relative"
+                  >
+                    {/* Ombre du marqueur */}
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-black/20 rounded-full blur-sm"></div>
+                    {/* Marqueur rouge */}
+                    <div className="relative w-10 h-10">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-full h-full drop-shadow-lg"
+                      >
+                        <path
+                          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                          fill="#EF4444"
+                          stroke="#DC2626"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    </div>
+                  </motion.div>
+                </div>
+                {/* Bouton rouge pour montrer l'adresse */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    const address = encodeURIComponent(config.contact.address);
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                  }}
+                  className="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition-all z-10"
+                >
+                  <MapPin size={16} />
+                  {t('contact.showAddress', { defaultValue: 'Show Address' })}
+                </motion.button>
               </div>
               <div className="flex items-start gap-3 mt-4">
                 <div className="w-6 h-6 border-2 border-[#443C34] rounded-full flex items-center justify-center text-[#443C34] flex-shrink-0 mt-0.5">
@@ -753,26 +487,26 @@ export function Contact({ config, content = {} }: ContactProps) {
             {/* Professional Services Box - Plus léger */}
             <div className="bg-gradient-to-br from-[#F8F5F0] to-white rounded-2xl p-6 border-2 border-[#D4A574]/30 shadow-md">
               <h4 className="text-xl text-[#443C34] mb-4 font-bold">
-                Professional Services
+                {t('contact.professionalServices')}
               </h4>
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
                   <div className="bg-[#D4A574] rounded-lg text-white p-1 shadow-sm">
                     <Check size={14} className="text-white" strokeWidth={3} />
                   </div>
-                  <span className="text-[#443C34] font-medium text-sm">Hosting: {config.services.hosting.join(' & ')}</span>
+                  <span className="text-[#443C34] font-medium text-sm">{t('contact.hosting')}: {config.services.hosting.join(' & ')}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="bg-[#D4A574] rounded-lg text-white p-1 shadow-sm">
                     <Check size={14} className="text-white" strokeWidth={3} />
                   </div>
-                  <span className="text-[#443C34] font-medium text-sm">Domain: {config.services.domain}</span>
+                  <span className="text-[#443C34] font-medium text-sm">{t('contact.domain')}: {config.services.domain}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="bg-[#D4A574] rounded-lg text-white p-1 shadow-sm">
                     <Check size={14} className="text-white" strokeWidth={3} />
                   </div>
-                  <span className="text-[#443C34] font-medium text-sm">Email: {config.services.email}</span>
+                  <span className="text-[#443C34] font-medium text-sm">{t('contact.emailLabel')}: {config.services.email}</span>
                 </li>
               </ul>
             </div>

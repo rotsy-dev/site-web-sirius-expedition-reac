@@ -17,15 +17,18 @@ import { Blogs } from './components/Blogs';
 import { Contact } from './components/Contact';
 import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
+import { QuoteRequest } from './components/QuoteRequest';
+import { MadagascarGallery } from './components/MadagascarGallery';
 
 // Composants Admin
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
+import { SITE_SECTIONS } from '../constants';
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [pendingTour, setPendingTour] = useState<any>(null);
+  const [pendingTour, _setPendingTour] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
@@ -39,6 +42,11 @@ function App() {
     isAuthenticated,
     logout,
   } = useContentManager();
+
+  // Sélectionner les circuits marqués comme "Best Seller" dans les spécialités de tours
+  const bestSellerTours = (content.tourSpecialties || []).filter(
+    (tour: any) => tour.isBestSeller
+  );
 
   // UseEffect pour scroller en haut à chaque changement de section
   useEffect(() => {
@@ -139,7 +147,7 @@ function App() {
                       onNavigateToTours={() => setActiveSection('tours')}
                     />
                     <BestSellers
-                      tours={content.bestSellers}
+                      tours={bestSellerTours}
                       content={content}
                       onNavigateToTour={() => {
                         setActiveSection('tours');
@@ -150,9 +158,10 @@ function App() {
                       config={content.siteConfig}
                       content={content}
                     />
+                    <MadagascarGallery content={content} />
                     <Reviews
                       reviews={content.reviews}
-                      config={content.siteConfig}
+                      config={content.siteConfig as any}
                       content={content}
                     />
                   </>
@@ -164,9 +173,10 @@ function App() {
                       specialties={content.tourSpecialties}
                       initialSelectedTour={pendingTour}
                       content={content}
+                      onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
                     />
                     <BestSellers
-                      tours={content.bestSellers}
+                      tours={bestSellerTours}
                       content={content}
                     />
                   </div>
@@ -183,6 +193,13 @@ function App() {
                   />
                 )}
 
+                {activeSection === 'quote' && (
+                  <QuoteRequest
+                    config={content.siteConfig}
+                    content={content}
+                  />
+                )}
+
                 {activeSection === 'about' && (
                   <AboutUs
                     config={content.siteConfig}
@@ -193,7 +210,7 @@ function App() {
 
               <Footer
                 setActiveSection={setActiveSection}
-                config={content.siteConfig}
+                config={content.siteConfig as any}
               />
 
               {/* BOUTON SCROLL TO TOP */}

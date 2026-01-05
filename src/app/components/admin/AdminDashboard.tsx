@@ -28,6 +28,7 @@ import { ConfigEditor } from './sections/ConfigEditor';
 import VideoConfigEditor from './sections/VideoConfigEditor';
 import { PageHeadersEditor } from './sections/PageHeadersEditor';
 import { AboutEditor } from './sections/AboutEditor';
+import { GalleryEditor } from './sections/GalleryEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -51,6 +52,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
         { id: 'videos', label: 'Videos', icon: Film },
+        { id: 'gallery', label: 'Image Gallery', icon: Image },
         { id: 'headers', label: 'Page Headers', icon: Type },
         { id: 'about', label: 'Our Story', icon: HistoryIcon },
     ];
@@ -251,6 +253,13 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                                     ...content.siteConfig,
                                     videos: config
                                 })}
+                            />
+                        )}
+
+                        {activeTab === 'gallery' && (
+                            <GalleryEditor
+                                images={content.imageGallery || []}
+                                onSave={(images) => onUpdateSection('imageGallery', images)}
                             />
                         )}
 
