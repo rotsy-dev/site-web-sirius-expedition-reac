@@ -58,24 +58,10 @@ interface ContactProps {
 interface ExtendedContactFormData {
   name: string;
   email: string;
-  phone: string;
-  country: string;
   message: string;
-  interestedTour?: string;
-  travelDate?: string;
-  travelTime?: string;
-  participants?: string;
-  contactInfo?: string;
-  physicalAddress?: string;
-  alternatePhone?: string;
-  professionalEmail?: string;
-  preferredHours?: string;
+
 }
 
-const COUNTRIES = [
-  'Madagascar', 'France', 'United States', 'Canada', 'United Kingdom',
-  'Germany', 'Italy', 'Spain', 'Belgium', 'Switzerland', 'Other'
-];
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1763477080227-6e591f5017ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxNYWRhZ2FzY2FyJTIwbGFuZHNjYXBlJTIwYWR2ZW50dXJlfGVufDF8fHx8MTc2NDU5MTg4MHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
@@ -87,74 +73,15 @@ const EMAILJS_CONFIG = {
 
 export function Contact({ config, content = {} }: ContactProps) {
   const [formData, setFormData] = useState<ExtendedContactFormData>({
-    name: '', email: '', phone: '', country: '', message: '',
-    interestedTour: '', travelDate: '', travelTime: '', participants: '', contactInfo: '',
-    physicalAddress: '', alternatePhone: '', professionalEmail: '', preferredHours: ''
+    name: '', email: '', message: '',
+
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showOptionalFields, setShowOptionalFields] = useState(false);
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [preferredHours, setPreferredHours] = useState<string[]>([]);
-  const [availableDates, setAvailableDates] = useState<TourDate[]>([]);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
-  useEffect(() => {
-    const fetchConfig = async () => {
-      setIsLoadingConfig(true);
-      try {
-        const configDoc = doc(db, 'siteConfig', 'main');
-        const docSnap = await getDoc(configDoc);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.tours && Array.isArray(data.tours)) {
-            setTours(data.tours);
-          }
-          if (data.preferredContactHours && Array.isArray(data.preferredContactHours)) {
-            setPreferredHours(data.preferredContactHours);
-          } else {
-            setPreferredHours(['08:00 - 10:00', '10:00 - 12:00', '14:00 - 16:00', '16:00 - 18:00', 'Flexible']);
-          }
-        }
-      } catch (err) {
-        console.error('Erreur chargement configuration:', err);
-        setPreferredHours(['08:00 - 10:00', '10:00 - 12:00', '14:00 - 16:00', '16:00 - 18:00', 'Flexible']);
-      } finally {
-        setIsLoadingConfig(false);
-      }
-    };
-
-    fetchConfig();
-
-    if (typeof ScrollReveal !== 'undefined') {
-      const sr = ScrollReveal({
-        reset: false, distance: '40px', duration: 800, delay: 0,
-        easing: 'cubic-bezier(0.5, 0, 0, 1)', mobile: true
-      });
-      sr.reveal('.reveal-left', { origin: 'left', distance: '60px', delay: 200 });
-      sr.reveal('.reveal-right', { origin: 'right', distance: '60px', delay: 400 });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (formData.interestedTour) {
-      const selectedTour = tours.find(tour => tour.id === formData.interestedTour);
-      if (selectedTour && selectedTour.dates) {
-        const validDates = selectedTour.dates.filter(date =>
-          date.date && date.time && date.date.trim() !== '' && date.time.trim() !== ''
-        );
-        setAvailableDates(validDates);
-        setFormData(prev => ({ ...prev, travelDate: '', travelTime: '' }));
-      } else {
-        setAvailableDates([]);
-      }
-    } else {
-      setAvailableDates([]);
-    }
-  }, [formData.interestedTour, tours]);
 
   const validateForm = (): string[] => {
     const newErrors: string[] = [];
@@ -163,8 +90,6 @@ export function Contact({ config, content = {} }: ContactProps) {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.push('Email is not valid');
     }
-    if (!formData.phone.trim()) newErrors.push('Phone number is required');
-    if (!formData.country) newErrors.push('Country is required');
     if (!formData.message.trim()) newErrors.push('Message is required');
     return newErrors;
   };
@@ -182,41 +107,12 @@ export function Contact({ config, content = {} }: ContactProps) {
     }
 
     try {
-      const selectedTour = tours.find(t => t.id === formData.interestedTour);
-      const tourName = selectedTour ? selectedTour.name : 'Not specified';
-
-      let travelDateTime = 'Not specified';
-      if (formData.travelDate && formData.travelTime) {
-        const selectedDate = availableDates.find(date =>
-          date.id === `${formData.travelDate}_${formData.travelTime}`
-        );
-        if (selectedDate) {
-          const dateFormatted = new Date(selectedDate.date).toLocaleDateString('en-US', {
-            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-          });
-          travelDateTime = `${dateFormatted} at ${selectedDate.time}`;
-        }
-      }
-
       const templateParams = {
         to_email: config.contact.email,
         name: formData.name,
         reply_to: formData.email,
-        phone: formData.phone,
-        country: formData.country,
         message: formData.message,
-        time: new Date().toLocaleString('fr-FR', {
-          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        }),
-        interested_tour: tourName,
-        tour_id: formData.interestedTour || 'Not specified',
-        travel_date_time: travelDateTime,
-        participants: formData.participants || 'Not specified',
-        preferred_hours: formData.preferredHours || 'Not specified',
-        physical_address: formData.physicalAddress || 'Not specified',
-        alternate_phone: formData.alternatePhone || 'Not specified',
-        professional_email: formData.professionalEmail || 'Not specified',
-        additional_info: formData.contactInfo || 'None',
+
       };
 
       const response = await emailjs.send(
@@ -229,15 +125,7 @@ export function Contact({ config, content = {} }: ContactProps) {
       console.log('Email sent successfully!', response.status, response.text);
       setSubmitted(true);
 
-      setTimeout(() => {
-        setSubmitted(false);
-        setFormData({
-          name: '', email: '', phone: '', country: '', message: '',
-          interestedTour: '', travelDate: '', travelTime: '', participants: '', contactInfo: '',
-          physicalAddress: '', alternatePhone: '', professionalEmail: '', preferredHours: ''
-        });
-        setShowOptionalFields(false);
-      }, 3000);
+
 
     } catch (error: any) {
       console.error('Email sending failed:', error);
@@ -253,29 +141,8 @@ export function Contact({ config, content = {} }: ContactProps) {
     if (errors.length > 0) setErrors([]);
   };
 
-  const handleDateSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value) {
-      const [dateId, timeId] = value.split('_');
-      const selectedDate = availableDates.find(date => date.id === `${dateId}_${timeId}`);
-      if (selectedDate) {
-        setFormData(prev => ({ ...prev, travelDate: dateId, travelTime: timeId }));
-      }
-    } else {
-      setFormData(prev => ({ ...prev, travelDate: '', travelTime: '' }));
-    }
-  };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
+
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
@@ -391,41 +258,6 @@ export function Contact({ config, content = {} }: ContactProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="phone" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Phone Number <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="+261 34 00 000 00"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="country" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Country <span className="text-red-600">*</span>
-                    </label>
-                    <select
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                    >
-                      <option value="">Select a country</option>
-                      {COUNTRIES.map(country => (
-                        <option key={country} value={country}>{country}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
                 <div>
                   <label htmlFor="message" className="block mb-2 text-sm font-bold text-[#443C34]">
                     Your Message <span className="text-red-600">*</span>
@@ -442,182 +274,6 @@ export function Contact({ config, content = {} }: ContactProps) {
                   />
                 </div>
               </div>
-
-              <div className="pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowOptionalFields(!showOptionalFields)}
-                  className="text-[#443C34] hover:text-[#8B7355] font-bold text-sm flex items-center gap-2 transition-colors"
-                >
-                  {showOptionalFields ? '▼' : '▶'} Additional Information (optional)
-                </button>
-              </div>
-
-              {showOptionalFields && (
-                <div className="space-y-6 pt-4 border-t-2 border-[#D4A574]/20">
-                  <h4 className="text-lg font-bold text-[#443C34] flex items-center gap-2">
-                    <span className="bg-[#D4A574] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-                    Additional Information
-                  </h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="interestedTour" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Briefcase size={16} className="text-[#D4A574]" />
-                        Interested Tour
-                      </label>
-                      {isLoadingConfig ? (
-                        <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355] flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-[#D4A574] border-t-transparent rounded-full animate-spin" />
-                          Loading tours...
-                        </div>
-                      ) : tours.length === 0 ? (
-                        <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355]">
-                          No tours available at the moment.
-                        </div>
-                      ) : (
-                        <select
-                          id="interestedTour"
-                          name="interestedTour"
-                          value={formData.interestedTour}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                        >
-                          <option value="">Select a tour</option>
-                          {tours.map(tour => (
-                            <option key={tour.id} value={tour.id}>
-                              {tour.name}
-                              {tour.dates && tour.dates.length > 0 && ` (${tour.dates.length} dates available)`}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                      {formData.interestedTour && (
-                        <p className="mt-2 text-xs text-[#8B7355]">
-                          {tours.find(t => t.id === formData.interestedTour)?.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {formData.interestedTour && (
-                      <div>
-                        <label htmlFor="travelDate" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                          <Calendar size={16} className="text-[#D4A574]" />
-                          Preferred Travel Date & Time
-                        </label>
-                        {availableDates.length === 0 ? (
-                          <div className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 text-[#8B7355]">
-                            No dates available for this tour
-                          </div>
-                        ) : (
-                          <select
-                            id="travelDate"
-                            value={formData.travelDate && formData.travelTime ? `${formData.travelDate}_${formData.travelTime}` : ''}
-                            onChange={handleDateSelection}
-                            className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34]"
-                          >
-                            <option value="">Select a date and time</option>
-                            {availableDates
-                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                              .map(dateObj => {
-                                const displayDate = formatDate(dateObj.date);
-                                return (
-                                  <option key={dateObj.id} value={dateObj.id}>
-                                    {displayDate} at {dateObj.time}
-                                  </option>
-                                );
-                              })}
-                          </select>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="participants" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Users size={16} className="text-[#D4A574]" />
-                        Number of Participants
-                      </label>
-                      <input
-                        type="number"
-                        id="participants"
-                        name="participants"
-                        value={formData.participants}
-                        onChange={handleChange}
-                        min="1"
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="2"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="physicalAddress" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                      <Building size={16} className="text-[#D4A574]" />
-                      Physical Address
-                    </label>
-                    <input
-                      type="text"
-                      id="physicalAddress"
-                      name="physicalAddress"
-                      value={formData.physicalAddress}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="123 Example Street, Paris"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="alternatePhone" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Phone size={16} className="text-[#D4A574]" />
-                        Alternate Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        id="alternatePhone"
-                        name="alternatePhone"
-                        value={formData.alternatePhone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="+33 6 00 00 00 00"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="professionalEmail" className="block mb-2 text-sm font-bold text-[#443C34] flex items-center gap-2">
-                        <Mail size={16} className="text-[#D4A574]" />
-                        Professional Email
-                      </label>
-                      <input
-                        type="email"
-                        id="professionalEmail"
-                        name="professionalEmail"
-                        value={formData.professionalEmail}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all text-[#443C34] placeholder:text-[#8B7355]/50"
-                        placeholder="john@company.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="contactInfo" className="block mb-2 text-sm font-bold text-[#443C34]">
-                      Additional Contact Information
-                    </label>
-                    <textarea
-                      id="contactInfo"
-                      name="contactInfo"
-                      value={formData.contactInfo}
-                      onChange={handleChange}
-                      rows={3}
-                      className="w-full px-4 py-3 rounded-xl bg-[#F8F5F0] border-2 border-[#D4A574]/30 focus:border-[#443C34] focus:outline-none transition-all resize-none text-[#443C34] placeholder:text-[#8B7355]/50"
-                      placeholder="Any other useful information..."
-                    />
-                  </div>
-                </div>
-              )}
 
               <motion.button
                 whileHover={{ scale: submitted || isSubmitting ? 1 : 1.02 }}
