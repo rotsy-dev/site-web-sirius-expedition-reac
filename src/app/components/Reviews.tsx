@@ -4,8 +4,10 @@ import { useRef, useState, useCallback } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle, Verified } from 'lucide-react';
+import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle, Verified, Loader2 } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion"
+import { useTranslatedContent } from '../../hooks/useTranslatedContent';
+import { useTranslation } from 'react-i18next';
 
 interface Review {
   id: number;
@@ -21,19 +23,20 @@ interface Review {
 
 interface ReviewsProps {
   reviews: Review[];
-  config: { social: { tripadvisor: string; google: string; }; };
+  // On garde un type souple ici pour accepter la structure réelle de siteConfig
+  config: any;
   content?: { pageHeaders?: { reviews?: { badge?: string; title?: string; subtitle?: string; }; }; };
 }
 
 // Composant étoile avec animation améliorée
 function AnimatedStar({ index, rating, delay }: { index: number, rating: number, delay: number }) {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   return (
     <motion.div
       initial={{ scale: 0, rotate: -180 }}
       animate={{ scale: 1, rotate: 0 }}
-      transition={{ 
+      transition={{
         delay,
         type: "spring",
         stiffness: 260,
@@ -43,9 +46,9 @@ function AnimatedStar({ index, rating, delay }: { index: number, rating: number,
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <Star 
-        size={20} 
-        fill={index < rating ? "#A68966" : "none"} 
+      <Star
+        size={20}
+        fill={index < rating ? "#A68966" : "none"}
         className={index < rating ? "text-[#A68966]" : "text-[#4B3935]/10"}
         strokeWidth={isHovered ? 2.5 : 2}
       />
@@ -57,7 +60,7 @@ function AnimatedStar({ index, rating, delay }: { index: number, rating: number,
 function ReviewCard({ review, index }: { review: Review, index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -91,8 +94,8 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
       initial={{ opacity: 0, y: 60, scale: 0.9 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ 
-        duration: 0.8, 
+      transition={{
+        duration: 0.8,
         delay: index * 0.15,
         ease: [0.16, 1, 0.3, 1]
       }}
@@ -100,21 +103,21 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
       onMouseLeave={handleMouseLeave}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      style={{ 
-        rotateX, 
-        rotateY, 
+      style={{
+        rotateX,
+        rotateY,
         transformStyle: "preserve-3d",
         transformPerspective: 1000
       }}
       className="relative px-4 py-10 h-full"
     >
-      <div 
+      <div
         className="relative rounded-[3.5rem] overflow-hidden h-full flex flex-col transition-all duration-700 shadow-[0_20px_50px_rgba(61,47,43,0.1)] hover:shadow-[0_50px_100px_rgba(61,47,43,0.3)] border-t-2 border-l-2 border-white/50 bg-[#F0E7D5]"
       >
         {/* Effet de brillance animé au survol */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 opacity-0 pointer-events-none"
-          animate={isHovered ? { 
+          animate={isHovered ? {
             opacity: [0, 0.3, 0],
             background: [
               'radial-gradient(circle at 0% 0%, rgba(166,137,102,0.2) 0%, transparent 50%)',
@@ -126,7 +129,7 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
         />
 
         {/* Bordure interne décorative avec animation */}
-        <motion.div 
+        <motion.div
           className="absolute inset-4 rounded-[2.5rem] border pointer-events-none z-0"
           animate={{
             borderColor: isHovered ? 'rgba(166,137,102,0.15)' : 'rgba(75,57,53,0.05)'
@@ -135,8 +138,8 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
         />
 
         {/* Quote décoratif avec parallaxe */}
-        <motion.div 
-          style={{ 
+        <motion.div
+          style={{
             translateZ: isHovered ? 80 : 50,
             scale: isHovered ? 1.1 : 1
           }}
@@ -166,30 +169,30 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
         </AnimatePresence>
 
         {/* Contenu principal */}
-        <div className="p-12 pb-6 flex-1 relative z-10 bg-[#F0E7D5]" style={{ transform: "translateZ(30px)" }}>
+        <div className="p-6 md:p-12 pb-4 md:pb-6 flex-1 relative z-10 bg-[#F0E7D5]" style={{ transform: "translateZ(30px)" }}>
           <div className="flex gap-2 mb-8">
             {[...Array(5)].map((_, i) => (
-              <AnimatedStar 
-                key={i} 
-                index={i} 
-                rating={review.rating} 
-                delay={0.5 + (i * 0.08)} 
+              <AnimatedStar
+                key={i}
+                index={i}
+                rating={review.rating}
+                delay={0.5 + (i * 0.08)}
               />
             ))}
           </div>
 
-          <motion.p 
-            className="text-[#4B3935] text-2xl leading-relaxed font-serif italic mb-10"
+          <motion.p
+            className="text-[#4B3935] text-lg md:text-2xl leading-relaxed font-serif italic mb-6 md:mb-10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             "{review.text}"
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             whileHover={{ scale: 1.05, y: -2 }}
-            className="inline-flex items-center gap-3 bg-white/50 backdrop-blur-md border border-[#4B3935]/10 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] text-[#4B3935] shadow-lg"
+            className="inline-flex items-center gap-2 md:gap-3 bg-white/50 backdrop-blur-md border border-[#4B3935]/10 px-4 md:px-6 py-2 md:py-3 rounded-2xl text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-[#4B3935] shadow-lg"
           >
             <CheckCircle size={16} className="text-[#A68966]" />
             {review.tour}
@@ -197,31 +200,31 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
         </div>
 
         {/* Section profil avec effet de survol amélioré */}
-        <div className="p-12 pt-14 relative z-10 bg-[#4B3935]" style={{ transform: "translateZ(60px)" }}>
-          <div className="flex items-center gap-6">
-            <motion.div 
+        <div className="p-6 md:p-12 pt-8 md:pt-14 relative z-10 bg-[#4B3935]" style={{ transform: "translateZ(60px)" }}>
+          <div className="flex items-center gap-4 md:gap-6">
+            <motion.div
               whileHover={{ scale: 1.15, rotate: 5 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="relative"
             >
-              <motion.div 
+              <motion.div
                 className="absolute inset-0 bg-[#A68966] rounded-full blur-xl opacity-20"
                 animate={isHovered ? { scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] } : {}}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              <img 
-                src={review.avatar} 
-                alt={review.name} 
-                className="w-20 h-20 rounded-full border-[6px] border-[#F0E7D5]/20 shadow-2xl object-cover relative z-10"
+              <img
+                src={review.avatar}
+                alt={review.name}
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 md:border-[6px] border-[#F0E7D5]/20 shadow-2xl object-cover relative z-10"
                 loading="lazy"
               />
             </motion.div>
-            
+
             <div className="flex flex-col">
-              <h4 className="text-[#F0E7D5] font-black text-xl tracking-tight mb-1">
+              <h4 className="text-[#F0E7D5] font-black text-lg md:text-xl tracking-tight mb-1">
                 {review.name}
               </h4>
-              <div className="flex items-center gap-3 text-[#A68966] text-sm font-bold">
+              <div className="flex items-center gap-2 md:gap-3 text-[#A68966] text-xs md:text-sm font-bold">
                 <span className="flex items-center gap-1.5">🌍 {review.country}</span>
                 <span className="w-1.5 h-1.5 bg-[#A68966]/30 rounded-full" />
                 <span className="text-[#F0E7D5]/40 font-medium">{review.date}</span>
@@ -238,16 +241,16 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
 function ReviewStats({ reviews }: { reviews: Review[] }) {
   const avgRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
   const total = reviews.length;
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="flex justify-center gap-12 mb-16"
     >
       <div className="text-center">
-        <motion.div 
+        <motion.div
           className="text-5xl font-black text-[#4B3935] mb-2"
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
@@ -262,11 +265,11 @@ function ReviewStats({ reviews }: { reviews: Review[] }) {
         </div>
         <div className="text-sm text-[#4B3935]/60 font-medium">Note moyenne</div>
       </div>
-      
+
       <div className="w-px bg-[#4B3935]/10" />
-      
+
       <div className="text-center">
-        <motion.div 
+        <motion.div
           className="text-5xl font-black text-[#4B3935] mb-2"
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
@@ -281,8 +284,26 @@ function ReviewStats({ reviews }: { reviews: Review[] }) {
 }
 
 export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
+  const { t } = useTranslation();
   const sliderRef = useRef<Slider>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Traduire automatiquement les reviews
+  const { translatedContent: translatedReviews, isLoading: isTranslatingReviews } = useTranslatedContent(
+    reviews,
+    ['text', 'tour']
+  );
+
+  // Traduire automatiquement les headers de la section
+  const { translatedContent: translatedReviewsHeader } = useTranslatedContent(
+    content?.pageHeaders?.reviews ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const displayReviews = (translatedReviews || reviews) as Review[];
+  const header = (translatedReviewsHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content?.pageHeaders?.reviews
+    || {};
 
   const settings = {
     dots: true,
@@ -310,83 +331,103 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <motion.div 
+          <motion.div
             className="inline-block mb-6"
             whileHover={{ scale: 1.05 }}
           >
             <span className="bg-gradient-to-r from-[#A68966] to-[#4B3935] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.3em]">
-              {content.pageHeaders?.reviews?.badge || 'Témoignages'}
+              {header.badge || t('sections.reviews')}
             </span>
           </motion.div>
           <h2 className="text-6xl font-black text-[#4B3935] mb-6 tracking-tight">
-            {content.pageHeaders?.reviews?.title || 'Expériences Sirius'}
+            {header.title || t('sections.reviews')}
           </h2>
           <p className="text-xl text-[#4B3935]/60 max-w-2xl mx-auto font-medium">
-            {content.pageHeaders?.reviews?.subtitle || 'Chaque aventure est une histoire que nous écrivons ensemble.'}
+            {header.subtitle || t('sections.reviewsSubtitle')}
           </p>
         </motion.div>
 
         {/* Statistiques */}
-        <ReviewStats reviews={reviews} />
+        <ReviewStats reviews={displayReviews} />
 
         {/* Carousel */}
         <div className="mt-20">
-          <Slider ref={sliderRef} {...settings} className="reviews-slider overflow-visible">
-            {reviews.map((review, idx) => (
-              <ReviewCard key={review.id} review={review} index={idx} />
-            ))}
-          </Slider>
+          {/* Desktop/Tablet Slider */}
+          <div className="hidden md:block">
+            <Slider ref={sliderRef} {...settings} className="reviews-slider overflow-visible">
+              {displayReviews.map((review, idx) => (
+                <ReviewCard key={review.id} review={review} index={idx} />
+              ))}
+            </Slider>
 
-          {/* Navigation améliorée avec indicateur de progression */}
-          <div className="flex justify-center items-center gap-8 mt-20">
-            <motion.button 
-              whileHover={{ x: -5, scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => sliderRef.current?.slickPrev()}
-              className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
-              aria-label="Avis précédent"
-            >
-              <div className="w-16 h-16 rounded-full border-2 border-[#4B3935]/10 flex items-center justify-center group-hover:bg-[#4B3935] group-hover:text-[#F0E7D5] group-hover:border-[#4B3935] transition-all duration-300 shadow-xl bg-white">
-                <ChevronLeft size={24} />
+            {/* Navigation améliorée avec indicateur de progression */}
+            <div className="flex justify-center items-center gap-8 mt-20">
+              <motion.button
+                whileHover={{ x: -5, scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => sliderRef.current?.slickPrev()}
+                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
+                aria-label="Avis précédent"
+              >
+                <div className="w-16 h-16 rounded-full border-2 border-[#4B3935]/10 flex items-center justify-center group-hover:bg-[#4B3935] group-hover:text-[#F0E7D5] group-hover:border-[#4B3935] transition-all duration-300 shadow-xl bg-white">
+                  <ChevronLeft size={24} />
+                </div>
+                <span className="hidden sm:inline">PREV</span>
+              </motion.button>
+
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-[3px] w-32 bg-[#4B3935]/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-[#A68966] to-[#4B3935]"
+                    animate={{ width: `${((currentSlide % reviews.length) / reviews.length) * 100}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+                <span className="text-[#4B3935]/40 text-xs font-bold">
+                  {(currentSlide % reviews.length) + 1} / {reviews.length}
+                </span>
               </div>
-              <span className="hidden sm:inline">PREV</span>
-            </motion.button>
-            
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-[3px] w-32 bg-[#4B3935]/10 rounded-full overflow-hidden">
-                <motion.div 
-                  className="h-full bg-gradient-to-r from-[#A68966] to-[#4B3935]"
-                  animate={{ width: `${((currentSlide % reviews.length) / reviews.length) * 100}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-              <span className="text-[#4B3935]/40 text-xs font-bold">
-                {(currentSlide % reviews.length) + 1} / {reviews.length}
-              </span>
+
+              <motion.button
+                whileHover={{ x: 5, scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => sliderRef.current?.slickNext()}
+                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
+                aria-label="Avis suivant"
+              >
+                <span className="hidden sm:inline">NEXT</span>
+                <div className="w-16 h-16 rounded-full border-2 border-[#4B3935]/10 flex items-center justify-center group-hover:bg-[#4B3935] group-hover:text-[#F0E7D5] group-hover:border-[#4B3935] transition-all duration-300 shadow-xl bg-white">
+                  <ChevronRight size={24} />
+                </div>
+              </motion.button>
             </div>
-            
-            <motion.button 
-              whileHover={{ x: 5, scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => sliderRef.current?.slickNext()}
-              className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
-              aria-label="Avis suivant"
-            >
-              <span className="hidden sm:inline">NEXT</span>
-              <div className="w-16 h-16 rounded-full border-2 border-[#4B3935]/10 flex items-center justify-center group-hover:bg-[#4B3935] group-hover:text-[#F0E7D5] group-hover:border-[#4B3935] transition-all duration-300 shadow-xl bg-white">
-                <ChevronRight size={24} />
-              </div>
-            </motion.button>
           </div>
+
+          {/* Mobile Vertical Stack */}
+          <div className="md:hidden flex flex-col gap-8">
+            {displayReviews.map((review, idx) => (
+              <div key={review.id} className="h-full">
+                <ReviewCard review={review} index={idx} />
+              </div>
+            ))}
+          </div>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingReviews && (
+            <div className="flex items-center justify-center gap-2 mt-8 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, MessageCircle } from 'lucide-react';
+import { ContactModal } from './components/ContactModal';
 
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
@@ -16,16 +17,20 @@ import { Blogs } from './components/Blogs';
 import { Contact } from './components/Contact';
 import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
+import { QuoteRequest } from './components/QuoteRequest';
+import { MadagascarGallery } from './components/MadagascarGallery';
 
 // Composants Admin
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
+import { SITE_SECTIONS } from '../constants';
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [pendingTour, setPendingTour] = useState<any>(null);
+  const [pendingTour, _setPendingTour] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const {
     content,
@@ -38,6 +43,11 @@ function App() {
     logout,
   } = useContentManager();
 
+  // Sélectionner les circuits marqués comme "Best Seller" dans les spécialités de tours
+  const bestSellerTours = (content.tourSpecialties || []).filter(
+    (tour: any) => tour.isBestSeller
+  );
+
   // UseEffect pour scroller en haut à chaque changement de section
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -48,7 +58,7 @@ function App() {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -137,7 +147,7 @@ function App() {
                       onNavigateToTours={() => setActiveSection('tours')}
                     />
                     <BestSellers
-                      tours={content.bestSellers}
+                      tours={bestSellerTours}
                       content={content}
                       onNavigateToTour={() => {
                         setActiveSection('tours');
@@ -148,9 +158,10 @@ function App() {
                       config={content.siteConfig}
                       content={content}
                     />
+                    <MadagascarGallery content={content} />
                     <Reviews
                       reviews={content.reviews}
-                      config={content.siteConfig}
+                      config={content.siteConfig as any}
                       content={content}
                     />
                   </>
@@ -162,9 +173,10 @@ function App() {
                       specialties={content.tourSpecialties}
                       initialSelectedTour={pendingTour}
                       content={content}
+                      onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
                     />
-                    <BestSellers 
-                      tours={content.bestSellers}
+                    <BestSellers
+                      tours={bestSellerTours}
                       content={content}
                     />
                   </div>
@@ -175,14 +187,21 @@ function App() {
                 )}
 
                 {activeSection === 'contact' && (
-                  <Contact 
+                  <Contact
+                    config={content.siteConfig}
+                    content={content}
+                  />
+                )}
+
+                {activeSection === 'quote' && (
+                  <QuoteRequest
                     config={content.siteConfig}
                     content={content}
                   />
                 )}
 
                 {activeSection === 'about' && (
-                  <AboutUs 
+                  <AboutUs
                     config={content.siteConfig}
                     content={content}
                   />
@@ -191,7 +210,7 @@ function App() {
 
               <Footer
                 setActiveSection={setActiveSection}
-                config={content.siteConfig}
+                config={content.siteConfig as any}
               />
 
               {/* BOUTON SCROLL TO TOP */}
@@ -210,6 +229,31 @@ function App() {
                   </motion.button>
                 )}
               </AnimatePresence>
+
+              {/* FLOATING CONTACT BUTTON */}
+              <AnimatePresence>
+                {!isContactModalOpen && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0, y: 20 }}
+                    onClick={() => setIsContactModalOpen(true)}
+                    className={`fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
+                    {/* Pulse indicator */}
+                    <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <ContactModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+                config={content.siteConfig}
+              />
             </motion.div>
           )}
         </AnimatePresence>

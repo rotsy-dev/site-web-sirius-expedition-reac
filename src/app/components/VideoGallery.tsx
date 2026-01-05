@@ -1,7 +1,9 @@
 "use client"
 import { useState, useRef } from "react"
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion"
-import { Play, X, ArrowRight, Clapperboard, Award } from "lucide-react"
+import { Play, X, ArrowRight, Clapperboard, Award, Loader2 } from "lucide-react"
+import { useTranslatedContent } from "../../hooks/useTranslatedContent"
+import { useTranslation } from "react-i18next"
 
 // Types
 interface Video {
@@ -14,12 +16,8 @@ interface Video {
 
 interface VideoGalleryProps {
   videos: Video[]
-  config: {
-    videos: {
-      mainYouTubeId: string
-      channelUrl: string
-    }
-  }
+  // On accepte la structure réelle de siteConfig (config est peu typé ici)
+  config: any
   content?: {
     pageHeaders?: {
       videos?: {
@@ -32,9 +30,27 @@ interface VideoGalleryProps {
 }
 
 export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps) {
+  const { t } = useTranslation();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Traduire automatiquement les vidéos
+  const { translatedContent: translatedVideos, isLoading: isTranslatingVideos } = useTranslatedContent(
+    videos,
+    ['title', 'category']
+  );
+
+  // Traduire automatiquement les headers de la section
+  const { translatedContent: translatedVideosHeader } = useTranslatedContent(
+    content?.pageHeaders?.videos ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const displayVideos = (translatedVideos || videos) as Video[];
+  const header = (translatedVideosHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content?.pageHeaders?.videos
+    || {};
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -65,8 +81,16 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
           </h2>
           <div className="h-1 w-20 bg-[#A68966] rounded-full" />
           <p className="text-[10px] font-bold tracking-[0.6em] uppercase text-[#EBE3D5]/40 mt-2">
-            {content.pageHeaders?.videos?.subtitle || 'The Madagascan adventure on the move'}
+            {header.subtitle || t('sections.videosSubtitle')}
           </p>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingVideos && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-[#EBE3D5]/80">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </motion.div>
       </div>
 
@@ -224,24 +248,24 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
             <motion.div 
               className="flex gap-8"
               animate={{
-                x: [0, -((videos.length * 400) + (videos.length * 32))],
+                x: [0, -((displayVideos.length * 400) + (displayVideos.length * 32))],
               }}
               transition={{
                 x: {
                   repeat: Number.POSITIVE_INFINITY,
                   repeatType: "loop",
-                  duration: videos.length * 8,
+                  duration: displayVideos.length * 8,
                   ease: "linear",
                 },
               }}
             >
-              {[...videos, ...videos, ...videos].map((v, index) => (
+              {[...displayVideos, ...displayVideos, ...displayVideos].map((v, index) => (
                 <motion.div 
                   key={`${v.id}-${index}`}
                   initial={{ opacity: 0, y: 60 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: (index % videos.length) * 0.15, duration: 0.6 }}
+                  transition={{ delay: (index % displayVideos.length) * 0.15, duration: 0.6 }}
                   whileHover={{ y: -12, scale: 1.05 }}
                   className="cursor-pointer group flex-shrink-0 w-[400px]" 
                   onClick={() => setSelectedVideo(v.youtubeId)}
@@ -459,39 +483,4 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
   )
 }
 
-// Données de démonstration
-const demoVideos: Video[] = [
-  {
-    id: "1",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
-    title: "Baobab Avenue at Sunset",
-    category: "Landscape"
-  },
-  {
-    id: "2",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80",
-    title: "Lemur Wildlife Safari",
-    category: "Wildlife"
-  },
-  {
-    id: "3",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1588392382834-a891154bca4d?w=800&q=80",
-    title: "Tsingy de Bemaraha Adventure",
-    category: "Adventure"
-  }
-]
-
-const demoConfig = {
-  videos: {
-    mainYouTubeId: "dQw4w9WgXcQ",
-    channelUrl: "https://youtube.com/@sirius"
-  }
-}
-
-// Rendu avec données de démo
-function App() {
-  return <VideoGallery videos={demoVideos} config={demoConfig} />
-}
+// (Demo data & local App component removed – production uses real props from parent)

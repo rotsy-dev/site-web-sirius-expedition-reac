@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Bird, Search, ChevronDown } from "lucide-react"
+import { Bird, Search, ChevronDown, Loader2 } from "lucide-react"
 import { TourModal, getDetailedTour, ExtendedTourSpecialty } from "./TourModal"
-import { SectionHeader } from "@/components/common/SectionHeader"
+import { useTranslatedContent } from "../../hooks/useTranslatedContent"
+import { useTranslation } from "react-i18next"
 
 // Types
 interface TourSpecialty {
@@ -11,21 +12,61 @@ interface TourSpecialty {
   description: string
   image: string
   category?: string
+  isBestSeller?: boolean
 }
 
 interface TourSpecialtiesProps {
   specialties: TourSpecialty[]
   initialSelectedTour?: ExtendedTourSpecialty | null
   content?: any
+  onNavigateToQuote?: () => void
 }
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1600&q=80";
 
-export function TourSpecialties({ specialties, initialSelectedTour, content }: TourSpecialtiesProps) {
+export function TourSpecialties({ specialties, initialSelectedTour, content, onNavigateToQuote }: TourSpecialtiesProps) {
+  const { t } = useTranslation();
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
 
   // Modal State
   const [selectedTour, setSelectedTour] = useState<ExtendedTourSpecialty | null>(initialSelectedTour || null);
+
+  // Préchargement immédiat de l'image hero
+  useEffect(() => {
+    if (HERO_IMAGE) {
+      const img = new Image();
+      img.onload = () => {
+        setHeroImageLoaded(true);
+      };
+      img.onerror = () => {
+        setHeroImageLoaded(true);
+      };
+      img.src = HERO_IMAGE;
+      // Marquer comme chargé rapidement même si l'image n'est pas encore chargée
+      const timeout = setTimeout(() => {
+        setHeroImageLoaded(true);
+      }, 100);
+      return () => clearTimeout(timeout);
+    } else {
+      setHeroImageLoaded(true);
+    }
+  }, []);
+
+  // Traduire automatiquement les spécialités
+  const { translatedContent: translatedSpecialties, isLoading: isTranslatingSpecialties } = useTranslatedContent(
+    specialties,
+    ['title', 'description', 'category']
+  );
+
+  // Traduire automatiquement les headers de la section
+  const { translatedContent: translatedSpecialtiesHeader } = useTranslatedContent(
+    content?.pageHeaders?.specialties ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const displaySpecialties = (translatedSpecialties || specialties) as TourSpecialty[];
+  const header = translatedSpecialtiesHeader || content?.pageHeaders?.specialties || {};
 
   // Auto-open modal if initialSelectedTour is provided
   useEffect(() => {
@@ -37,10 +78,20 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
   // Filtering Logic
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Tous")
+  // Les catégories restent stockées avec leurs valeurs actuelles (venant potentiellement de Firebase),
+  // mais les labels affichés sont traduits via i18n.
   const categories = ["Tous", "Nature", "Culture", "Aventure", "Photography"];
 
+  const categoryLabelMap: Record<string, string> = {
+    "Tous": t('tourSpecialties.categories.all'),
+    "Nature": t('tourSpecialties.categories.nature'),
+    "Culture": t('tourSpecialties.categories.culture'),
+    "Aventure": t('tourSpecialties.categories.adventure'),
+    "Photography": t('tourSpecialties.categories.photography'),
+  };
+
   // Use Firebase data directly with fallback for category
-  const smartSpecialties = specialties.map((specialty) => ({
+  const smartSpecialties = displaySpecialties.map((specialty) => ({
     ...specialty,
     category: specialty.category || "Nature"
   }));
@@ -61,19 +112,27 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
     <>
       {/* Hero Section with Background Image */}
       <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0"
-        >
-          <img
-            src={HERO_IMAGE}
-            alt="Madagascar landscape"
-            className="w-full h-full object-cover"
-          />
+        <div className="absolute inset-0 overflow-hidden">
+          {HERO_IMAGE ? (
+            <>
+              <img
+                src={HERO_IMAGE}
+                alt="Madagascar landscape"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-100 ${
+                  heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="eager"
+                fetchPriority="high"
+              />
+              {!heroImageLoaded && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-        </motion.div>
+        </div>
 
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <motion.div
@@ -83,7 +142,7 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
             className="mb-4"
           >
             <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-              {content?.pageHeaders?.specialties?.badge || 'DÉCOUVREZ MADAGASCAR'}
+              {header.badge || t('sections.specialties')}
             </span>
           </motion.div>
 
@@ -91,19 +150,27 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
+            className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-black text-white mb-4 tracking-tight"
           >
-           {content?.pageHeaders?.specialties?.title || 'Curated Experiences'}
+            {header.title || t('sections.specialties')}
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto mb-8 leading-relaxed"
+            className="text-sm md:text-base lg:text-xl text-white/90 font-light max-w-2xl mx-auto mb-8 leading-relaxed"
           >
-            {content?.pageHeaders?.specialties?.subtitle || 'Vivez des aventures exceptionnelles au cœur de la biodiversité unique de Madagascar'}
+            {header.subtitle || t('sections.specialtiesSubtitle')}
           </motion.p>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingSpecialties && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -120,7 +187,7 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
               <input
                 type="text"
                 className="block w-full pl-14 pr-5 py-5 bg-white border-2 border-[#D4A574]/30 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-[#D4A574] transition-all text-lg font-medium shadow-md hover:shadow-lg"
-                placeholder="Rechercher une expérience..."
+                placeholder={t('tourSpecialties.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -136,7 +203,9 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
                 className="block w-full pl-6 pr-12 py-5 bg-white border-2 border-[#D4A574]/30 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-[#D4A574] appearance-none cursor-pointer transition-all text-lg font-bold shadow-md hover:shadow-lg"
               >
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {categoryLabelMap[cat] || cat}
+                  </option>
                 ))}
               </select>
             </div>
@@ -169,6 +238,13 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
                         className="w-full h-full object-cover"
                       />
 
+                      {/* Badge Best Seller */}
+                      {specialty.isBestSeller && (
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-3 py-1.5 rounded-full font-bold text-xs shadow-xl flex items-center gap-2 z-10">
+                          🏆 {t('tourSpecialties.bestSeller')}
+                        </div>
+                      )}
+
                       <div className="absolute -bottom-8 left-8 z-20 ">
                         <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-gray-50 transition-transform duration-300 group-hover:scale-110">
                           <Bird className="w-8 h-8 text-[#332C26]" />
@@ -177,11 +253,11 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
                     </div>
 
                     <div className="pt-14 p-8 md:p-10 flex-1 flex flex-col items-start bg-white mt-5">
-                      <h3 className="text-3xl font-black text-[#332C26] mb-4 tracking-tight leading-tight">
+                      <h3 className="text-2xl md:text-3xl font-black text-[#332C26] mb-4 tracking-tight leading-tight">
                         {specialty.title}
                       </h3>
 
-                      <p className="text-gray-500 leading-relaxed text-base font-medium mb-10 flex-1">
+                      <p className="text-gray-500 leading-relaxed text-sm md:text-base font-medium mb-10 flex-1">
                         {specialty.description}
                       </p>
 
@@ -190,7 +266,7 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
                         onClick={() => handleOpenModal(specialty)}
                         className="w-auto px-6 py-2 md:px-8 md:py-3 bg-[#443C34] text-white rounded-xl font-black text-sm md:text-lg transition-all duration-300 hover:w-full hover:bg-[#332C26] shadow-lg shadow-black/10 whitespace-nowrap overflow-hidden flex items-center justify-center cursor-pointer"
                       >
-                        Discover More
+                        {t('tourSpecialties.discoverMore')}
                       </motion.button>
                     </div>
                   </div>
@@ -202,7 +278,11 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
           {/* Modal */}
           <AnimatePresence>
             {selectedTour && (
-              <TourModal tour={selectedTour} onClose={() => setSelectedTour(null) } />
+              <TourModal 
+                tour={selectedTour} 
+                onClose={() => setSelectedTour(null)}
+                onNavigateToQuote={onNavigateToQuote}
+              />
             )}
           </AnimatePresence>
 
@@ -212,12 +292,14 @@ export function TourSpecialties({ specialties, initialSelectedTour, content }: T
               animate={{ opacity: 1 }}
               className="text-center py-20"
             >
-              <p className="text-xl text-gray-500 mb-4">No experiences found matching your criteria.</p>
+              <p className="text-xl text-gray-500 mb-4">
+                {t('tourSpecialties.noResults')}
+              </p>
               <button
                 onClick={() => { setSearchQuery(""); setSelectedCategory("Tous"); }}
                 className="text-[#443C34] font-bold underline text-lg hover:text-[#332C26]"
               >
-                Reset filters
+                {t('tourSpecialties.resetFilters')}
               </button>
             </motion.div>
           )}

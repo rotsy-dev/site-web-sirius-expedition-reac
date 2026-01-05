@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { motion } from 'framer-motion'
-import { Award, Users, Globe, Heart, Shield, Clock, Star, CheckCircle, Leaf, Target, TrendingUp, Headphones, DollarSign, UserCheck } from 'lucide-react';
-import { SectionHeader } from '@/components/common/SectionHeader';
+import { Award, Users, Globe, Heart, Shield, Clock, Star, Leaf, Target, TrendingUp, Headphones, DollarSign, UserCheck, Loader2 } from 'lucide-react';
 import ScrollReveal from 'scrollreveal'
+import { useTranslatedContent } from '../../hooks/useTranslatedContent';
+import { useTranslation } from 'react-i18next';
 
 interface AboutUsProps {
   config: {
@@ -34,6 +35,39 @@ interface AboutUsProps {
 const HERO_IMAGE = "https://images.unsplash.com/photo-1598563352765-85f7971070a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsZW11ciUyME1hZGFnYXNjYXIlMjB3aWxkbGlmZXxlbnwxfHx8fDE3NjQ1OTE4Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
 export function AboutUs({ config, content = {} }: AboutUsProps) {
+  const { t } = useTranslation();
+
+  // Traduire automatiquement l'histoire (ourStory)
+  const { translatedContent: translatedStory, isLoading: isTranslatingStory } = useTranslatedContent(
+    content?.ourStory ?? null,
+    ['title', 'paragraphs']
+  );
+
+  // Traduire automatiquement les headers de la section
+  const { translatedContent: translatedAboutHeader } = useTranslatedContent(
+    content?.pageHeaders?.about ?? null,
+    ['badge', 'title', 'subtitle']
+  );
+
+  const story = (translatedStory || content?.ourStory) as typeof content.ourStory;
+  const header = (translatedAboutHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content?.pageHeaders?.about
+    || {};
+
+  const [heroImageLoaded, setHeroImageLoaded] = React.useState(false);
+
+  // Préchargement de l'image hero
+  React.useEffect(() => {
+    if (HERO_IMAGE) {
+      const img = new Image();
+      img.onload = () => setHeroImageLoaded(true);
+      img.onerror = () => setHeroImageLoaded(true);
+      img.src = HERO_IMAGE;
+    } else {
+      setHeroImageLoaded(true);
+    }
+  }, []);
+
   React.useEffect(() => {
     if (typeof ScrollReveal !== 'undefined') {
       const sr = ScrollReveal({
@@ -54,9 +88,9 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
     }
   }, [])
 
-  // Récupération des données dynamiques de l'histoire
-  const story = content?.ourStory || {
-    title: 'Our Story',
+  // Récupération des données dynamiques de l'histoire (déjà traduite ci-dessus)
+  const finalStory = story || {
+    title: t('about.ourStory'),
     paragraphs: [
       "Sirius Expedition was founded with a simple mission: to share the incredible beauty and biodiversity of Madagascar with the world...",
       "With years of experience and deep local knowledge, we specialize in creating customized tours...",
@@ -65,10 +99,10 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
   };
 
   const stats = [
-    { icon: <Users size={40} />, number: '500+', label: 'Happy Travelers' },
-    { icon: <Globe size={40} />, number: '50+', label: 'Tour Packages' },
-    { icon: <Clock size={40} />, number: '15+', label: 'Years Experience' },
-    { icon: <Star size={40} />, number: '4.9', label: 'Average Rating' },
+    { icon: <Users size={40} />, number: '500+', label: t('about.happyTravelers') },
+    { icon: <Globe size={40} />, number: '50+', label: t('about.tourPackages') },
+    { icon: <Clock size={40} />, number: '15+', label: t('about.yearsExperience') },
+    { icon: <Star size={40} />, number: '4.9', label: t('about.averageRating') },
   ];
 
   const values = [
@@ -135,14 +169,27 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
         <motion.div
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0"
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0 overflow-hidden"
         >
-          <img
-            src={HERO_IMAGE}
-            alt="About Sirius Expedition"
-            className="w-full h-full object-cover"
-          />
+          {HERO_IMAGE ? (
+            <>
+              <img
+                src={HERO_IMAGE}
+                alt="About Sirius Expedition"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                  heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="eager"
+                fetchPriority="high"
+              />
+              {!heroImageLoaded && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
         </motion.div>
 
@@ -154,7 +201,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
             className="mb-4"
           >
             <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-              {content?.pageHeaders?.about?.badge || 'ABOUT US'}
+              {header.badge || t('sections.aboutUs')}
             </span>
           </motion.div>
 
@@ -164,7 +211,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
           >
-            {content?.pageHeaders?.about?.title || 'About Sirius Expedition'}
+            {header.title || t('about.title')}
           </motion.h1>
 
           <motion.p
@@ -173,8 +220,16 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
           >
-            {content?.pageHeaders?.about?.subtitle || 'Your trusted partner for unforgettable Madagascar adventures'}
+            {header.subtitle || t('about.subtitle')}
           </motion.p>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingStory && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -209,8 +264,8 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
             <div
               className="flex flex-col justify-center reveal-left"
             >
-              <h3 className="text-5xl font-bold mb-6 text-[#443C34]">{story.title}</h3>
-              {story.paragraphs.map((para, idx) => (
+              <h3 className="text-5xl font-bold mb-6 text-[#443C34]">{finalStory.title}</h3>
+              {finalStory.paragraphs.map((para, idx) => (
                 <p key={idx} className="text-gray-600 mb-4 text-base leading-relaxed">
                   {para}
                 </p>
@@ -250,7 +305,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
             <div className="flex flex-col gap-6 reveal-bottom">
               <div className="bg-white rounded-2xl p-6 border-2 border-[#D4A574]/30 border-l-4 border-l-[#443C34] shadow-md hover:shadow-xl transition-all duration-300">
                 <p className="text-gray-600 italic text-base leading-relaxed">
-                  "{story.paragraphs[story.paragraphs.length - 1]}"
+                  "{finalStory.paragraphs[finalStory.paragraphs.length - 1]}"
                 </p>
               </div>
 
@@ -261,7 +316,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                   {/* LIGNE 1 : Hosting */}
                   <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      Hosted by :
+                      {t('contact.hosting')} :
                     </span>
                     <span className="font-bold text-[#443C34] text-xs">
                       {config.services.hosting.join(' & ')}
@@ -271,7 +326,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                   {/* LIGNE 2 : Domaine */}
                   <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      Domaine :
+                      {t('contact.domain')} :
                     </span>
                     <span className="font-bold text-[#443C34] text-xs flex-1">
                       {config.services.domain}
@@ -281,7 +336,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
                   {/* LIGNE 3 : Email */}
                   <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      Email by :
+                      {t('contact.emailLabel')} :
                     </span>
                     <span className="font-bold text-[#443C34] text-xs flex-1">
                       {config.services.email}
@@ -298,7 +353,9 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
         {/* Values - Thème Mocha & Vanilla */}
         <div className="mb-24 lg:mb-48">
           <div className="text-center space-y-3 mb-12 sm:mb-24">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">Our Core Values</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">
+              {t('about.values')}
+            </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {values.map((value, index) => (
@@ -317,7 +374,9 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
         {/* Why Choose Us - Thème Mocha & Vanilla */}
         <div className="mb-24 lg:mb-48">
           <div className="text-center space-y-3 mb-12 sm:mb-24">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">Why Choose Sirius Expedition ?</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">
+              {t('about.whyChooseUs')}
+            </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {whyChooseUs.map((item, index) => (

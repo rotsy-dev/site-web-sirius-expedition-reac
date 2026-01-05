@@ -20,6 +20,7 @@ export const SITE_SECTIONS = {
   TOURS: 'tours',
   BLOGS: 'blogs',
   ABOUT: 'about',
+  QUOTE: 'quote',
   CONTACT: 'contact',
   ADMIN: 'admin',
 } as const;

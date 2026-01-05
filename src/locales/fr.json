@@ -5,6 +5,7 @@
     "blog": "Blog",
     "about": "À propos",
     "contact": "Contact",
+    "quote": "Demande de devis",
     "login": "Connexion"
   },
   "hero": {
@@ -58,6 +59,7 @@
     "name": "Nom complet",
     "email": "Adresse email",
     "phone": "Téléphone",
+    "country": "Pays",
     "message": "Votre message",
     "send": "Envoyer le message",
     "sending": "Envoi en cours...",
@@ -65,7 +67,46 @@
     "error": "Erreur lors de l'envoi du message",
     "info": "Informations de contact",
     "address": "Adresse",
-    "followUs": "Suivez-nous"
+    "followUs": "Suivez-nous",
+    "sendUsMessage": "Envoyez-nous un message",
+    "getBackWithin24": "Nous vous répondrons dans les 24 heures",
+    "validationErrors": "Erreurs de validation :",
+    "selectCountry": "Sélectionner un pays",
+    "messagePlaceholder": "Parlez-nous de votre aventure de rêve à Madagascar...",
+    "additionalInfo": "Informations supplémentaires",
+    "additionalInfoOptional": "Informations supplémentaires (optionnel)",
+    "interestedTour": "Circuit intéressé",
+    "loadingTours": "Chargement des circuits...",
+    "noToursAvailable": "Aucun circuit disponible pour le moment.",
+    "selectTour": "Sélectionner un circuit",
+    "datesAvailable": "dates disponibles",
+    "preferredTravelDate": "Date et heure de voyage préférées",
+    "noDatesAvailable": "Aucune date disponible pour ce circuit",
+    "selectDateAndTime": "Sélectionner une date et une heure",
+    "at": "à",
+    "numberOfParticipants": "Nombre de participants",
+    "physicalAddress": "Adresse physique",
+    "alternatePhone": "Numéro de téléphone alternatif",
+    "professionalEmail": "Email professionnel",
+    "additionalContactInfo": "Informations de contact supplémentaires",
+    "contacts": "Contacts",
+    "socialMedia": "Réseaux sociaux",
+    "ourLocation": "Notre emplacement",
+    "showAddress": "Afficher l'adresse",
+    "professionalServices": "Services professionnels",
+    "hosting": "Hébergement",
+    "domain": "Domaine",
+    "emailLabel": "Email",
+    "fullNameRequired": "Le nom complet est requis",
+    "emailRequired": "L'email est requis",
+    "emailInvalid": "L'email n'est pas valide",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "countryRequired": "Le pays est requis",
+    "messageRequired": "Le message est requis",
+    "notSpecified": "Non spécifié",
+    "none": "Aucun",
+    "failedToSend": "Échec de l'envoi du message. Veuillez réessayer ou nous contacter directement à",
+    "anyOtherInfo": "Toute autre information utile..."
   },
   "about": {
     "title": "À propos de Sirius Expedition",
@@ -79,7 +120,11 @@
     "yearsOfExperience": "années d'expérience",
     "happyClients": "Clients satisfaits",
     "tours": "Circuits organisés",
-    "destinations": "Destinations"
+    "destinations": "Destinations",
+    "happyTravelers": "Voyageurs heureux",
+    "tourPackages": "Circuits proposés",
+    "yearsExperience": "Années d'expérience",
+    "averageRating": "Note moyenne"
   },
   "blog": {
     "title": "Blog & Actualités",
@@ -91,16 +136,34 @@
     "relatedPosts": "Articles connexes",
     "shareArticle": "Partager l'article"
   },
-  "footer": {
-    "description": "Découvrez les merveilles de Madagascar avec Sirius Expedition",
-    "quickLinks": "Liens rapides",
-    "followUs": "Suivez-nous",
-    "contact": "Contact",
-    "rights": "Tous droits réservés",
-    "newsletter": "Newsletter",
-    "newsletterText": "Inscrivez-vous pour recevoir nos dernières offres",
-    "subscribe": "S'abonner",
-    "emailPlaceholder": "Votre email"
+  "tourSpecialties": {
+    "searchPlaceholder": "Rechercher une expérience...",
+    "discoverMore": "Découvrir plus",
+    "noResults": "Aucune expérience ne correspond à vos critères.",
+    "resetFilters": "Réinitialiser les filtres",
+    "bestSeller": "Meilleure vente",
+    "categories": {
+      "all": "Toutes les expériences",
+      "nature": "Nature",
+      "culture": "Culture",
+      "adventure": "Aventure",
+      "photography": "Photographie"
+    },
+    "modal": {
+      "duration": "Durée",
+      "location": "Localisation",
+      "group": "Groupe",
+      "transport": "Transport",
+      "whyUs": "Pourquoi nous choisir ?",
+      "highlights": "Points forts",
+      "itinerary": "Itinéraire jour par jour",
+      "included": "Inclus",
+      "excluded": "Non inclus",
+      "from": "À partir de",
+      "perPerson": "/ personne",
+      "reviews": "avis",
+      "askQuote": "Demander un devis"
+    }
   },
   "common": {
     "learnMore": "En savoir plus",
@@ -148,6 +211,48 @@
     "termsOfUse": "Conditions d'utilisation",
     "privacyPolicy": "Politique de confidentialité",
     "cookieManagement": "Gestion des cookies"
+  }
+,
+  "quote": {
+    "badge": "Devis personnalisé",
+    "title": "Demandez un devis sur mesure",
+    "subtitle": "Expliquez-nous votre projet de voyage à Madagascar et nous vous enverrons une proposition adaptée.",
+    "name": "Nom complet",
+    "email": "Adresse email",
+    "whatsapp": "Numéro WhatsApp",
+    "country": "Pays de résidence",
+    "tour": "Choisissez un circuit",
+    "pax": "Nombre de voyageurs",
+    "datePeriod": "Période de voyage",
+    "message": "Informations complémentaires",
+    "submit": "Envoyer la demande de devis",
+    "sending": "Envoi de votre demande...",
+    "sent": "Demande envoyée !",
+    "sendError": "Erreur lors de l'envoi de votre demande. Veuillez réessayer.",
+    "notProvided": "Non renseigné",
+    "errors": {
+      "name": "Le nom complet est requis",
+      "email": "L'email est requis",
+      "country": "Le pays est requis",
+      "tour": "Veuillez sélectionner un circuit",
+      "pax": "Le nombre de voyageurs est requis",
+      "datePeriod": "La période de voyage est requise"
+    },
+    "placeholders": {
+      "name": "John Doe",
+      "email": "janedoe@email.com",
+      "whatsapp": "Numéro WhatsApp",
+      "country": "Sélectionner un pays",
+      "tour": "Sélectionner un circuit",
+      "pax": "Nombre de personnes",
+      "datePeriod": "2026-01-05 ~ 2026-12-05",
+      "message": "Toute autre information utile..."
+    }
+  },
+  "gallery": {
+    "badge": "Découvrir Madagascar",
+    "title": "Madagascar en images",
+    "subtitle": "Explorez la beauté et la diversité de l'île Rouge"
   }
 
 }

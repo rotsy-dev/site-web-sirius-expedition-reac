@@ -4,12 +4,14 @@ import Slider from 'react-slick'
 import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
 import { ImageWithFallback } from '../../components/common/ImageWithFallback'
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import * as React from "react"
 import { AnimatePresence } from 'framer-motion'
 import { TourModal, getDetailedTour, ExtendedTourSpecialty } from './TourModal'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import ScrollReveal from 'scrollreveal'
+import { useTranslatedContent } from '../../hooks/useTranslatedContent'
+import { useTranslation } from 'react-i18next'
 
 const { useRef, useState, useEffect } = React
 
@@ -45,9 +47,29 @@ const settings = {
 }
 
 export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSellersProps) {
+  const { t } = useTranslation()
   const sliderRef = useRef<Slider>(null)
   const [hoveredButton, setHoveredButton] = useState<number | null>(null)
   const [selectedTour, setSelectedTour] = useState<ExtendedTourSpecialty | null>(null)
+  
+  // Traduire automatiquement le contenu des tours
+  const { translatedContent: translatedTours, isLoading: isTranslatingTours } = useTranslatedContent(
+    tours,
+    ['title', 'description', 'location', 'longDescription']
+  )
+
+  // Traduire automatiquement les headers de la section Best Sellers (badge, titre, sous-titre)
+  const { translatedContent: translatedBestSellersHeader } = useTranslatedContent(
+    content.pageHeaders?.bestSellers ?? null,
+    ['badge', 'title', 'subtitle']
+  )
+
+  const header = (translatedBestSellersHeader as { badge?: string; title?: string; subtitle?: string } | null)
+    || content.pageHeaders?.bestSellers
+    || {}
+  
+  // Utiliser les tours traduits ou les tours originaux
+  const displayTours = (translatedTours || tours) as typeof tours
 
   useEffect(() => {
     if (typeof ScrollReveal !== 'undefined') {
@@ -90,7 +112,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
           <h3 className="text-2xl font-bold text-[#4B3935] mb-2">{tour.title}</h3>
 
           <p className="text-[#4B3935]/70 mb-6 text-sm leading-relaxed">
-            Explore the iconic Avenue of the Baobabs and the unique Tsingy formations
+            {tour.description || 'Explore the iconic Avenue of the Baobabs and the unique Tsingy formations'}
           </p>
 
           <div className="text-3xl font-bold text-[#4B3935] mb-6">1 299 €</div>
@@ -107,20 +129,6 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             </div>
           </div>
 
-          {/* Liste des points avec icônes Mocha */}
-          <div className="space-y-3 mb-8 border-t border-[#4B3935]/10 pt-6">
-            {[
-              "Expérience du coucher de soleil",
-              "Site du patrimoine mondial",
-              "Visite de villages locaux",
-            ].map((item, i) => (
-              <div key={i} className="flex gap-3 items-center text-[#4B3935]/80 text-sm">
-                <Check size={16} className="text-[#2fb5a3]" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
           {/* Bouton style Mocha / Vanilla */}
           <button
             onMouseEnter={() => setHoveredButton(tour.id)}
@@ -134,7 +142,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
               }
             `}
           >
-            Explore tour
+            {t('common.learnMore')}
           </button>
         </div>
       </div>
@@ -149,15 +157,23 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
 
           <div className="section-header mb-12">
             <SectionHeader
-              badge={content.pageHeaders?.bestSellers?.badge || 'Best Sellers'}
-              title={content.pageHeaders?.bestSellers?.title || 'Most Popular Adventures'}
-              subtitle={content.pageHeaders?.bestSellers?.subtitle || 'Handpicked experiences...'}
+              badge={header.badge || t('sections.bestSellers')}
+              title={header.title || t('sections.bestSellers')}
+              subtitle={header.subtitle || t('sections.bestSellersSubtitle')}
             />
           </div>
+          
+          {/* Indicateur de chargement de traduction */}
+          {isTranslatingTours && (
+            <div className="flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
 
           {/* MOBILE / TABLET */}
           <div className="grid gap-8 lg:hidden">
-            {tours.map(tour => (
+            {displayTours.map(tour => (
               <Card key={tour.id} tour={tour} />
             ))}
           </div>
@@ -165,7 +181,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
           {/* DESKTOP → SLIDER */}
           <div className="hidden lg:block">
             <Slider ref={sliderRef} {...settings} className="best-sellers-slider">
-              {tours.map(tour => (
+              {displayTours.map(tour => (
                 <div key={tour.id} className="px-4 py-4 h-full">
                   <Card tour={tour} />
                 </div>

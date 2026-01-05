@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
     Image,
@@ -16,7 +16,9 @@ import {
     RotateCcw,
     Film,
     Type,
-    HistoryIcon
+    HistoryIcon,
+    Menu,
+    X
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
@@ -28,6 +30,7 @@ import { ConfigEditor } from './sections/ConfigEditor';
 import VideoConfigEditor from './sections/VideoConfigEditor';
 import { PageHeadersEditor } from './sections/PageHeadersEditor';
 import { AboutEditor } from './sections/AboutEditor';
+import { GalleryEditor } from './sections/GalleryEditor';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -38,9 +41,17 @@ interface AdminDashboardProps {
     onUpdateSection: (section: string, data: any) => void;
 }
 
-export function AdminDashboard({ onLogout, onExport, onImport, onReset, content, onUpdateSection }: AdminDashboardProps) {
+export function AdminDashboard({
+    onLogout,
+    onExport,
+    onImport,
+    onReset,
+    content,
+    onUpdateSection
+}: AdminDashboardProps) {
     const [activeTab, setActiveTab] = useState('hero');
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const menuItems = [
         { id: 'hero', label: 'Hero Carousel', icon: Image },
@@ -51,6 +62,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
         { id: 'faq', label: 'FAQ', icon: HelpCircle },
         { id: 'config', label: 'Configuration', icon: Settings },
         { id: 'videos', label: 'Videos', icon: Film },
+        { id: 'gallery', label: 'Image Gallery', icon: Image },
         { id: 'headers', label: 'Page Headers', icon: Type },
         { id: 'about', label: 'Our Story', icon: HistoryIcon },
     ];
@@ -85,30 +97,66 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
     };
 
     return (
-        <div className="min-h-screen bg-background flex">
-            {/* ========== LEFT SIDEBAR - COLLÉE À GAUCHE ========== */}
-            <aside className="w-64 min-h-screen bg-card border-r border-border fixed left-0 top-0 bottom-0 z-40">
+        <div className="min-h-screen bg-background flex flex-col md:flex-row">
+            {/* Overlay sombre pour mobile */}
+            <AnimatePresence>
+                {isSidebarOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Sidebar */}
+            <aside
+                className={`
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    md:translate-x-0
+                    fixed md:static
+                    top-0 left-0 bottom-0
+                    w-64
+                    bg-card border-r border-border
+                    z-50
+                    transition-transform duration-300 ease-in-out
+                    flex flex-col
+                `}
+            >
                 <div className="p-4 h-full flex flex-col">
-                    {/* Logo / Header de la sidebar */}
-                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-                            <LayoutDashboard className="text-primary-foreground" size={20} />
+                    {/* Header sidebar */}
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+                                <LayoutDashboard className="text-primary-foreground" size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-sm font-bold text-foreground">Admin Dashboard</h1>
+                                <p className="text-xs text-muted-foreground">Sirius Expedition</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-sm font-bold text-foreground">Admin Dashboard</h1>
-                            <p className="text-xs text-muted-foreground">Sirius Expedition</p>
-                        </div>
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="md:hidden p-1 rounded-lg hover:bg-muted"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
 
-                    {/* Navigation Menu */}
-                    <nav className="space-y-1 flex-1">
+                    {/* Navigation */}
+                    <nav className="space-y-1 flex-1 overflow-y-auto">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
                             return (
                                 <motion.button
                                     key={item.id}
                                     whileHover={{ x: 4 }}
-                                    onClick={() => setActiveTab(item.id)}
+                                    onClick={() => {
+                                        setActiveTab(item.id);
+                                        setIsSidebarOpen(false);
+                                    }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                                         activeTab === item.id
                                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg'
@@ -122,7 +170,7 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                         })}
                     </nav>
 
-                    {/* Bouton de déconnexion en bas */}
+                    {/* Déconnexion */}
                     <div className="pt-4 border-t border-border">
                         <motion.button
                             whileHover={{ scale: 1.02 }}
@@ -137,63 +185,88 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                 </div>
             </aside>
 
-            {/* ========== CONTENU PRINCIPAL AVEC MARGIN LEFT ========== */}
-            <div className="flex-1 ml-64 w-full">
-                {/* Header - AVEC PADDING ÉGAL DES DEUX CÔTÉS */}
-                <header className="bg-card border-b border-border sticky top-0 z-30 backdrop-blur-xl bg-card/80 w-full">
-                    <div className="w-full px-8 py-4">
-                        <div className="flex items-center justify-between">
+            {/* Contenu principal */}
+            <div className="flex-1 flex flex-col">
+                {/* Header */}
+                <header className="bg-card border-b border-border sticky top-0 z-30 backdrop-blur-xl bg-card/80">
+                    <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="md:hidden p-2 rounded-lg hover:bg-muted"
+                            >
+                                <Menu size={24} />
+                            </button>
+
                             <div>
                                 <h2 className="text-xl font-bold text-foreground">
-                                    {menuItems.find(item => item.id === activeTab)?.label}
+                                    {menuItems.find((item) => item.id === activeTab)?.label}
                                 </h2>
                                 <p className="text-sm text-muted-foreground">
                                     Gérez le contenu de cette section
                                 </p>
                             </div>
+                        </div>
 
-                            <div className="flex items-center gap-2">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={onExport}
-                                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
-                                >
-                                    <Download size={16} />
-                                    Exporter
-                                </motion.button>
+                        {/* Boutons d'action - version desktop/tablette */}
+                        <div className="hidden sm:flex items-center gap-2">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={onExport}
+                                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
+                            >
+                                <Download size={16} />
+                                Exporter
+                            </motion.button>
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleImport}
-                                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
-                                >
-                                    <Upload size={16} />
-                                    Importer
-                                </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleImport}
+                                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
+                            >
+                                <Upload size={16} />
+                                Importer
+                            </motion.button>
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleReset}
-                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${
-                                        showResetConfirm
-                                            ? 'bg-destructive text-destructive-foreground'
-                                            : 'bg-muted hover:bg-muted/80 text-foreground'
-                                    }`}
-                                >
-                                    <RotateCcw size={16} />
-                                    {showResetConfirm ? 'Confirmer ?' : 'Reset'}
-                                </motion.button>
-                            </div>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleReset}
+                                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${
+                                    showResetConfirm
+                                        ? 'bg-destructive text-destructive-foreground'
+                                        : 'bg-muted hover:bg-muted/80 text-foreground'
+                                }`}
+                            >
+                                <RotateCcw size={16} />
+                                {showResetConfirm ? 'Confirmer ?' : 'Reset'}
+                            </motion.button>
+                        </div>
+
+                        {/* Boutons d'action - version mobile (icônes uniquement) */}
+                        <div className="flex sm:hidden items-center gap-2">
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={onExport} className="p-2 bg-muted rounded-lg">
+                                <Download size={18} />
+                            </motion.button>
+                            <motion.button whileTap={{ scale: 0.9 }} onClick={handleImport} className="p-2 bg-muted rounded-lg">
+                                <Upload size={18} />
+                            </motion.button>
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={handleReset}
+                                className={`p-2 rounded-lg ${showResetConfirm ? 'bg-destructive text-destructive-foreground' : 'bg-muted'}`}
+                            >
+                                <RotateCcw size={18} />
+                            </motion.button>
                         </div>
                     </div>
                 </header>
 
-                {/* Contenu principal - AVEC PADDING ÉGAL */}
-                <main className="w-full p-8">
-                    <div className="bg-card rounded-2xl border border-border p-6 min-h-[600px]">
+                {/* Main content */}
+                <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+                    <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 min-h-[600px]">
                         {activeTab === 'headers' && (
                             <PageHeadersEditor
                                 headers={content.pageHeaders}
@@ -206,61 +279,61 @@ export function AdminDashboard({ onLogout, onExport, onImport, onReset, content,
                                 onSave={(slides) => onUpdateSection('heroSlides', slides)}
                             />
                         )}
-
                         {activeTab === 'tours' && (
                             <ToursEditor
                                 tours={content.bestSellers}
                                 onSave={(tours) => onUpdateSection('bestSellers', tours)}
                             />
                         )}
-
                         {activeTab === 'specialties' && (
                             <TourSpecialtiesEditor
                                 specialties={content.tourSpecialties}
                                 onSave={(specialties) => onUpdateSection('tourSpecialties', specialties)}
                             />
                         )}
-
                         {activeTab === 'reviews' && (
                             <ReviewsEditor
                                 reviews={content.reviews}
                                 onSave={(reviews) => onUpdateSection('reviews', reviews)}
                             />
                         )}
-
                         {activeTab === 'blog' && (
                             <BlogEditor
                                 posts={content.blogPosts}
                                 onSave={(posts) => onUpdateSection('blogPosts', posts)}
                             />
                         )}
-
                         {activeTab === 'faq' && (
                             <FAQEditor
                                 faqs={content.faqs}
                                 onSave={(faqs) => onUpdateSection('faqs', faqs)}
                             />
                         )}
-
                         {activeTab === 'videos' && (
                             <VideoConfigEditor
                                 videos={content.videoGallery}
                                 config={content.siteConfig.videos}
                                 onSaveVideos={(videos) => onUpdateSection('videoGallery', videos)}
-                                onSaveConfig={(config) => onUpdateSection('siteConfig', {
-                                    ...content.siteConfig,
-                                    videos: config
-                                })}
+                                onSaveConfig={(config) =>
+                                    onUpdateSection('siteConfig', {
+                                        ...content.siteConfig,
+                                        videos: config
+                                    })
+                                }
                             />
                         )}
-
+                        {activeTab === 'gallery' && (
+                            <GalleryEditor
+                                images={content.imageGallery || []}
+                                onSave={(images) => onUpdateSection('imageGallery', images)}
+                            />
+                        )}
                         {activeTab === 'about' && (
-                            <AboutEditor 
-                                story={content.ourStory} 
-                                onSave={(story) => onUpdateSection('ourStory', story)} 
+                            <AboutEditor
+                                story={content.ourStory}
+                                onSave={(story) => onUpdateSection('ourStory', story)}
                             />
                         )}
-
                         {activeTab === 'config' && (
                             <ConfigEditor
                                 config={content.siteConfig}

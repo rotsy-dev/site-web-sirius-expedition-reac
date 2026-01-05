@@ -22,6 +22,7 @@ const PAGES = [
   { key: 'videos', label: 'Video Gallery', icon: '🎬' },
   { key: 'blog', label: 'Blog', icon: '📝' },
   { key: 'about', label: 'About Us', icon: 'ℹ️' },
+  { key: 'quote', label: 'Ask a quote', icon: '💼' },
   { key: 'contact', label: 'Contact', icon: '📧' }
 ];
 

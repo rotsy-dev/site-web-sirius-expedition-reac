@@ -50,6 +50,11 @@ const defaultContent = {
             title: 'About Sirius Expedition',
             subtitle: 'Your trusted partner for unforgettable Madagascar adventures'
         },
+        quote: {
+            badge: 'Ask a quote',
+            title: 'Get your personalized quote',
+            subtitle: 'Share your travel dates and preferences, we take care of the rest.'
+        },
         contact: {
             badge: 'Get In Touch',
             title: 'Contact Us',
@@ -79,30 +84,32 @@ const defaultContent = {
     blogPosts: [],
     faqs: [],
     videoGallery: [],
+    imageGallery: [],
     siteConfig: {
         siteName: 'Sirius Expedition',
         tagline: 'Aventures authentiques à Madagascar',
         logo: '',
-        contact: { 
-            email: 'contact@siriusexpedition.com', 
-            phone: '+261 34 00 000 00', 
+        contact: {
+            email: 'contact@siriusexpedition.com',
+            phone: '+261 34 00 000 00',
             address: 'Antananarivo, Madagascar',
             whatsapp: '+261340000000'
         },
-        social: { 
-            facebook: 'https://facebook.com/siriusexpedition', 
-            youtube: 'https://youtube.com/@siriusexpedition', 
+        social: {
+            facebook: 'https://facebook.com/siriusexpedition',
+            youtube: 'https://youtube.com/@siriusexpedition',
             instagram: 'https://instagram.com/siriusexpedition',
             tripadvisor: 'https://tripadvisor.com/siriusexpedition',
-            google: 'https://g.page/siriusexpedition'
+            google: 'https://g.page/siriusexpedition',
+            tiktok: 'https://tiktok.com/@siriusexpedition'
         },
-        videos: { 
+        videos: {
             aboutUsVideoId: '',
             mainYouTubeId: '',
             channelUrl: 'https://youtube.com/@siriusexpedition'
         },
-        services: { 
-            hosting: ['Hébergement 5*', 'Bungalows', 'Camping'], 
+        services: {
+            hosting: ['Hébergement 5*', 'Bungalows', 'Camping'],
             domain: 'siriusexpedition.com',
             email: 'reservation@siriusexpedition.com'
         },
@@ -133,8 +140,8 @@ export function useContentManager() {
         const loadContent = async () => {
             try {
                 const collections = [
-                    'heroSlides', 'bestSellers', 'tourSpecialties', 
-                    'reviews', 'blogPosts', 'faqs', 'videoGallery'
+                    'heroSlides', 'bestSellers', 'tourSpecialties',
+                    'reviews', 'blogPosts', 'faqs', 'videoGallery', 'imageGallery'
                 ];
 
                 const fetchedContent: any = { ...defaultContent };
@@ -144,14 +151,20 @@ export function useContentManager() {
                     getDoc(doc(db, 'siteConfig', 'main')),
                     getDoc(doc(db, 'pageHeaders', 'main')),
                     getDoc(doc(db, 'ourStory', 'main')), // <--- Récupération Histoire
-                    ...collections.map(coll => 
+                    ...collections.map(coll =>
                         getDocs(query(collection(db, coll), orderBy("id", "asc")))
                     )
                 ]);
 
                 // Traitement des collections
                 collections.forEach((coll, index) => {
-                    fetchedContent[coll] = collectionSnapshots[index].docs.map(d => d.data());
+                    const docs = collectionSnapshots[index].docs.map(d => d.data());
+                    fetchedContent[coll] = docs;
+                    // Debug pour imageGallery
+                    if (coll === 'imageGallery') {
+                        console.log('useContentManager - imageGallery chargé:', docs);
+                        console.log('useContentManager - nombre d\'images:', docs.length);
+                    }
                 });
 
                 // ✅ Page Headers
@@ -201,12 +214,12 @@ export function useContentManager() {
             // ✅ GESTION DES OBJETS UNIQUES (Inclus ourStory)
             if (['siteConfig', 'pageHeaders', 'ourStory'].includes(section)) {
                 batch.set(doc(db, section, 'main'), data);
-            } 
+            }
             // ✅ GESTION DES COLLECTIONS
             else if (Array.isArray(data)) {
                 const snapshot = await getDocs(collection(db, section));
                 snapshot.docs.forEach(d => batch.delete(d.ref));
-                
+
                 data.forEach((item: any) => {
                     const ref = doc(db, section, item.id.toString());
                     batch.set(ref, item);
@@ -223,10 +236,10 @@ export function useContentManager() {
 
     const resetToDefaults = async () => {
         if (!confirm('⚠️ Réinitialiser TOUT le contenu ?')) return;
-        
+
         try {
             const batch = writeBatch(db);
-            const collections = ['heroSlides', 'bestSellers', 'tourSpecialties', 'reviews', 'blogPosts', 'faqs', 'videoGallery'];
+            const collections = ['heroSlides', 'bestSellers', 'tourSpecialties', 'reviews', 'blogPosts', 'faqs', 'videoGallery', 'imageGallery'];
 
             for (const coll of collections) {
                 const snap = await getDocs(collection(db, coll));
@@ -241,7 +254,7 @@ export function useContentManager() {
             batch.set(doc(db, 'siteConfig', 'main'), defaultContent.siteConfig);
             batch.set(doc(db, 'pageHeaders', 'main'), defaultContent.pageHeaders);
             batch.set(doc(db, 'ourStory', 'main'), defaultContent.ourStory); // <--- Reset Histoire
-            
+
             await batch.commit();
             alert('✅ Contenu réinitialisé !');
             window.location.reload();

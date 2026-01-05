@@ -357,20 +357,41 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </button>
 
                             {previewSlide.image && (
-                                <div className="relative h-96">
+                                <div className="relative h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] bg-black">
+                                    {/* Image de fond avec léger zoom */}
                                     <img
                                         src={previewSlide.image}
                                         alt={previewSlide.title}
                                         className="w-full h-full object-cover"
                                         loading="lazy"
+                                        style={{
+                                            filter: 'brightness(0.9) contrast(1.1) saturate(1.1)'
+                                        }}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 right-0 p-8 text-primary-foreground">
-                                        <h3 className="text-4xl font-bold mb-3">{previewSlide.title}</h3>
-                                        <p className="text-xl mb-4 opacity-90">{previewSlide.subtitle}</p>
-                                        <button className="px-6 py-3 bg-gradient-to-r from-primary to-accent rounded-xl font-semibold">
-                                            {previewSlide.cta}
-                                        </button>
+
+                                    {/* Overlays proches du Hero réel */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-transparent to-transparent" />
+
+                                    {/* Contenu texte aligné avec le Hero */}
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="px-5 sm:px-8 md:px-10 lg:px-12 pb-10 w-full max-w-3xl">
+                                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 leading-tight drop-shadow-xl">
+                                                {previewSlide.title}
+                                            </h3>
+                                            <div className="bg-black/45 backdrop-blur-sm border border-white/15 rounded-xl p-4 sm:p-5 md:p-6 shadow-2xl max-w-xl">
+                                                <p className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed">
+                                                    {previewSlide.subtitle}
+                                                </p>
+                                            </div>
+                                            <button className="relative mt-5 inline-flex items-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg font-semibold text-sm sm:text-base text-white shadow-xl overflow-hidden">
+                                                <span className="relative z-10 uppercase tracking-wide">
+                                                    {previewSlide.cta}
+                                                </span>
+                                                <span className="relative z-10 text-lg">➜</span>
+                                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
