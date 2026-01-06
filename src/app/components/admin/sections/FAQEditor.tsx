@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Save, HelpCircle } from 'lucide-react';
-import { db } from '../../../../firebase/config'; // ← ajuste le chemin selon ta structure
+import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 
 interface FAQ {
@@ -25,7 +25,6 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
 
     const categories = ['General', 'Tours', 'Pricing', 'Travel Info', 'Booking'];
 
-    // Chargement des FAQ depuis Firestore au montage
     useEffect(() => {
         const fetchFaqs = async () => {
             try {
@@ -36,9 +35,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                     ...docSnap.data() as Omit<FAQ, 'id'>
                 }));
 
-                // Tri par ID pour un ordre stable
                 fetchedFaqs.sort((a, b) => a.id - b.id);
-
                 setFaqs(fetchedFaqs.length > 0 ? fetchedFaqs : initialFaqs);
             } catch (err) {
                 console.error('Erreur lors du chargement des FAQ :', err);
@@ -74,10 +71,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
     const handleDeleteFAQ = async (id: number) => {
         if (confirm('Supprimer définitivement cette FAQ ? Cette action est irréversible.')) {
             try {
-                // Suppression immédiate dans Firestore
                 await deleteDoc(doc(db, 'faqs', id.toString()));
-
-                // Suppression locale
                 setFaqs(faqs.filter(f => f.id !== id));
                 setHasChanges(true);
             } catch (err) {
@@ -89,7 +83,6 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
 
     const handleSave = async () => {
         try {
-            // Sauvegarde de chaque FAQ dans Firestore
             for (const faq of faqs) {
                 const faqDoc = doc(db, 'faqs', faq.id.toString());
                 await setDoc(faqDoc, faq);
@@ -119,42 +112,49 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+        <div className="space-y-8">
+            {/* ==================== HEADER RESPONSIVE ==================== */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">Questions Fréquentes (FAQ)</h2>
                     <p className="text-muted-foreground">Gérez les questions et réponses</p>
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     {hasChanges && (
-                        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                            Non sauvegardé
-                        </span>
+                        <div className="self-start sm:self-center">
+                            <span className="text-sm text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-3 py-1.5 rounded-lg font-medium">
+                                Non sauvegardé
+                            </span>
+                        </div>
                     )}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleAddFAQ}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
-                    >
-                        <Plus size={18} />
-                        Ajouter FAQ
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSave}
-                        disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        <Save size={18} />
-                        Sauvegarder
-                    </motion.button>
+
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddFAQ}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
+                        >
+                            <Plus size={18} />
+                            Ajouter FAQ
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSave}
+                            disabled={!hasChanges}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            <Save size={18} />
+                            Sauvegarder
+                        </motion.button>
+                    </div>
                 </div>
             </div>
 
-            {/* Stats */}
+            {/* ==================== STATS ==================== */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {categories.map(category => (
                     <div key={category} className="bg-card border border-border rounded-xl p-4 text-center">
@@ -166,19 +166,20 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                 ))}
             </div>
 
-            {/* Liste des FAQs par catégorie */}
+            {/* ==================== LISTE DES FAQ PAR CATÉGORIE ==================== */}
             {categories.map(category => {
                 const categoryFaqs = groupedFaqs[category] || [];
                 if (categoryFaqs.length === 0) return null;
 
                 return (
-                    <div key={category} className="space-y-3">
+                    <div key={category} className="space-y-4">
                         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                             <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                 <HelpCircle size={16} className="text-primary" />
                             </div>
                             {category} ({categoryFaqs.length})
                         </h3>
+
                         <div className="grid gap-4">
                             {categoryFaqs.map((faq) => (
                                 <motion.div
@@ -187,7 +188,8 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="bg-muted/30 rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                                 >
-                                    <div className="flex items-center justify-between p-4 bg-card border-b border-border">
+                                    {/* Header de la FAQ - responsive */}
+                                    <div className="p-4 bg-card border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex-1">
                                             <h4 className="font-medium text-foreground text-lg">{faq.question}</h4>
                                             {editingId !== faq.id && (
@@ -196,7 +198,8 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                 </p>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-2 ml-4">
+
+                                        <div className="flex items-center gap-2 self-start sm:self-center">
                                             <button
                                                 onClick={() => setEditingId(editingId === faq.id ? null : faq.id)}
                                                 className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors"
@@ -213,7 +216,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                         </div>
                                     </div>
 
-                                    {/* Formulaire d'édition */}
+                                    {/* Zone d'édition */}
                                     <AnimatePresence>
                                         {editingId === faq.id && (
                                             <motion.div
@@ -223,8 +226,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                 transition={{ duration: 0.3 }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="p-6 space-y-5">
-                                                    {/* Catégorie */}
+                                                <div className="p-4 sm:p-6 space-y-5">
                                                     <div>
                                                         <label className="block text-sm font-medium text-foreground mb-2">Catégorie</label>
                                                         <select
@@ -238,7 +240,6 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                         </select>
                                                     </div>
 
-                                                    {/* Question */}
                                                     <div>
                                                         <label className="block text-sm font-medium text-foreground mb-2">Question</label>
                                                         <input
@@ -249,7 +250,6 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                                                         />
                                                     </div>
 
-                                                    {/* Réponse */}
                                                     <div>
                                                         <label className="block text-sm font-medium text-foreground mb-2">Réponse</label>
                                                         <textarea
@@ -270,9 +270,9 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                 );
             })}
 
-            {/* Empty state */}
+            {/* ==================== EMPTY STATE ==================== */}
             {faqs.length === 0 && !isLoading && (
-                <div className="bg-muted/30 rounded-2xl p-16 text-center border border-border border-dashed">
+                <div className="bg-muted/30 rounded-2xl p-12 sm:p-16 text-center border border-border border-dashed">
                     <HelpCircle size={64} className="text-muted-foreground mx-auto mb-6" />
                     <h3 className="text-2xl font-bold text-foreground mb-3">Aucune FAQ pour le moment</h3>
                     <p className="text-muted-foreground mb-8 max-w-md mx-auto">
@@ -282,7 +282,7 @@ export function FAQEditor({ faqs: initialFaqs, onSave }: FAQEditorProps) {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleAddFAQ}
-                        className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all"
+                        className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all"
                     >
                         Ajouter la première FAQ
                     </motion.button>

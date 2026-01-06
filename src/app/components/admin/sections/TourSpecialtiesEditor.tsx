@@ -22,9 +22,9 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 
-// ==================== COMPOSANT IMAGEUPLOADER (Base64) ====================
+// ==================== IMAGEUPLOADER (Base64) ====================
 interface ImageUploaderProps {
-  value: string; // Base64 string
+  value: string;
   onChange: (base64: string) => void;
   aspectRatio?: string;
 }
@@ -188,7 +188,7 @@ interface TourSpecialty {
   title: string;
   slug: string;
   description: string;
-  image: string; // maintenant Base64
+  image: string;
   link: string;
   duration: string;
   location: string;
@@ -215,7 +215,6 @@ export function TourSpecialtiesEditor({
   const [specialties, setSpecialties] = useState<TourSpecialty[]>(initialSpecialties);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modale
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSpecialty, setCurrentSpecialty] = useState<TourSpecialty | null>(null);
 
@@ -347,24 +346,25 @@ export function TourSpecialtiesEditor({
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* ==================== HEADER RESPONSIVE ==================== */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
           <h2 className="text-3xl font-bold text-foreground">Gestion des Spécialités de Tours</h2>
           <p className="text-muted-foreground mt-2">Images stockées directement en Base64 dans Firestore (plan Spark gratuit)</p>
         </div>
+
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={openAddModal}
-          className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl"
+          className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl transition-all"
         >
-          <Plus size={20} /> Ajouter une spécialité
+          <Plus size={22} /> Ajouter une spécialité
         </motion.button>
       </div>
 
-      {/* Cartes preview */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* ==================== CARTES PREVIEW ==================== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {specialties.map((specialty) => (
           <motion.div
             key={specialty.id}
@@ -390,7 +390,7 @@ export function TourSpecialtiesEditor({
                 </div>
               )}
             </div>
-            <div className="p-8">
+            <div className="p-6 sm:p-8">
               <h3 className="text-2xl font-bold text-foreground mb-3">{specialty.title}</h3>
               <p className="text-muted-foreground line-clamp-3 mb-6">{specialty.description}</p>
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-8">
@@ -400,16 +400,18 @@ export function TourSpecialtiesEditor({
                 <span>{specialty.duration}</span>
                 <span className="font-bold text-foreground">{specialty.price}</span>
               </div>
-              <div className="flex justify-between">
+
+              {/* Boutons en colonne sur mobile */}
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => openEditModal(specialty)}
-                  className="flex items-center gap-2 px-5 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-medium transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-medium transition-colors"
                 >
                   <Edit2 size={18} /> Modifier
                 </button>
                 <button
                   onClick={() => deleteSpecialty(specialty.id)}
-                  className="p-3 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                  className="flex-shrink-0 p-3 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -419,7 +421,7 @@ export function TourSpecialtiesEditor({
         ))}
       </div>
 
-      {/* MODALE */}
+      {/* ==================== MODALE ==================== */}
       <AnimatePresence>
         {isModalOpen && currentSpecialty && (
           <motion.div
@@ -436,8 +438,8 @@ export function TourSpecialtiesEditor({
               className="bg-card rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="sticky top-0 bg-card border-b border-border px-8 py-6 flex justify-between items-center z-10">
-                <h2 className="text-3xl font-bold text-foreground">
+              <div className="sticky top-0 bg-card border-b border-border px-6 sm:px-8 py-6 flex justify-between items-center z-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
                   {specialties.some((s) => s.id === currentSpecialty.id) ? 'Modifier' : 'Ajouter'} une spécialité
                 </h2>
                 <button onClick={closeModal} className="p-3 hover:bg-muted rounded-xl transition-colors">
@@ -445,17 +447,17 @@ export function TourSpecialtiesEditor({
                 </button>
               </div>
 
-              <div className="p-8 space-y-8">
+              <div className="p-6 sm:p-8 space-y-8">
                 {/* Icône */}
                 <div>
                   <label className="block text-lg font-medium text-foreground mb-4">Icône (emoji)</label>
-                  <div className="flex flex-wrap gap-4 mb-6">
+                  <div className="grid grid-cols-5 sm:grid-cols-10 gap-4 mb-6">
                     {emojiOptions.map((emoji) => (
                       <button
                         key={emoji}
                         type="button"
                         onClick={() => setCurrentSpecialty((prev) => (prev ? { ...prev, icon: emoji } : null))}
-                        className={`w-14 h-14 text-3xl rounded-2xl transition-all shadow-lg ${
+                        className={`aspect-square text-3xl rounded-2xl transition-all shadow-lg flex items-center justify-center ${
                           currentSpecialty.icon === emoji
                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground ring-4 ring-primary/30 scale-110'
                             : 'bg-muted hover:bg-muted/80 hover:scale-105'
@@ -477,7 +479,7 @@ export function TourSpecialtiesEditor({
                 </div>
 
                 {/* Titre & Slug */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block font-medium mb-2">Titre</label>
                     <input
@@ -515,7 +517,7 @@ export function TourSpecialtiesEditor({
                   />
                 </div>
 
-                {/* Image Base64 */}
+                {/* Image */}
                 <div>
                   <label className="block text-lg font-medium mb-4">Image de couverture</label>
                   <ImageUploader
@@ -541,7 +543,7 @@ export function TourSpecialtiesEditor({
                 </div>
 
                 {/* Infos principales */}
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div>
                     <label className="block font-medium mb-2">Durée</label>
                     <input
@@ -578,7 +580,7 @@ export function TourSpecialtiesEditor({
                 </div>
 
                 {/* Transport et Difficulté */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block font-medium mb-2">Transport</label>
                     <input
@@ -710,7 +712,7 @@ export function TourSpecialtiesEditor({
                   <div className="space-y-6">
                     {currentSpecialty.itinerary.map((step, idx) => (
                       <div key={idx} className="border border-border rounded-2xl p-6 bg-muted/20">
-                        <div className="flex justify-between items-start mb-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                           <input
                             type="text"
                             value={step.day}
@@ -719,7 +721,7 @@ export function TourSpecialtiesEditor({
                               newIt[idx].day = e.target.value;
                               setCurrentSpecialty((prev) => (prev ? { ...prev, itinerary: newIt } : null));
                             }}
-                            className="font-bold text-lg px-4 py-2 border border-border rounded-xl w-40"
+                            className="font-bold text-lg px-4 py-2 border border-border rounded-xl w-full sm:w-48"
                           />
                           <div className="flex gap-2">
                             <button
@@ -781,26 +783,26 @@ export function TourSpecialtiesEditor({
                             setCurrentSpecialty((prev) => (prev ? { ...prev, itinerary: newIt } : null));
                           }}
                           placeholder="Description détaillée de cette étape..."
-                          className="w-full px-5 py-4 border border-border rounded-xl resize-none"
+                          className="w-full px-5 py-4 border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Boutons finaux */}
-                <div className="flex justify-end gap-4 pt-8 border-t border-border">
+                {/* Boutons finaux - empilés sur mobile */}
+                <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-border">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="px-8 py-4 bg-muted hover:bg-muted/80 rounded-xl font-medium transition-colors"
+                    className="w-full sm:w-auto px-8 py-4 bg-muted hover:bg-muted/80 rounded-xl font-medium transition-colors order-2 sm:order-1"
                   >
                     Annuler
                   </button>
                   <button
                     type="button"
                     onClick={saveCurrentSpecialty}
-                    className="px-10 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all"
+                    className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all order-1 sm:order-2"
                   >
                     Enregistrer la spécialité
                   </button>

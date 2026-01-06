@@ -6,7 +6,6 @@ import { db } from '../../../../firebase/config';
 import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 import { ImageUploader } from '@/components/shared/ImageUploader';
 
-
 interface HeroSlide {
     id: number;
     image: string;
@@ -27,11 +26,9 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
     const [hasChanges, setHasChanges] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // État pour la modale d'édition
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
 
-    // Chargement des slides depuis Firestore
     useEffect(() => {
         const fetchSlides = async () => {
             try {
@@ -59,7 +56,6 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
         ));
         setHasChanges(true);
 
-        // Mise à jour en temps réel dans la modale aussi
         if (editingSlide && editingSlide.id === id) {
             setEditingSlide({ ...editingSlide, [field]: value });
         }
@@ -132,41 +128,50 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* ==================== HEADER RESPONSIVE ==================== */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">Hero Carousel</h2>
                     <p className="text-muted-foreground">Gérez les slides de votre page d'accueil</p>
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    {/* Indicateur de changements non sauvegardés */}
                     {hasChanges && (
-                        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                            Modifications non sauvegardées
-                        </span>
+                        <div className="self-start sm:self-center">
+                            <span className="text-sm text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded-lg font-medium">
+                                Modifications non sauvegardées
+                            </span>
+                        </div>
                     )}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleAddSlide}
-                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
-                    >
-                        <Plus size={18} />
-                        Ajouter Slide
-                    </motion.button>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSave}
-                        disabled={!hasChanges}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        <Save size={18} />
-                        Sauvegarder
-                    </motion.button>
+
+                    {/* Boutons d'action */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAddSlide}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 rounded-lg text-foreground font-medium transition-colors"
+                        >
+                            <Plus size={18} />
+                            Ajouter Slide
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSave}
+                            disabled={!hasChanges}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            <Save size={18} />
+                            Sauvegarder
+                        </motion.button>
+                    </div>
                 </div>
             </div>
 
-            {/* Liste des slides */}
+            {/* ==================== LISTE DES SLIDES ==================== */}
             <div className="grid gap-4">
                 {slides.map((slide, index) => (
                     <motion.div
@@ -176,16 +181,16 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                         transition={{ delay: index * 0.1 }}
                         className="bg-muted/30 rounded-xl border border-border overflow-hidden"
                     >
-                        <div className="flex items-center justify-between p-4 bg-card border-b border-border">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-card border-b border-border gap-3">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center text-primary-foreground font-bold">
+                                <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center text-primary-foreground font-bold flex-shrink-0">
                                     {index + 1}
                                 </div>
                                 <h3 className="font-semibold text-foreground">
                                     {slide.title || `Slide ${index + 1}`}
                                 </h3>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                                 <button
                                     onClick={() => setPreviewSlide(slide)}
                                     className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -210,13 +215,12 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </div>
                         </div>
 
-                        {/* Aperçu miniature de l'image */}
                         {slide.image && (
                             <div className="p-4 flex justify-center bg-muted/50">
                                 <img
                                     src={slide.image}
                                     alt="Preview"
-                                    className="h-32 rounded-lg object-cover shadow-md"
+                                    className="h-32 rounded-lg object-cover shadow-md max-w-full"
                                     loading="lazy"
                                 />
                             </div>
@@ -225,6 +229,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                 ))}
             </div>
 
+            {/* Le reste du code (modales) reste identique */}
             {/* Modale d'édition/ajout */}
             <AnimatePresence>
                 {isEditModalOpen && editingSlide && (
@@ -257,14 +262,13 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                             </div>
 
                             <div className="p-6 space-y-5">
-                                {/* ImageUploader intégré */}
                                 <div>
                                     <label className="block text-sm font-medium text-foreground mb-2">
                                         Image de la slide
                                     </label>
                                     <ImageUploader
                                         value={editingSlide.image}
-                                        onChange={(url:any) => handleChange(editingSlide.id, 'image', url)}
+                                        onChange={(url: any) => handleChange(editingSlide.id, 'image', url)}
                                         aspectRatio="16/9"
                                     />
                                     <p className="text-xs text-muted-foreground mt-2">
@@ -332,7 +336,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                 )}
             </AnimatePresence>
 
-            {/* Modal preview */}
+            {/* Modal preview - inchangée */}
             <AnimatePresence>
                 {previewSlide && (
                     <motion.div
@@ -358,7 +362,6 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
 
                             {previewSlide.image && (
                                 <div className="relative h-[260px] sm:h-[320px] md:h-[380px] lg:h-[420px] bg-black">
-                                    {/* Image de fond avec léger zoom */}
                                     <img
                                         src={previewSlide.image}
                                         alt={previewSlide.title}
@@ -369,11 +372,9 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                         }}
                                     />
 
-                                    {/* Overlays proches du Hero réel */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                                     <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-transparent to-transparent" />
 
-                                    {/* Contenu texte aligné avec le Hero */}
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="px-5 sm:px-8 md:px-10 lg:px-12 pb-10 w-full max-w-3xl">
                                             <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 leading-tight drop-shadow-xl">
@@ -388,7 +389,7 @@ export function HeroEditor({ slides: initialSlides, onSave }: HeroEditorProps) {
                                                 <span className="relative z-10 uppercase tracking-wide">
                                                     {previewSlide.cta}
                                                 </span>
-                                                <span className="relative z-10 text-lg">➜</span>
+                                                <span className="relative z-10 text-lg">→</span>
                                                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
                                             </button>
                                         </div>

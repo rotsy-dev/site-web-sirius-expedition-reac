@@ -41,21 +41,18 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
             initial={{ opacity: 0, y: -50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-6 right-6 z-50 max-w-md"
+            className="fixed top-4 right-4 z-[9999] w-[calc(100vw-2rem)] max-w-md"
         >
-            <div className="bg-red-500/95 backdrop-blur-xl text-white rounded-2xl shadow-2xl border border-red-400/50 p-4 flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <AlertCircle size={20} />
+            <div className="bg-red-500/95 backdrop-blur-xl text-white rounded-xl shadow-2xl border border-red-400/50 p-3 flex items-start gap-2">
+                <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold mb-1">Erreur</h4>
-                    <p className="text-sm text-red-50">{message}</p>
+                    <h4 className="font-semibold mb-1 text-sm">Erreur</h4>
+                    <p className="text-xs text-red-50 break-words">{message}</p>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                >
-                    <XCircle size={20} />
+                <button onClick={onClose} className="flex-shrink-0 text-white/80 hover:text-white">
+                    <XCircle className="w-4 h-4" />
                 </button>
             </div>
         </motion.div>
@@ -74,21 +71,18 @@ function SuccessToast({ message, onClose }: { message: string; onClose: () => vo
             initial={{ opacity: 0, y: -50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-6 right-6 z-50 max-w-md"
+            className="fixed top-4 right-4 z-[9999] w-[calc(100vw-2rem)] max-w-md"
         >
-            <div className="bg-green-500/95 backdrop-blur-xl text-white rounded-2xl shadow-2xl border border-green-400/50 p-4 flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <Check size={20} />
+            <div className="bg-green-500/95 backdrop-blur-xl text-white rounded-xl shadow-2xl border border-green-400/50 p-3 flex items-start gap-2">
+                <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <Check className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold mb-1">Succès</h4>
-                    <p className="text-sm text-green-50">{message}</p>
+                    <h4 className="font-semibold mb-1 text-sm">Succès</h4>
+                    <p className="text-xs text-green-50 break-words">{message}</p>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
-                >
-                    <XCircle size={20} />
+                <button onClick={onClose} className="flex-shrink-0 text-white/80 hover:text-white">
+                    <XCircle className="w-4 h-4" />
                 </button>
             </div>
         </motion.div>
@@ -107,12 +101,10 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Mot de passe oublié
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
     const [resetSuccess, setResetSuccess] = useState('');
 
-    // Validation mot de passe
     const [passwordValidation, setPasswordValidation] = useState({ isValid: false, errors: [] as string[] });
     const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -159,7 +151,6 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                 await signInWithEmailAndPassword(auth, email, password);
                 setIsAuthenticated(true);
             } else {
-                // Register
                 if (!username || !email || !password || !confirmPassword) {
                     throw new Error('Tous les champs sont obligatoires');
                 }
@@ -241,7 +232,6 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
             setResetSuccess('Un email de réinitialisation a été envoyé à ' + resetEmail);
             setResetEmail('');
             
-            // Retour au mode login après 3 secondes
             setTimeout(() => {
                 setShowForgotPassword(false);
                 setResetSuccess('');
@@ -295,53 +285,59 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                 {resetSuccess && <SuccessToast message={resetSuccess} onClose={() => setResetSuccess('')} />}
             </AnimatePresence>
 
-            {/* === FOND GLOBAL + FORMULAIRE À GAUCHE + TEXTE À DROITE === */}
+            {/* Container principal avec min-height dynamique */}
             <div 
-                className="min-h-screen relative flex items-center bg-cover bg-center bg-no-repeat overflow-x-hidden"
+                className="relative w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: `url(${backgroundImageUrl})` }}
             >
-                {/* Overlay sombre pour lisibilité */}
+                {/* Overlay */}
                 <div className="absolute inset-0 bg-black/50" />
 
-                {/* Contenu principal */}
-                <div className="relative z-10 w-full flex flex-col lg:flex-row items-center justify-center lg:gap-12 xl:gap-16 px-4 sm:px-6 lg:px-12 py-8 lg:py-0">
-                    {/* === FORMULAIRE À GAUCHE === */}
+                {/* Contenu centré */}
+                <div className="relative z-10 w-full h-full flex flex-col lg:flex-row items-center justify-center gap-0 lg:gap-12 px-4 py-8 lg:py-0">
+                    
+                    {/* === FORMULAIRE === */}
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="w-full max-w-md lg:max-w-lg mb-12 lg:mb-0"
+                        className="w-full max-w-[440px] lg:max-w-[480px]"
                     >
                         {/* Bouton Retour */}
-                        <motion.button
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => onBack?.()}
-                            className="mb-8 flex items-center gap-2 text-white/80 hover:text-white transition-all group"
-                        >
-                            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                            <span className="text-sm font-medium">Retour</span>
-                        </motion.button>
+                        {onBack && (
+                            <motion.button
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={onBack}
+                                className="mb-6 flex items-center gap-2 text-white/80 hover:text-white transition-all group"
+                            >
+                                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                                <span className="text-sm font-medium">Retour</span>
+                            </motion.button>
+                        )}
 
-                        <div className="bg-card/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-border/50 p-6 sm:p-8 lg:p-10">
-                            <div className="text-center mb-8 sm:mb-10">
-                                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 sm:mb-6 shadow-xl">
-                                    <Shield className="text-primary-foreground" size={32} />
+                        {/* Card formulaire */}
+                        <div className="bg-card/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-border/50 p-6 lg:p-10">
+                            
+                            {/* Header */}
+                            <div className="text-center mb-8">
+                                <div className="inline-flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 shadow-xl">
+                                    <Shield className="text-primary-foreground w-8 h-8 lg:w-10 lg:h-10" />
                                 </div>
-                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+                                <h1 className="text-2xl lg:text-4xl font-bold mb-2">
                                     {showForgotPassword ? 'Réinitialiser' : mode === 'login' ? 'Connexion Admin' : 'Inscription Admin'}
                                 </h1>
-                                <p className="text-muted-foreground text-base sm:text-lg">
+                                <p className="text-muted-foreground text-sm lg:text-lg">
                                     {showForgotPassword ? 'Récupération de compte' : 'Sirius Expedition Dashboard'}
                                 </p>
                             </div>
 
-                            <div className="space-y-6">
+                            {/* Formulaire */}
+                            <div className="space-y-5">
                                 {!showForgotPassword ? (
                                     <>
-                                        {/* Formulaire normal (login/register) */}
                                         {mode === 'register' && (
                                             <Input 
                                                 icon={<User size={20} />} 
@@ -370,11 +366,11 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                                             />
 
                                             {mode === 'register' && (
-                                                <div className="mt-3 flex items-center gap-2 text-xs">
+                                                <div className="mt-3 flex items-start gap-2 text-xs">
                                                     {passwordValidation.isValid ? (
-                                                        <Check size={16} className="text-green-600" />
+                                                        <Check size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
                                                     ) : password ? (
-                                                        <X size={16} className="text-red-600" />
+                                                        <X size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
                                                     ) : null}
                                                     <span className={passwordValidation.isValid ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
                                                         Au moins 8 caractères, majuscule, minuscule, chiffre et caractère spécial
@@ -384,7 +380,7 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
 
                                             {mode === 'register' && password && (
                                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-                                                    <div className="flex items-center justify-center gap-16 xl:gap-24 text-xs mb-2">
+                                                    <div className="flex items-center justify-between text-xs mb-2">
                                                         <span className="text-muted-foreground">Force du mot de passe</span>
                                                         <span className={`font-semibold ${passwordStrength < 40 ? 'text-red-500' : passwordStrength < 70 ? 'text-yellow-500' : 'text-green-500'}`}>
                                                             {getStrengthLabel(passwordStrength)}
@@ -400,7 +396,6 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                                                 </motion.div>
                                             )}
 
-                                            {/* Lien Mot de passe oublié (uniquement en mode login) */}
                                             {mode === 'login' && (
                                                 <div className="mt-2 text-right">
                                                     <button
@@ -428,14 +423,13 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                                             disabled={isLoading || (mode === 'register' && !passwordValidation.isValid)}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
+                                            className="w-full py-3.5 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base shadow-lg transition-all disabled:opacity-60"
                                         >
                                             {isLoading ? 'Patientez...' : mode === 'login' ? 'Se connecter' : 'Créer le compte'}
                                         </motion.button>
                                     </>
                                 ) : (
                                     <>
-                                        {/* Formulaire Mot de passe oublié */}
                                         <div className="text-center mb-6">
                                             <p className="text-sm text-muted-foreground">
                                                 Entrez votre email pour recevoir un lien de réinitialisation
@@ -455,7 +449,7 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                                             disabled={isLoading}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="w-full py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all disabled:opacity-60"
+                                            className="w-full py-3.5 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-xl font-bold text-base shadow-lg transition-all disabled:opacity-60"
                                         >
                                             {isLoading ? 'Envoi en cours...' : 'Envoyer le lien'}
                                         </motion.button>
@@ -475,13 +469,13 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                             </div>
 
                             {!showForgotPassword && (
-                                <div className="mt-8 text-center">
+                                <div className="mt-6 text-center">
                                     <button
                                         onClick={() => {
                                             setMode(mode === 'login' ? 'register' : 'login');
                                             resetForm();
                                         }}
-                                        className="text-primary hover:underline font-medium"
+                                        className="text-primary hover:underline font-medium text-sm"
                                     >
                                         {mode === 'login' ? 'Créer un compte admin' : 'Déjà un compte ? Se connecter'}
                                     </button>
@@ -490,26 +484,35 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
                         </div>
                     </motion.div>
 
-                    {/* === TEXTE BRANDING À DROITE === */}
+                    {/* === TEXTE BRANDING À DROITE (Desktop) === */}
                     <motion.div
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="hidden lg:block text-white max-w-md xl:max-w-lg"
+                        className="hidden lg:block text-white max-w-lg"
                     >
-                        <h2 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
+                        <h2 className="text-5xl xl:text-6xl font-bold mb-4 leading-tight drop-shadow-lg">
                             Sirius Expedition
                         </h2>
-                        <p className="text-xl xl:text-2xl 2xl:text-3xl opacity-90 drop-shadow-md">
+                        <p className="text-2xl xl:text-3xl opacity-90 drop-shadow-md">
                             Aventures authentiques à Madagascar
                         </p>
                     </motion.div>
 
-                    {/* Texte branding en bas sur mobile */}
-                    <div className="lg:hidden absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 text-center text-white px-4 w-full">
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-2 drop-shadow-lg">Sirius Expedition</h2>
-                        <p className="text-lg sm:text-xl opacity-90 drop-shadow-md">Aventures authentiques à Madagascar</p>
-                    </div>
+                    {/* === TEXTE BRANDING EN BAS (Mobile/Tablet) === */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="lg:hidden text-center text-white mt-8"
+                    >
+                        <h2 className="text-3xl font-bold mb-2 drop-shadow-lg">
+                            Sirius Expedition
+                        </h2>
+                        <p className="text-lg opacity-90 drop-shadow-md">
+                            Aventures authentiques à Madagascar
+                        </p>
+                    </motion.div>
                 </div>
             </div>
         </>
@@ -520,15 +523,17 @@ export function AdminLogin({ onBack }: { onBack?: () => void }) {
 function Input({ icon, label, value, onChange, placeholder }: any) {
     return (
         <div>
-            <label className="block text-sm mb-2">{label}</label>
+            <label className="block text-sm mb-2 font-medium">{label}</label>
             <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</div>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {icon}
+                </div>
                 <input
                     type="text"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
-                    className="w-full pl-12 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    className="w-full pl-12 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-base"
                 />
             </div>
         </div>
@@ -538,7 +543,7 @@ function Input({ icon, label, value, onChange, placeholder }: any) {
 function PasswordInput({ label, value, onChange, show, toggleShow }: any) {
     return (
         <div>
-            <label className="block text-sm mb-2">{label}</label>
+            <label className="block text-sm mb-2 font-medium">{label}</label>
             <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                     <Lock size={20} />
@@ -547,7 +552,7 @@ function PasswordInput({ label, value, onChange, show, toggleShow }: any) {
                     type={show ? 'text' : 'password'}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full pl-12 pr-12 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    className="w-full pl-12 pr-12 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-base"
                 />
                 <button
                     type="button"
