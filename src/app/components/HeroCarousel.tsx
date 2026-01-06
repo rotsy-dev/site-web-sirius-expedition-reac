@@ -24,23 +24,32 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
   const [direction, setDirection] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Traduction automatique des slides (titre, sous-titre, CTA)
+  // Traduction automatique des slides
   const { translatedContent: translatedSlides, isLoading: isTranslatingSlides } = useTranslatedContent(
     slides,
     ['title', 'subtitle', 'cta']
   );
 
-      const displaySlides = (translatedSlides || slides) as Slide[];
+  const displaySlides = (translatedSlides || slides) as Slide[];
 
-  // Auto-play
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Auto-play avec pause plus longue sur mobile
   useEffect(() => {
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % displaySlides.length);
-    }, 6000);
+    }, isMobile ? 8000 : 6000);
     return () => clearInterval(timer);
-  }, [currentIndex, displaySlides.length]);
+  }, [currentIndex, displaySlides.length, isMobile]);
 
   // Préchargement optimisé des images
   useEffect(() => {
@@ -59,14 +68,12 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
             };
             img.onerror = () => {
               if (!resolved) {
-                // En cas d'erreur, on marque quand même comme chargé pour éviter le blocage
                 setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
                 resolved = true;
                 resolve();
               }
             };
             img.src = slide.image;
-            // Timeout réduit pour affichage plus rapide
             setTimeout(() => {
               if (!resolved) {
                 setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
@@ -81,8 +88,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
       await Promise.all(promises);
     };
     preloadImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displaySlides.length]);
+  }, [displaySlides, imageLoaded]);
 
   const nextSlide = () => {
     setDirection(1);
@@ -94,9 +100,15 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
     setCurrentIndex((prev) => (prev - 1 + displaySlides.length) % displaySlides.length);
   };
 
-  // Animations différentes pour chaque slide
+  // Animations adaptatives mobile/desktop
   const getTextAnimation = (index: number) => {
-    const animations = [
+    const mobileAnim = {
+      initial: { opacity: 0, y: 30 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.8, ease: easeOut }
+    };
+
+    const desktopAnimations = [
       {
         initial: { opacity: 0, x: -100 },
         animate: { opacity: 1, x: 0 },
@@ -113,11 +125,18 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
         transition: { duration: 1, ease: easeOut }
       }
     ];
-    return animations[index % animations.length];
+
+    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
   };
 
   const getBoxAnimation = (index: number) => {
-    const animations = [
+    const mobileAnim = {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { delay: 0.2, duration: 0.7, ease: easeOut }
+    };
+
+    const desktopAnimations = [
       {
         initial: { opacity: 0, y: 50, rotateX: -15 },
         animate: { opacity: 1, y: 0, rotateX: 0 },
@@ -134,11 +153,18 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
         transition: { delay: 0.3, duration: 0.9, ease: easeOut }
       }
     ];
-    return animations[index % animations.length];
+
+    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
   };
 
   const getButtonAnimation = (index: number) => {
-    const animations = [
+    const mobileAnim = {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { delay: 0.4, duration: 0.6, ease: easeOut }
+    };
+
+    const desktopAnimations = [
       {
         initial: { opacity: 0, y: 30 },
         animate: { opacity: 1, y: 0 },
@@ -155,12 +181,13 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
         transition: { delay: 0.6, duration: 0.7, ease: easeOut }
       }
     ];
-    return animations[index % animations.length];
+
+    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
   };
 
   return (
-    <section className="relative w-full min-h-[70vh] md:h-screen bg-gradient-to-br from-[#1a1410] via-[#2a1f1c] to-black overflow-hidden">
-      {/* Particules animées subtiles */}
+    <section className="relative w-full h-screen bg-gradient-to-br from-[#1a1410] via-[#2a1f1c] to-black overflow-hidden">
+      {/* Particules animées */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{
@@ -172,7 +199,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
             repeat: Infinity,
             ease: easeInOut
           }}
-          className="absolute top-20 right-20 w-96 h-96 bg-[#F0E7D5]/10 rounded-full blur-3xl"
+          className="absolute top-10 sm:top-20 right-10 sm:right-20 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-[#F0E7D5]/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -185,7 +212,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
             ease: easeInOut,
             delay: 2
           }}
-          className="absolute bottom-20 left-20 w-96 h-96 bg-[#2fb5a3]/10 rounded-full blur-3xl"
+          className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-[#2fb5a3]/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -227,7 +254,6 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                 <div className="absolute inset-0">
                   {slide.image ? (
                     <>
-                      {/* Image avec zoom Ken Burns */}
                       <motion.div
                         initial={{ scale: 1.05 }}
                         animate={{ scale: 1 }}
@@ -250,7 +276,6 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                         />
                       </motion.div>
 
-                      {/* Skeleton loader élégant */}
                       {!imageLoaded[slide.id] && (
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-br from-[#4B3935] via-[#3a2f2b] to-[#2a1f1c]"
@@ -264,62 +289,60 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                         />
                       )}
 
-                      {/* Overlays artistiques */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
-
-                      {/* Vignette douce */}
+                      {/* Overlays - plus intenses sur mobile */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 md:from-black/70 md:via-black/25 md:to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent md:from-black/40" />
                       <div className="absolute inset-0" style={{
-                        boxShadow: 'inset 0 0 120px rgba(0,0,0,0.4)'
+                        boxShadow: 'inset 0 0 120px rgba(0,0,0,0.5)'
                       }} />
                     </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#4B3935] to-[#2a1f1c]">
-                      <p className="text-[#F0E7D5]/50 font-medium">Aucune image</p>
+                      <p className="text-[#F0E7D5]/50 font-medium text-sm">Aucune image</p>
                     </div>
                   )}
                 </div>
 
-                {/* Contenu */}
-                <div className="absolute inset-0 flex items-center">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
-                    <div className="max-w-xl md:max-w-2xl">
+                {/* Contenu - optimisé mobile */}
+                <div className="absolute inset-0 flex items-center px-4 sm:px-6 lg:px-12 pb-28 sm:pb-0">
+                  <div className="max-w-7xl mx-auto w-full">
+                    <div className="max-w-full sm:max-w-xl md:max-w-2xl">
                       <motion.h2
                         {...textAnim}
-                        className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-[1.2] drop-shadow-2xl max-w-[90%]"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 leading-[1.15] drop-shadow-2xl"
                       >
                         {slide.title}
                       </motion.h2>
 
                       <motion.div
                         {...boxAnim}
-                        className="relative group"
+                        className="relative group mb-6 sm:mb-0"
                       >
                         <div className="absolute -inset-1 bg-gradient-to-r from-[#2fb5a3]/20 to-[#4B3935]/20 rounded-xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700" />
 
-                        <div className="relative bg-[#4B3935]/80 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-xl border border-[#F0E7D5]/15 shadow-2xl">
+                        <div className="relative bg-[#4B3935]/90 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-xl border border-[#F0E7D5]/15 shadow-2xl">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: '60px' }}
+                            animate={{ width: '50px' }}
                             transition={{ delay: 0.8, duration: 0.8 }}
-                            className="absolute top-0 left-6 h-1 bg-gradient-to-r from-[#2fb5a3] to-transparent rounded-full"
+                            className="absolute top-0 left-5 sm:left-6 h-1 bg-gradient-to-r from-[#2fb5a3] to-transparent rounded-full"
                           />
 
-                          <p className="text-[#F0E7D5] text-sm sm:text-base md:text-lg leading-relaxed">
+                          <p className="text-[#F0E7D5] text-base sm:text-lg md:text-xl leading-relaxed">
                             {slide.subtitle}
                           </p>
                         </div>
                       </motion.div>
 
-                      <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                      <div className="mt-30 flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <motion.button
                           {...buttonAnim}
                           onClick={(e) => {
                             e.stopPropagation();
                             onNavigateToTours?.();
                           }}
-                          className="relative group inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-[#2fb5a3] to-[#26a393] rounded-lg font-semibold text-white shadow-2xl overflow-hidden"
-                          whileHover={{ scale: 1.05, y: -2 }}
+                          className="relative group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-7 sm:py-3.5 bg-gradient-to-r from-[#2fb5a3] to-[#26a393] rounded-lg font-semibold text-white shadow-2xl overflow-hidden"
+                          whileHover={!isMobile ? { scale: 1.05, y: -2 } : {}}
                           whileTap={{ scale: 0.98 }}
                         >
                           <motion.div
@@ -334,7 +357,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                             }}
                           />
 
-                          <span className="relative uppercase text-xs sm:text-sm tracking-wider">
+                          <span className="relative uppercase text-sm sm:text-base tracking-wider font-bold">
                             {slide.cta}
                           </span>
 
@@ -357,8 +380,8 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                               e.stopPropagation();
                               onNavigateToContact();
                             }}
-                            className="inline-flex items-center justify-center px-6 py-3.5 rounded-lg border border-white/30 text-sm sm:text-base font-semibold text-white/90 bg-black/20 backdrop-blur hover:bg-black/35 transition-all"
-                            whileHover={{ scale: 1.03, y: -1 }}
+                            className="inline-flex items-center justify-center px-8 py-4 sm:px-6 sm:py-3.5 rounded-lg border-2 border-white/40 text-sm sm:text-base font-semibold text-white bg-black/30 backdrop-blur hover:bg-black/40 hover:border-white/60 transition-all"
+                            whileHover={!isMobile ? { scale: 1.03, y: -1 } : {}}
                             whileTap={{ scale: 0.97 }}
                           >
                             {t('contact.title')}
@@ -373,42 +396,42 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           })}
         </AnimatePresence>
 
-        {/* Navigation */}
+        {/* Navigation - visible sur tous les écrans */}
         <motion.button
           onClick={prevSlide}
-          whileHover={{ scale: 1.1, x: -4, backgroundColor: 'rgba(255,255,255,0.25)' }}
+          whileHover={!isMobile ? { scale: 1.1, x: -4, backgroundColor: 'rgba(255,255,255,0.25)' } : {}}
           whileTap={{ scale: 0.9 }}
-          className="absolute left-6 top-1/2 -translate-y-1/2 z-40 p-3.5 bg-white/15 backdrop-blur-md rounded-xl border border-white/20 transition-all duration-300"
+          className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-40 p-3 sm:p-3.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 transition-all duration-300 flex items-center justify-center shadow-xl"
           aria-label="Slide précédente"
         >
-          <ChevronLeft className="text-white w-7 h-7" strokeWidth={2.5} />
+          <ChevronLeft className="text-white w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.5} />
         </motion.button>
 
         <motion.button
           onClick={nextSlide}
-          whileHover={{ scale: 1.1, x: 4, backgroundColor: 'rgba(255,255,255,0.25)' }}
+          whileHover={!isMobile ? { scale: 1.1, x: 4, backgroundColor: 'rgba(255,255,255,0.25)' } : {}}
           whileTap={{ scale: 0.9 }}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-40 p-3.5 bg-white/15 backdrop-blur-md rounded-xl border border-white/20 transition-all duration-300"
+          className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 p-3 sm:p-3.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 transition-all duration-300 flex items-center justify-center shadow-xl"
           aria-label="Slide suivante"
         >
-          <ChevronRight className="text-white w-7 h-7" strokeWidth={2.5} />
+          <ChevronRight className="text-white w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.5} />
         </motion.button>
 
         {/* Indicateurs */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-2.5">
           {displaySlides.map((_, index) => (
             <motion.button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              whileHover={{ scale: 1.3 }}
+              whileHover={!isMobile ? { scale: 1.3 } : {}}
               whileTap={{ scale: 0.9 }}
               className="relative group"
               aria-label={`Slide ${index + 1}`}
             >
               <motion.div
                 className={`transition-all duration-500 rounded-full ${index === currentIndex
-                    ? 'w-11 h-2.5 bg-gradient-to-r from-[#2fb5a3] via-[#F0E7D5] to-[#2fb5a3]'
-                    : 'w-2.5 h-2.5 bg-white/40 group-hover:bg-white/70'
+                    ? 'w-10 sm:w-11 h-2.5 bg-gradient-to-r from-[#2fb5a3] via-[#F0E7D5] to-[#2fb5a3]'
+                    : 'w-2.5 h-2.5 bg-white/50 group-hover:bg-white/80'
                   }`}
                 animate={index === currentIndex ? {
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
@@ -426,14 +449,14 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           ))}
         </div>
 
-        {/* Compteur stylisé */}
+        {/* Compteur - visible uniquement sur desktop */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
-          className="absolute bottom-8 right-8 z-40"
+          className="hidden md:block absolute bottom-8 right-8 z-40"
         >
-          <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl px-5 py-2.5 rounded-xl border border-white/20 shadow-xl">
+          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl px-5 py-2.5 rounded-xl border border-white/30 shadow-xl">
             <span className="text-white font-semibold text-base tabular-nums">
               {String(currentIndex + 1).padStart(2, '0')}
               <span className="text-[#2fb5a3] mx-1.5">/</span>

@@ -5,15 +5,24 @@
 
 export type SupportedLanguage = 'en' | 'fr' | 'de' | 'it';
 
-interface TranslationCache {
-  [key: string]: {
-    [lang: string]: string;
-    timestamp: number;
-  };
-}
+type TranslationCacheEntry = {
+  [lang in SupportedLanguage]?: string;
+} & {
+  timestamp: number;
+};
+
+type TranslationCache = {
+  [key: string]: TranslationCacheEntry;
+};
 
 const CACHE_KEY = 'auto_translation_cache';
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+// ⏱️ Petite protection contre le "Too Many Requests" (429)
+// Si l'API renvoie 429, on active un cooldown pendant lequel
+// on ne fera plus d'appels réseau et on retournera le texte original.
+let rateLimitedUntil = 0;
+const RATE_LIMIT_COOLDOWN = 60 * 1000; // 60 secondes
 
 /**
  * Récupère le cache des traductions depuis localStorage
@@ -91,10 +100,12 @@ function cacheTranslation(
 ): void {
   const cache = getCache();
   const cacheKey = `${text}_${targetLang}`;
-  cache[cacheKey] = {
-    [targetLang]: translation,
-    timestamp: Date.now(),
-  };
+
+  const existing: TranslationCacheEntry = cache[cacheKey] || { timestamp: Date.now() };
+  existing[targetLang] = translation;
+  existing.timestamp = Date.now();
+
+  cache[cacheKey] = existing;
   saveCache(cache);
 }
 
@@ -109,6 +120,11 @@ async function translateText(
 ): Promise<string> {
   // Si la langue source et cible sont identiques, retourner le texte original
   if (sourceLang === targetLang) {
+    return text;
+  }
+
+  // Si on est dans une fenêtre de rate-limit, ne pas appeler l'API
+  if (Date.now() < rateLimitedUntil) {
     return text;
   }
 
@@ -128,8 +144,17 @@ async function translateText(
     });
 
     const response = await fetch(`${proxyUrl}?${params.toString()}`);
-    
+
+    // Gestion spécifique du code 429 (Too Many Requests)
     if (!response.ok) {
+      if (response.status === 429) {
+        console.warn('Traduction automatique: limite de requêtes atteinte (429). Cooldown activé.');
+        // Activer une fenêtre de cooldown pour éviter de spammer l'API
+        rateLimitedUntil = Date.now() + RATE_LIMIT_COOLDOWN;
+        // On retourne simplement le texte original pour ne pas casser l'UI
+        return text;
+      }
+
       throw new Error(`Erreur HTTP: ${response.status}`);
     }
 

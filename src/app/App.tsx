@@ -77,25 +77,142 @@ function App() {
             <motion.div
               key="loader"
               initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#1A1A1A]"
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-black"
             >
+              {/* Image de fond - Avenue des Baobabs */}
               <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360],
-                  borderRadius: ["20%", "50%", "20%"]
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: 'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071)',
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-16 h-16 bg-gradient-to-br from-[#D4A373] to-[#A67C52] mb-6"
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 2, ease: "easeOut" }}
               />
-              <motion.h2
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-white font-bold tracking-[0.3em] text-2xl"
+
+              {/* Flash blanc - effet de prise de photo */}
+              <motion.div
+                className="absolute inset-0 bg-white"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.8, 0] }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              />
+
+              {/* Overlay sombre progressif */}
+              <motion.div
+                className="absolute inset-0 bg-black"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ duration: 2, delay: 1.5 }}
+              />
+
+              {/* Icône appareil photo avec effet de clic */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                initial={{ scale: 1.5, opacity: 0 }}
+                animate={{
+                  scale: [1.5, 1, 1.05, 1],
+                  opacity: [0, 1, 1, 0]
+                }}
+                transition={{
+                  duration: 2.5,
+                  times: [0, 0.3, 0.5, 1],
+                  delay: 0.5
+                }}
               >
-                SIRIUS EXPEDITION
-              </motion.h2>
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+              </motion.div>
+
+              {/* Son effet "clic" visuel - cercles concentriques */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{
+                  scale: [0.8, 2.5],
+                  opacity: [0.6, 0]
+                }}
+                transition={{ duration: 1.2, delay: 0.6 }}
+              >
+                <div className="w-40 h-40 border-2 border-white rounded-full" />
+              </motion.div>
+
+              {/* Contenu principal */}
+              <motion.div
+                className="relative z-10 flex flex-col items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2, duration: 1.2 }}
+              >
+                {/* Nom de la marque */}
+                <div className="text-center mb-8">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2.5, duration: 1.2 }}
+                    className="text-white font-bold tracking-[0.3em] text-4xl mb-4 drop-shadow-2xl"
+                  >
+                    SIRIUS EXPEDITION
+                  </motion.h2>
+
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 4, duration: 1 }}
+                    className="h-px w-48 bg-gradient-to-r from-transparent via-[#D4A373] to-transparent mx-auto mb-4"
+                  />
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 5.2, duration: 1 }}
+                    className="text-[#D4A373] text-base tracking-[0.3em] font-light"
+                  >
+                    DISCOVER MADAGASCAR
+                  </motion.p>
+                </div>
+
+                {/* Barre de progression simple et élégante */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 6.5, duration: 0.8 }}
+                  className="w-64 h-0.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm"
+                >
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-transparent via-[#D4A373] to-transparent"
+                    animate={{
+                      x: ['-200%', '200%'],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </motion.div>
+
+                {/* Texte de chargement simple */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.9, 0.4] }}
+                  transition={{ delay: 6.8, duration: 2, repeat: Infinity }}
+                  className="text-white/60 text-sm mt-6 tracking-[0.2em] font-light"
+                >
+                  LOADING...
+                </motion.p>
+              </motion.div>
+
+              {/* Cadres photo minimalistes */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                transition={{ delay: 3.5, duration: 1.5 }}
+              >
+                <div className="absolute top-6 left-6 w-12 h-12 border-t border-l border-white/50" />
+                <div className="absolute top-6 right-6 w-12 h-12 border-t border-r border-white/50" />
+                <div className="absolute bottom-6 left-6 w-12 h-12 border-b border-l border-white/50" />
+                <div className="absolute bottom-6 right-6 w-12 h-12 border-b border-r border-white/50" />
+              </motion.div>
             </motion.div>
           ) : activeSection === 'admin' ? (
             /* --- 2. LOGIQUE ADMIN --- */
