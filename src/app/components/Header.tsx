@@ -160,7 +160,7 @@ export function Header({ activeSection, setActiveSection, siteConfig }: HeaderPr
               className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#D4A574] hover:bg-[#C4965F] text-[#4B3935] shadow-md transition-all"
             >
               <Calendar size={14} strokeWidth={2.5} />
-              <span className="relative z-10">{t("nav.quote")}</span>
+              {/* <span className="relative z-10">{t("nav.quote")}</span> */}
             </motion.button>
 
             {/* Bouton Langue Mobile - icône uniquement */}

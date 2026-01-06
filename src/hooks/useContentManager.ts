@@ -52,7 +52,7 @@ const defaultContent = {
         },
         quote: {
             badge: 'Ask a quote',
-            title: 'Get your personalized quote',
+            title: 'Request quote',
             subtitle: 'Share your travel dates and preferences, we take care of the rest.'
         },
         contact: {

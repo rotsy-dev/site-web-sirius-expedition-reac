@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence, easeOut, easeInOut } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronUp, ChevronDown, Pause, Play, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
 
@@ -11,6 +11,7 @@ interface Slide {
   subtitle: string;
   cta: string;
   videoUrl?: string;
+  animationMode?: 'slide' | 'fade' | 'zoom';
 }
 
 interface HeroCarouselProps {
@@ -24,207 +25,180 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
   const [direction, setDirection] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Traduction automatique des slides
+  const [isPaused, setIsPaused] = useState(false);
+  
   const { translatedContent: translatedSlides, isLoading: isTranslatingSlides } = useTranslatedContent(
     slides,
     ['title', 'subtitle', 'cta']
   );
 
   const displaySlides = (translatedSlides || slides) as Slide[];
+  
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  const parallaxX = useTransform(mouseX, [0, 1], [-15, 15]);
+  const parallaxY = useTransform(mouseY, [0, 1], [-15, 15]);
 
-  // Détection mobile
+  const [viewport, setViewport] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+    isMobile: false,
+    isTablet: false,
+  });
+
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const updateViewport = () => {
+      const width = window.innerWidth;
+      setViewport({
+        width,
+        isMobile: width < 768,
+        isTablet: width >= 768 && width < 1024,
+      });
+    };
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
-  // Auto-play avec pause plus longue sur mobile
   useEffect(() => {
+    if (viewport.isMobile) return;
+    let rafId: number;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        mouseX.set(e.clientX / window.innerWidth);
+        mouseY.set(e.clientY / window.innerHeight);
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [viewport.isMobile, mouseX, mouseY]);
+
+  useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % displaySlides.length);
-    }, isMobile ? 8000 : 6000);
+    }, viewport.isMobile ? 8000 : 6000);
     return () => clearInterval(timer);
-  }, [currentIndex, displaySlides.length, isMobile]);
+  }, [currentIndex, displaySlides.length, isPaused, viewport.isMobile]);
 
-  // Préchargement optimisé des images
   useEffect(() => {
-    const preloadImages = async () => {
-      const promises = displaySlides.map((slide) => {
-        if (slide.image && !imageLoaded[slide.id]) {
-          return new Promise<void>((resolve) => {
-            const img = new Image();
-            let resolved = false;
-            img.onload = () => {
-              if (!resolved) {
-                setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
-                resolved = true;
-                resolve();
-              }
-            };
-            img.onerror = () => {
-              if (!resolved) {
-                setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
-                resolved = true;
-                resolve();
-              }
-            };
-            img.src = slide.image;
-            setTimeout(() => {
-              if (!resolved) {
-                setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
-                resolved = true;
-                resolve();
-              }
-            }, 200);
-          });
-        }
-        return Promise.resolve();
-      });
-      await Promise.all(promises);
-    };
-    preloadImages();
-  }, [displaySlides, imageLoaded]);
+    const indices = [
+      currentIndex,
+      (currentIndex + 1) % displaySlides.length,
+      (currentIndex - 1 + displaySlides.length) % displaySlides.length,
+    ];
+    indices.forEach(idx => {
+      const slide = displaySlides[idx];
+      if (slide?.image && !imageLoaded[slide.id]) {
+        const img = new Image();
+        img.onload = () => setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
+        img.onerror = () => setImageLoaded(prev => ({ ...prev, [slide.id]: true }));
+        img.src = slide.image;
+      }
+    });
+  }, [currentIndex, displaySlides, imageLoaded]);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % displaySlides.length);
-  };
+  }, [displaySlides.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + displaySlides.length) % displaySlides.length);
-  };
+  }, [displaySlides.length]);
 
-  // Animations adaptatives mobile/desktop
-  const getTextAnimation = (index: number) => {
-    const mobileAnim = {
-      initial: { opacity: 0, y: 30 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.8, ease: easeOut }
-    };
-
-    const desktopAnimations = [
-      {
-        initial: { opacity: 0, x: -100 },
-        animate: { opacity: 1, x: 0 },
-        transition: { duration: 1, ease: easeOut }
-      },
-      {
-        initial: { opacity: 0, scale: 0.8 },
-        animate: { opacity: 1, scale: 1 },
-        transition: { duration: 1.2, ease: easeOut }
-      },
-      {
-        initial: { opacity: 0, y: 100 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 1, ease: easeOut }
-      }
-    ];
-
-    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
-  };
-
-  const getBoxAnimation = (index: number) => {
-    const mobileAnim = {
-      initial: { opacity: 0, y: 20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { delay: 0.2, duration: 0.7, ease: easeOut }
-    };
-
-    const desktopAnimations = [
-      {
-        initial: { opacity: 0, y: 50, rotateX: -15 },
-        animate: { opacity: 1, y: 0, rotateX: 0 },
-        transition: { delay: 0.3, duration: 0.8, ease: easeOut }
-      },
-      {
-        initial: { opacity: 0, scale: 0.9, rotate: -5 },
-        animate: { opacity: 1, scale: 1, rotate: 0 },
-        transition: { delay: 0.4, duration: 1, ease: easeOut }
-      },
-      {
-        initial: { opacity: 0, x: 100 },
-        animate: { opacity: 1, x: 0 },
-        transition: { delay: 0.3, duration: 0.9, ease: easeOut }
-      }
-    ];
-
-    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
-  };
-
-  const getButtonAnimation = (index: number) => {
-    const mobileAnim = {
-      initial: { opacity: 0, y: 20 },
-      animate: { opacity: 1, y: 0 },
-      transition: { delay: 0.4, duration: 0.6, ease: easeOut }
-    };
-
-    const desktopAnimations = [
-      {
-        initial: { opacity: 0, y: 30 },
-        animate: { opacity: 1, y: 0 },
-        transition: { delay: 0.6, duration: 0.6, type: "spring" as const, bounce: 0.4 }
-      },
-      {
-        initial: { opacity: 0, scale: 0 },
-        animate: { opacity: 1, scale: 1 },
-        transition: { delay: 0.7, duration: 0.8, type: "spring" as const, stiffness: 200 }
-      },
-      {
-        initial: { opacity: 0, y: 40 },
-        animate: { opacity: 1, y: 0 },
-        transition: { delay: 0.6, duration: 0.7, ease: easeOut }
-      }
-    ];
-
-    return isMobile ? mobileAnim : desktopAnimations[index % desktopAnimations.length];
+  // 3 ANIMATIONS DIFFÉRENTES pour le contenu selon l'index
+  const getContentAnimation = (slideIndex: number) => {
+    const animationType = slideIndex % 3;
+    
+    if (animationType === 0) {
+      // Animation 1: Slide vertical simple
+      return {
+        title: {
+          initial: { opacity: 0, y: direction > 0 ? 100 : -100 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] as any, delay: 0.2 }
+        },
+        subtitle: {
+          initial: { opacity: 0, y: direction > 0 ? 80 : -80 },
+          animate: { opacity: 1, y: 0 },
+          transition: { delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] as any }
+        },
+        cta: {
+          initial: { opacity: 0, y: direction > 0 ? 60 : -60 },
+          animate: { opacity: 1, y: 0 },
+          transition: { delay: 0.6, duration: 0.8 }
+        }
+      };
+    } else if (animationType === 1) {
+      // Animation 2: Fade + Blur vertical
+      return {
+        title: {
+          initial: { opacity: 0, y: direction > 0 ? 80 : -80, filter: 'blur(10px)' },
+          animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+          transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] as any, delay: 0.3 }
+        },
+        subtitle: {
+          initial: { opacity: 0, y: direction > 0 ? 60 : -60, filter: 'blur(8px)' },
+          animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+          transition: { delay: 0.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] as any }
+        },
+        cta: {
+          initial: { opacity: 0, y: direction > 0 ? 40 : -40, filter: 'blur(6px)' },
+          animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+          transition: { delay: 0.7, duration: 0.8 }
+        }
+      };
+    } else {
+      // Animation 3: Zoom + Rotate vertical
+      return {
+        title: {
+          initial: { opacity: 0, y: direction > 0 ? 120 : -120, scale: 0.8, rotateX: direction > 0 ? 20 : -20 },
+          animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
+          transition: { duration: 1, ease: [0.16, 1, 0.3, 1] as any, delay: 0.25 }
+        },
+        subtitle: {
+          initial: { opacity: 0, y: direction > 0 ? 100 : -100, scale: 0.85 },
+          animate: { opacity: 1, y: 0, scale: 1 },
+          transition: { delay: 0.45, duration: 0.85, ease: [0.16, 1, 0.3, 1] as any }
+        },
+        cta: {
+          initial: { opacity: 0, y: direction > 0 ? 80 : -80, scale: 0.9 },
+          animate: { opacity: 1, y: 0, scale: 1 },
+          transition: { delay: 0.65, duration: 0.75 }
+        }
+      };
+    }
   };
 
   return (
     <section className="relative w-full h-screen bg-gradient-to-br from-[#1a1410] via-[#2a1f1c] to-black overflow-hidden">
-      {/* Particules animées */}
+      {/* Fond animé simple - INCHANGÉ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.05, 0.15, 0.05],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: easeInOut
-          }}
-          className="absolute top-10 sm:top-20 right-10 sm:right-20 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-[#F0E7D5]/10 rounded-full blur-3xl"
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.08, 0.03] }} 
+          transition={{ duration: 15, repeat: Infinity, ease: [0.4, 0, 0.6, 1] }} 
+          className="absolute top-20 right-20 w-96 h-96 bg-[#2fb5a3]/20 rounded-full blur-3xl" 
         />
-        <motion.div
-          animate={{
-            y: [0, 30, 0],
-            opacity: [0.05, 0.12, 0.05],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: easeInOut,
-            delay: 2
-          }}
-          className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-[#2fb5a3]/10 rounded-full blur-3xl"
+        <motion.div 
+          animate={{ scale: [1, 1.3, 1], opacity: [0.03, 0.08, 0.03] }} 
+          transition={{ duration: 18, repeat: Infinity, ease: [0.4, 0, 0.6, 1], delay: 2 }} 
+          className="absolute bottom-20 left-20 w-96 h-96 bg-[#F0E7D5]/10 rounded-full blur-3xl" 
         />
       </div>
 
-      {/* Carousel */}
       <div className="relative w-full h-full">
-        {/* Indicateur de traduction */}
         {isTranslatingSlides && (
-          <div className="absolute top-6 left-6 z-40 flex items-center gap-3">
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="inline-flex items-center gap-2 text-[11px] text-white/90 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20"
+          <div className="absolute top-6 left-6 z-50">
+            <motion.span 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="inline-flex items-center gap-2 text-xs text-white/90 bg-black/40 px-3 py-2 rounded-full backdrop-blur-md border border-white/20"
             >
               <Loader2 className="w-3 h-3 animate-spin" />
               {t('common.loading')}
@@ -236,159 +210,118 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           {displaySlides.map((slide, index) => {
             if (index !== currentIndex) return null;
 
-            const textAnim = getTextAnimation(index);
-            const boxAnim = getBoxAnimation(index);
-            const buttonAnim = getButtonAnimation(index);
+            const contentAnim = getContentAnimation(index);
 
             return (
-              <motion.div
+              <motion.div 
                 key={slide.id}
-                custom={direction}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0 w-full h-full"
+                initial={{ opacity: 0, y: direction > 0 ? 100 : -100 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: direction > 0 ? -100 : 100 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0"
+                style={{ perspective: 1200 }}
               >
-                {/* Image de fond */}
+                {/* Image avec parallaxe - INCHANGÉ */}
                 <div className="absolute inset-0">
                   {slide.image ? (
                     <>
-                      <motion.div
-                        initial={{ scale: 1.05 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 12, ease: "linear" }}
-                        className="absolute inset-0"
+                      <motion.div 
+                        initial={{ scale: 1.15 }} 
+                        animate={{ scale: 1 }} 
+                        transition={{ duration: 18, ease: 'linear' }} 
+                        className="absolute inset-0 will-change-transform"
+                        style={!viewport.isMobile ? { x: parallaxX, y: parallaxY } : {}}
                       >
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded[slide.id] ? 'opacity-100' : 'opacity-0'
-                            }`}
-                          loading={currentIndex === 0 ? "eager" : "lazy"}
-                          fetchPriority={currentIndex === 0 ? "high" : "auto"}
-                          onLoad={() => setImageLoaded(prev => ({ ...prev, [slide.id]: true }))}
-                          onError={() => setImageLoaded(prev => ({ ...prev, [slide.id]: true }))}
-                          style={{
-                            filter: 'brightness(0.92) contrast(1.12) saturate(1.15)',
-                            WebkitFilter: 'brightness(0.92) contrast(1.12) saturate(1.15)',
+                        <img 
+                          src={slide.image} 
+                          alt={slide.title} 
+                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${imageLoaded[slide.id] ? 'opacity-100' : 'opacity-0'}`}
+                          loading={currentIndex === 0 ? 'eager' : 'lazy'}
+                          style={{ 
+                            filter: 'brightness(0.75) contrast(1.15) saturate(1.2)',
+                            transform: 'translate3d(0,0,0)',
                           }}
+                          onLoad={() => setImageLoaded(prev => ({ ...prev, [slide.id]: true }))}
                         />
                       </motion.div>
-
+                      
                       {!imageLoaded[slide.id] && (
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-br from-[#4B3935] via-[#3a2f2b] to-[#2a1f1c]"
-                          animate={{
-                            opacity: [0.3, 0.5, 0.3],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                          }}
+                        <motion.div 
+                          className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#2a1f1c]" 
+                          animate={{ opacity: [0.3, 0.5, 0.3] }} 
+                          transition={{ duration: 2, repeat: Infinity }} 
                         />
                       )}
-
-                      {/* Overlays - plus intenses sur mobile */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10 md:from-black/70 md:via-black/25 md:to-transparent" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent md:from-black/40" />
-                      <div className="absolute inset-0" style={{
-                        boxShadow: 'inset 0 0 120px rgba(0,0,0,0.5)'
-                      }} />
+                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent md:from-black/80 md:via-black/40" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent md:from-black/60" />
                     </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#4B3935] to-[#2a1f1c]">
-                      <p className="text-[#F0E7D5]/50 font-medium text-sm">Aucune image</p>
+                      <p className="text-[#F0E7D5]/50">Aucune image</p>
                     </div>
                   )}
                 </div>
 
-                {/* Contenu - optimisé mobile */}
-                <div className="absolute inset-0 flex items-center px-4 sm:px-6 lg:px-12 pb-28 sm:pb-0">
-                  <div className="max-w-7xl mx-auto w-full">
-                    <div className="max-w-full sm:max-w-xl md:max-w-2xl">
-                      <motion.h2
-                        {...textAnim}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 leading-[1.15] drop-shadow-2xl"
-                      >
-                        {slide.title}
-                      </motion.h2>
-
-                      <motion.div
-                        {...boxAnim}
-                        className="relative group mb-6 sm:mb-0"
-                      >
-                        <div className="absolute -inset-1 bg-gradient-to-r from-[#2fb5a3]/20 to-[#4B3935]/20 rounded-xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700" />
-
-                        <div className="relative bg-[#4B3935]/90 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-xl border border-[#F0E7D5]/15 shadow-2xl">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: '50px' }}
-                            transition={{ delay: 0.8, duration: 0.8 }}
-                            className="absolute top-0 left-5 sm:left-6 h-1 bg-gradient-to-r from-[#2fb5a3] to-transparent rounded-full"
-                          />
-
-                          <p className="text-[#F0E7D5] text-base sm:text-lg md:text-xl leading-relaxed">
-                            {slide.subtitle}
-                          </p>
-                        </div>
-                      </motion.div>
-
-                      <div className="mt-30 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                        <motion.button
-                          {...buttonAnim}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onNavigateToTours?.();
-                          }}
-                          className="relative group inline-flex items-center justify-center gap-2 px-8 py-4 sm:px-7 sm:py-3.5 bg-gradient-to-r from-[#2fb5a3] to-[#26a393] rounded-lg font-semibold text-white shadow-2xl overflow-hidden"
-                          whileHover={!isMobile ? { scale: 1.05, y: -2 } : {}}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
-                            animate={{
-                              x: ['-200%', '200%'],
-                            }}
-                            transition={{
-                              duration: 3,
-                              repeat: Infinity,
-                              repeatDelay: 2,
-                            }}
-                          />
-
-                          <span className="relative uppercase text-sm sm:text-base tracking-wider font-bold">
-                            {slide.cta}
-                          </span>
-
-                          <motion.svg
-                            className="relative w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            animate={{ x: [0, 4, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </motion.svg>
-                        </motion.button>
-
-                        {onNavigateToContact && (
-                          <motion.button
-                            {...buttonAnim}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onNavigateToContact();
-                            }}
-                            className="inline-flex items-center justify-center px-8 py-4 sm:px-6 sm:py-3.5 rounded-lg border-2 border-white/40 text-sm sm:text-base font-semibold text-white bg-black/30 backdrop-blur hover:bg-black/40 hover:border-white/60 transition-all"
-                            whileHover={!isMobile ? { scale: 1.03, y: -1 } : {}}
-                            whileTap={{ scale: 0.97 }}
-                          >
-                            {t('contact.title')}
-                          </motion.button>
-                        )}
+                {/* Contenu avec 3 ANIMATIONS DIFFÉRENTES */}
+                <div className="absolute inset-0 flex items-center justify-center md:justify-start px-4 sm:px-6 md:px-12 lg:px-16">
+                  <div className="w-full max-w-4xl">
+                    {/* Titre avec animation variable */}
+                    <motion.h2 
+                      initial={contentAnim.title.initial}
+                      animate={contentAnim.title.animate}
+                      transition={contentAnim.title.transition}
+                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 leading-tight text-center md:text-left"
+                      style={{ textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}
+                    >
+                      {slide.title}
+                    </motion.h2>
+                    
+                    {/* Description avec animation variable */}
+                    <motion.div 
+                      initial={contentAnim.subtitle.initial}
+                      animate={contentAnim.subtitle.animate}
+                      transition={contentAnim.subtitle.transition}
+                      className="mb-6 md:mb-8"
+                    >
+                      <div className="bg-black/40 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-2xl border border-white/10 shadow-xl">
+                        <p className="text-[#F0E7D5]/95 text-sm sm:text-base md:text-lg leading-relaxed text-center md:text-left">
+                          {slide.subtitle}
+                        </p>
                       </div>
-                    </div>
+                    </motion.div>
+
+                    {/* Boutons CTA avec animation variable */}
+                    <motion.div 
+                      initial={contentAnim.cta.initial}
+                      animate={contentAnim.cta.animate}
+                      transition={contentAnim.cta.transition}
+                      className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start"
+                    >
+                      <motion.button 
+                        onClick={onNavigateToTours}
+                        className="group relative px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[#2fb5a3] to-[#26a393] rounded-xl font-bold text-white text-sm sm:text-base shadow-lg shadow-[#2fb5a3]/30 overflow-hidden"
+                        whileHover={!viewport.isMobile ? { scale: 1.05, y: -3 } : {}}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <span className="relative uppercase tracking-wide">
+                          {slide.cta}
+                        </span>
+                      </motion.button>
+
+                      {onNavigateToContact && (
+                        <motion.button 
+                          onClick={onNavigateToContact}
+                          className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl border-2 border-white/40 text-sm sm:text-base font-semibold text-white bg-white/10 backdrop-blur-xl hover:bg-white/20 hover:border-white/60 transition-all duration-300"
+                          whileHover={!viewport.isMobile ? { scale: 1.03 } : {}}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {t('contact.title')}
+                        </motion.button>
+                      )}
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -396,70 +329,68 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           })}
         </AnimatePresence>
 
-        {/* Navigation - visible sur tous les écrans */}
-        <motion.button
+        {/* Contrôles navigation VERTICAUX */}
+        <motion.button 
           onClick={prevSlide}
-          whileHover={!isMobile ? { scale: 1.1, x: -4, backgroundColor: 'rgba(255,255,255,0.25)' } : {}}
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-40 p-3 sm:p-3.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 transition-all duration-300 flex items-center justify-center shadow-xl"
-          aria-label="Slide précédente"
+          className="absolute left-1/2 -translate-x-1/2 top-6 md:top-8 z-40 p-3 md:p-4 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-full border border-white/30 shadow-xl transition-colors"
         >
-          <ChevronLeft className="text-white w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.5} />
+          <ChevronUp className="text-white w-5 md:w-6 h-5 md:h-6" strokeWidth={2.5} />
         </motion.button>
 
-        <motion.button
+        <motion.button 
           onClick={nextSlide}
-          whileHover={!isMobile ? { scale: 1.1, x: 4, backgroundColor: 'rgba(255,255,255,0.25)' } : {}}
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 p-3 sm:p-3.5 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 transition-all duration-300 flex items-center justify-center shadow-xl"
-          aria-label="Slide suivante"
+          className="absolute left-1/2 -translate-x-1/2 bottom-20 md:bottom-24 z-40 p-3 md:p-4 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-full border border-white/30 shadow-xl transition-colors"
         >
-          <ChevronRight className="text-white w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.5} />
+          <ChevronDown className="text-white w-5 md:w-6 h-5 md:h-6" strokeWidth={2.5} />
         </motion.button>
 
-        {/* Indicateurs */}
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-2.5">
+        <motion.button 
+          onClick={() => setIsPaused(!isPaused)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="absolute top-4 md:top-6 right-4 md:right-6 z-40 p-3 bg-white/15 hover:bg-white/25 backdrop-blur-xl rounded-full border border-white/30 shadow-xl transition-colors"
+        >
+          {isPaused ? 
+            <Play className="text-white w-4 md:w-5 h-4 md:h-5" fill="white" /> : 
+            <Pause className="text-white w-4 md:w-5 h-4 md:h-5" fill="white" />
+          }
+        </motion.button>
+
+        {/* Indicateurs VERTICAUX */}
+        <div className="absolute right-6 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2.5 bg-black/30 backdrop-blur-xl px-3 py-5 rounded-full border border-white/20">
           {displaySlides.map((_, index) => (
-            <motion.button
+            <motion.button 
               key={index}
-              onClick={() => setCurrentIndex(index)}
-              whileHover={!isMobile ? { scale: 1.3 } : {}}
+              onClick={() => { 
+                setDirection(index > currentIndex ? 1 : -1); 
+                setCurrentIndex(index); 
+              }}
+              whileHover={{ scale: 1.3 }}
               whileTap={{ scale: 0.9 }}
-              className="relative group"
-              aria-label={`Slide ${index + 1}`}
             >
-              <motion.div
-                className={`transition-all duration-500 rounded-full ${index === currentIndex
-                    ? 'w-10 sm:w-11 h-2.5 bg-gradient-to-r from-[#2fb5a3] via-[#F0E7D5] to-[#2fb5a3]'
-                    : 'w-2.5 h-2.5 bg-white/50 group-hover:bg-white/80'
-                  }`}
-                animate={index === currentIndex ? {
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                } : {}}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                style={{
-                  backgroundSize: '200% 100%',
-                }}
-              />
+              <div className={`rounded-full transition-all duration-500 ${
+                index === currentIndex 
+                  ? 'h-10 w-2.5 bg-gradient-to-b from-[#2fb5a3] to-[#F0E7D5]' 
+                  : 'h-2.5 w-2.5 bg-white/40 hover:bg-white/60'
+              }`} />
             </motion.button>
           ))}
         </div>
 
-        {/* Compteur - visible uniquement sur desktop */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-          className="hidden md:block absolute bottom-8 right-8 z-40"
+        {/* Compteur */}
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          className="hidden md:block absolute bottom-8 left-8 z-40"
         >
-          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl px-5 py-2.5 rounded-xl border border-white/30 shadow-xl">
-            <span className="text-white font-semibold text-base tabular-nums">
+          <div className="bg-white/15 backdrop-blur-xl px-5 py-3 rounded-xl border border-white/30 shadow-xl">
+            <span className="text-white font-bold tabular-nums">
               {String(currentIndex + 1).padStart(2, '0')}
-              <span className="text-[#2fb5a3] mx-1.5">/</span>
+              <span className="text-[#2fb5a3] mx-2">/</span>
               {String(displaySlides.length).padStart(2, '0')}
             </span>
           </div>

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -12,11 +13,8 @@ const TikTokIcon = ({ className }: { className?: string }) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-
   </svg>
 )
-import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 
 interface FooterProps {
   setActiveSection: (section: string) => void;
@@ -46,7 +44,6 @@ interface FooterProps {
 
 export function Footer({ setActiveSection, config }: FooterProps) {
   const currentYear = new Date().getFullYear()
-  const { t } = useTranslation()
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -109,17 +106,17 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   };
 
   const pageLinks = [
-    { id: 'home', label: t('nav.home') },
-    { id: 'tours', label: t('nav.tours') },
-    { id: 'blogs', label: t('nav.blog') },
-    { id: 'about', label: t('nav.about') },
+    { id: 'home', label: 'Accueil' },
+    { id: 'tours', label: 'Circuits' },
+    { id: 'blogs', label: 'Blog' },
+    { id: 'about', label: 'À propos' },
   ]
 
   const corporateLinks = [
-    { label: t('footer.legalNotice'), href: '#' },
-    { label: t('footer.termsOfUse'), href: '#' },
-    { label: t('footer.privacyPolicy'), href: '#' },
-    { label: t('footer.cookieManagement'), href: '#' },
+    { label: 'Mentions légales', href: '#' },
+    { label: 'Conditions d\'utilisation', href: '#' },
+    { label: 'Politique de confidentialité', href: '#' },
+    { label: 'Gestion des cookies', href: '#' },
   ]
 
   return (
@@ -144,7 +141,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">{t('footer.description')}</p>
+              <p className="text-sm text-white/60 mt-1">Découvrez Madagascar autrement</p>
             </motion.div>
 
             <motion.p
@@ -154,10 +151,10 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md"
             >
-              {t('footer.description')}
+              Découvrez Madagascar autrement avec nos circuits authentiques et personnalisés.
             </motion.p>
 
-            {/* Newsletter */}
+            {/* Newsletter - CORRIGÉ */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -168,20 +165,20 @@ export function Footer({ setActiveSection, config }: FooterProps) {
             >
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#F5E6D3]" />
-                {t('footer.newsletter')}
+                Newsletter
               </h3>
-              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
-              <div className="flex gap-3">
+              <p className="text-white/60 text-sm mb-4">Recevez nos meilleures offres</p>
+              <div className="flex gap-2">
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   type="email"
-                  placeholder={t('footer.emailPlaceholder')}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl  md:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white text-center"
+                  placeholder="Votre email"
+                  className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-[#F5E6D3] hover:bg-[#EBD8C0] px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 text-[#443C34]"
+                  className="flex-shrink-0 bg-[#F5E6D3] hover:bg-[#EBD8C0] px-4 sm:px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center text-[#443C34]"
                 >
                   <ArrowUpRight className="w-4 h-4" />
                 </motion.button>
@@ -193,7 +190,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
-                {t('footer.quickLinks')}
+                Liens rapides
               </h3>
               <nav className="space-y-4">
                 {pageLinks.map((link, i) => (
@@ -241,9 +238,9 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               {/* Réseaux sociaux */}
               <div>
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
-                  {t('footer.followUs')}
+                  Suivez-nous
                 </h3>
-                <div className="grid grid-cols-3 sm:flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   {[
                     { href: config.social.facebook, icon: Facebook, index: 0 },
                     { href: config.social.youtube, icon: Youtube, index: 1 },
@@ -292,7 +289,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           className="flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. {t('footer.rights')}
+            © {currentYear} {config.siteName}. Tous droits réservés
           </p>
 
           <motion.div
@@ -308,8 +305,8 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               href={`mailto:${config.contact.email}`}
               className="flex items-center gap-2 hover:text-white transition-colors"
             >
-              <Mail className="w-4 h-4" />
-              <span>{config.contact.email}</span>
+              <Mail className="w-4 h-4 flex-shrink-0" />
+              <span className="break-all">{config.contact.email}</span>
             </motion.a>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -318,8 +315,8 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex items-center gap-2"
             >
-              <MapPin className="w-4 h-4" />
-              <span>{config.contact.address}</span>
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="text-center sm:text-left">{config.contact.address}</span>
             </motion.div>
           </motion.div>
         </motion.div>
