@@ -132,7 +132,7 @@ export function Header({ siteConfig }: HeaderProps) {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.96 }}
-              onClick={() => navigate(`/${currentLang}/ask-a-quote`)}
+              onClick={() => navigate(`/${currentLang}/quote`)}
               className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg bg-[#D4A574] hover:bg-[#C4965F] text-[#4B3935] transition-all overflow-hidden group"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
@@ -158,7 +158,7 @@ export function Header({ siteConfig }: HeaderProps) {
           <div className="flex lg:hidden items-center gap-2">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => navigate(`/${currentLang}/ask-a-quote`)}
+              onClick={() => navigate(`/${currentLang}/quote`)}
               className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#D4A574] text-[#4B3935] shadow-md"
             >
               <Calendar size={14} strokeWidth={2.5} />
@@ -209,7 +209,7 @@ export function Header({ siteConfig }: HeaderProps) {
                   </div>
 
                   <button
-                    onClick={() => { navigate(`/${currentLang}/ask-a-quote`); setMobileMenuOpen(false); }}
+                    onClick={() => { navigate(`/${currentLang}/quote`); setMobileMenuOpen(false); }}
                     className="w-full py-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 bg-[#D4A574] text-[#4B3935]"
                   >
                     <Calendar size={18} strokeWidth={2.5} />
