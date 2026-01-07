@@ -4,7 +4,7 @@ import Slider from 'react-slick'
 import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
 import { ImageWithFallback } from '../../components/common/ImageWithFallback'
-import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import * as React from "react"
 import { AnimatePresence } from 'framer-motion'
 import { TourModal, getDetailedTour, ExtendedTourSpecialty } from './TourModal'
@@ -16,7 +16,15 @@ import { useTranslation } from 'react-i18next'
 const { useRef, useState, useEffect } = React
 
 interface BestSellersProps {
-  tours: { id: number; image: string; title: string; location: string; duration: string }[]
+  tours: { 
+    id: number; 
+    image: string; 
+    title: string; 
+    location: string; 
+    duration: string;
+    price?: number;
+    description?: string;
+  }[]
   onNavigateToTour?: (tour: any) => void
   content?: {
     pageHeaders?: {
@@ -88,9 +96,9 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
   const handleOpenModal = (tour: any) => {
     if (onNavigateToTour) {
       onNavigateToTour(tour)
-      return
+    } else {
+      setSelectedTour(getDetailedTour(tour))
     }
-    setSelectedTour(getDetailedTour(tour))
   }
 
   const Card = ({ tour }: { tour: any }) => {
@@ -109,23 +117,30 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
         </div>
 
         <div className="p-8 flex flex-col flex-1">
-          <h3 className="text-2xl font-bold text-[#4B3935] mb-2">{tour.title}</h3>
+          {/* Titre avec hauteur fixe - 2 lignes max */}
+          <h3 className="text-2xl font-bold text-[#4B3935] mb-2 line-clamp-2 min-h-[3.5rem]">
+            {tour.title}
+          </h3>
 
-          <p className="text-[#4B3935]/70 mb-6 text-sm leading-relaxed">
+          {/* Description avec hauteur fixe - 3 lignes max */}
+          <p className="text-[#4B3935]/70 mb-6 text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
             {tour.description || 'Explore the iconic Avenue of the Baobabs and the unique Tsingy formations'}
           </p>
 
-          <div className="text-3xl font-bold text-[#4B3935] mb-6">1 299 €</div>
+          {/* Prix dynamique */}
+          <div className="text-2xl font-bold text-[#4B3935] mb-6">
+            {tour.price ? `${tour.price.toLocaleString()}` : '1 299 €'}
+          </div>
 
           {/* Location & Duration avec points Mocha */}
           <div className="space-y-3 mb-8">
             <div className="flex items-center gap-3 font-semibold text-[#4B3935]">
               <div className="w-2 h-2 rounded-full bg-[#2fb5a3]" />
-              {tour.location}
+              <span className="line-clamp-1">{tour.location}</span>
             </div>
             <div className="flex items-center gap-3 font-semibold text-[#4B3935]">
               <div className="w-2 h-2 rounded-full bg-[#2fb5a3]" />
-              {tour.duration}
+              <span className="line-clamp-1">{tour.duration}</span>
             </div>
           </div>
 

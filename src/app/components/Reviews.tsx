@@ -23,7 +23,6 @@ interface Review {
 
 interface ReviewsProps {
   reviews: Review[];
-  // On garde un type souple ici pour accepter la structure réelle de siteConfig
   config: any;
   content?: { pageHeaders?: { reviews?: { badge?: string; title?: string; subtitle?: string; }; }; };
 }
@@ -237,8 +236,10 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
   );
 }
 
-// Composant de statistiques
+// Composant de statistiques - ✅ CORRECTION ICI
 function ReviewStats({ reviews }: { reviews: Review[] }) {
+  const { t } = useTranslation(); // ← Ajout de cette ligne
+
   const avgRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
   const total = reviews.length;
 
@@ -263,7 +264,7 @@ function ReviewStats({ reviews }: { reviews: Review[] }) {
             <Star key={i} size={16} fill="#A68966" className="text-[#A68966]" />
           ))}
         </div>
-        <div className="text-sm text-[#4B3935]/60 font-medium">Note moyenne</div>
+        <div className="text-sm text-[#4B3935]/60 font-medium">{t('about.averageRating')}</div>
       </div>
 
       <div className="w-px bg-[#4B3935]/10" />
@@ -277,7 +278,7 @@ function ReviewStats({ reviews }: { reviews: Review[] }) {
         >
           {total}+
         </motion.div>
-        <div className="text-sm text-[#4B3935]/60 font-medium">Avis vérifiés</div>
+        <div className="text-sm text-[#4B3935]/60 font-medium"> {t('sections.reviews')}</div>
       </div>
     </motion.div>
   );
