@@ -21,6 +21,7 @@ interface Video {
 }
 
 interface VideoGalleryProps {
+  onNavigateToContact?: () => void;
   videos: Video[]
   config: any
   content?: {
@@ -34,13 +35,19 @@ interface VideoGalleryProps {
   }
 }
 
-export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps) {
+export function VideoGallery({ onNavigateToContact, videos, config, content = {} }: VideoGalleryProps) {
   const { t } = useTranslation();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
   const [videoLoaded, setVideoLoaded] = useState(false) // Pour lazy load de la vidéo
   const containerRef = useRef<HTMLDivElement>(null)
   const [mobile, setMobile] = useState(false)
+
+   const [viewport, setViewport] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+    isMobile: false,
+    isTablet: false,
+  });
 
   useEffect(() => {
     setMobile(isMobile())
@@ -185,14 +192,31 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
             <p className="text-[#3D2F2B]/70 text-lg leading-relaxed mb-10">
               Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants.
             </p>
-            <motion.button
-              whileHover={{ scale: mobile ? 1 : 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-4 bg-[#3D2F2B] text-[#EBE3D5] px-10 py-5 rounded-full font-bold text-lg hover:bg-[#2A201D] transition-all group w-full justify-center lg:w-auto"
-            >
-              Contact us
-              <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
-            </motion.button>
+          {onNavigateToContact && (
+  <motion.button 
+    onClick={onNavigateToContact}
+    /* bg-[#3D2B1F] est un marron profond "fève de vanille" */
+    className="
+      px-6 sm:px-8 py-3.5 sm:py-4 
+      rounded-xl border-2 
+      border-[#5D4037]/50 
+      bg-[#2C1E16] 
+      text-[#F3E5AB] 
+      font-semibold text-sm sm:text-base
+      shadow-lg shadow-black/20
+      backdrop-blur-md
+      /* Hover : devient un marron plus chaud et brillant */
+      hover:bg-[#3D2B1F] 
+      hover:border-[#F3E5AB]/40 
+      hover:shadow-[#2C1E16]/40
+      transition-all duration-300
+    "
+    whileHover={!viewport.isMobile ? { scale: 1.03, y: -2 } : {}}
+    whileTap={{ scale: 0.97 }}
+  >
+    {t('contact.title')}
+  </motion.button>
+)}
           </motion.div>
         </div>
 

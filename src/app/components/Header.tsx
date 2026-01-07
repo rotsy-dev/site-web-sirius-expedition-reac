@@ -37,7 +37,7 @@ export function Header({ siteConfig }: HeaderProps) {
     { path: `/${currentLang}`, label: t("nav.home"), id: "home" },
     { path: `/${currentLang}/tours`, label: t("nav.tours"), id: "tours" },
     { path: `/${currentLang}/blog`, label: t("nav.blog"), id: "blog" },
-    { path: `/${currentLang}/about-us`, label: t("nav.about"), id: "about" },
+    { path: `/${currentLang}/about`, label: t("nav.about"), id: "about" },
     { path: `/${currentLang}/contact`, label: t("nav.contact"), id: "contact" },
   ]
 
