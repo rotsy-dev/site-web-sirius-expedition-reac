@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -16,10 +18,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-import { useTranslation } from 'react-i18next'
-
 interface FooterProps {
-  setActiveSection: (section: string) => void;
   config: {
     siteName: string;
     logo: string;
@@ -44,9 +43,13 @@ interface FooterProps {
   };
 }
 
-export function Footer({ setActiveSection, config }: FooterProps) {
+export function Footer({ config }: FooterProps) {
   const currentYear = new Date().getFullYear()
   const { t } = useTranslation()
+  const { lang } = useParams()
+  
+  // Langue par défaut si non définie dans l'URL
+  const currentLang = lang || 'en'
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -109,17 +112,17 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   };
 
   const pageLinks = [
-    { id: 'home', label: t('nav.home') },
-    { id: 'tours', label: t('nav.tours') },
-    { id: 'blogs', label: t('nav.blog') },
-    { id: 'about', label: t('nav.about') },
+    { path: `/${currentLang}`, label: t('nav.home') },
+    { path: `/${currentLang}/tours`, label: t('nav.tours') },
+    { path: `/${currentLang}/blog`, label: t('nav.blog') },
+    { path: `/${currentLang}/about`, label: t('nav.about') },
   ]
 
   const corporateLinks = [
-    { label: t('footer.legalNotice'), href: '#' },
-    { label: t('footer.termsOfUse'), href: '#' },
-    { label: t('footer.privacyPolicy'), href: '#' },
-    { label: t('footer.cookieManagement'), href: '#' },
+    { label: t('footer.legalNotice'), path: `/${currentLang}/legal-notice` },
+    { label: t('footer.termsOfUse'), path: `/${currentLang}/terms` },
+    { label: t('footer.privacyPolicy'), path: `/${currentLang}/privacy` },
+    { label: t('footer.cookieManagement'), path: `/${currentLang}/cookies` },
   ]
 
   return (
@@ -157,7 +160,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               {t('footer.description')}
             </motion.p>
 
-            {/* Newsletter - CORRIGÉ */}
+            {/* Newsletter */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -197,20 +200,27 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </h3>
               <nav className="space-y-4">
                 {pageLinks.map((link, i) => (
-                  <motion.button
-                    key={link.id}
+                  <motion.div
+                    key={link.path}
                     custom={i}
                     variants={linkVariants}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    whileHover={{ x: 5, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setActiveSection(link.id)}
-                    className="block text-white/80 hover:text-white transition-all duration-200 text-left"
                   >
-                    {link.label}
-                  </motion.button>
+                    <Link
+                      to={link.path}
+                      className="block text-white/80 hover:text-white transition-all duration-200"
+                    >
+                      <motion.span
+                        whileHover={{ x: 5, scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="inline-block"
+                      >
+                        {link.label}
+                      </motion.span>
+                    </Link>
+                  </motion.div>
                 ))}
               </nav>
             </div>
@@ -222,19 +232,26 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               </h3>
               <nav className="space-y-4 mb-8">
                 {corporateLinks.map((link, idx) => (
-                  <motion.a
+                  <motion.div
                     key={idx}
                     custom={idx}
                     variants={linkVariants}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    whileHover={{ x: 5, scale: 1.05 }}
-                    href={link.href}
-                    className="block text-white/80 hover:text-white transition-all duration-200"
                   >
-                    {link.label}
-                  </motion.a>
+                    <Link
+                      to={link.path}
+                      className="block text-white/80 hover:text-white transition-all duration-200"
+                    >
+                      <motion.span
+                        whileHover={{ x: 5, scale: 1.05 }}
+                        className="inline-block"
+                      >
+                        {link.label}
+                      </motion.span>
+                    </Link>
+                  </motion.div>
                 ))}
               </nav>
 
