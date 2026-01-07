@@ -45,3 +45,4 @@ lerna-debug.log*
 # Temporary files
 *.tmp
 *.tempyarn.lock
+yarn.lock
