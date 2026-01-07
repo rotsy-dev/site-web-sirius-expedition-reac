@@ -403,12 +403,12 @@ function App() {
                   className="min-h-screen bg-muted/30"
                 >
                   {!isAuthenticated ? (
-                    <AdminLogin onBack={() => window.location.href = '/fr'} />
+                    <AdminLogin onBack={() => window.location.href = '/en'} />
                   ) : (
                     <AdminDashboard
                       onLogout={() => {
                         logout();
-                        window.location.href = '/fr';
+                        window.location.href = '/en';
                       }}
                       onExport={exportContent}
                       onImport={importContent}
@@ -420,14 +420,14 @@ function App() {
                 </motion.div>
               } />
 
-              {/* Redirection de la racine vers /fr */}
-              <Route path="/" element={<Navigate to="/fr" replace />} />
+              {/* Redirection de la racine vers /en */}
+              <Route path="/" element={<Navigate to="/en" replace />} />
 
               {/* Routes avec langue */}
               <Route path="/:lang/*" element={<LanguageRoutes />} />
 
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/fr" replace />} />
+              <Route path="*" element={<Navigate to="/en" replace />} />
             </Routes>
           )}
         </AnimatePresence>
