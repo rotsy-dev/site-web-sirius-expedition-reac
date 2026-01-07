@@ -16,6 +16,8 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
+import { useTranslation } from 'react-i18next'
+
 interface FooterProps {
   setActiveSection: (section: string) => void;
   config: {
@@ -44,6 +46,7 @@ interface FooterProps {
 
 export function Footer({ setActiveSection, config }: FooterProps) {
   const currentYear = new Date().getFullYear()
+  const { t } = useTranslation()
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -106,17 +109,17 @@ export function Footer({ setActiveSection, config }: FooterProps) {
   };
 
   const pageLinks = [
-    { id: 'home', label: 'Accueil' },
-    { id: 'tours', label: 'Circuits' },
-    { id: 'blogs', label: 'Blog' },
-    { id: 'about', label: 'À propos' },
+    { id: 'home', label: t('nav.home') },
+    { id: 'tours', label: t('nav.tours') },
+    { id: 'blogs', label: t('nav.blog') },
+    { id: 'about', label: t('nav.about') },
   ]
 
   const corporateLinks = [
-    { label: 'Mentions légales', href: '#' },
-    { label: 'Conditions d\'utilisation', href: '#' },
-    { label: 'Politique de confidentialité', href: '#' },
-    { label: 'Gestion des cookies', href: '#' },
+    { label: t('footer.legalNotice'), href: '#' },
+    { label: t('footer.termsOfUse'), href: '#' },
+    { label: t('footer.privacyPolicy'), href: '#' },
+    { label: t('footer.cookieManagement'), href: '#' },
   ]
 
   return (
@@ -141,7 +144,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">Découvrez Madagascar autrement</p>
+              <p className="text-sm text-white/60 mt-1">{t('footer.description')}</p>
             </motion.div>
 
             <motion.p
@@ -151,7 +154,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md"
             >
-              Découvrez Madagascar autrement avec nos circuits authentiques et personnalisés.
+              {t('footer.description')}
             </motion.p>
 
             {/* Newsletter - CORRIGÉ */}
@@ -165,14 +168,14 @@ export function Footer({ setActiveSection, config }: FooterProps) {
             >
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-[#F5E6D3]" />
-                Newsletter
+                {t('footer.newsletter')}
               </h3>
-              <p className="text-white/60 text-sm mb-4">Recevez nos meilleures offres</p>
+              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
               <div className="flex gap-2">
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   type="email"
-                  placeholder="Votre email"
+                  placeholder={t('footer.emailPlaceholder')}
                   className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
                 />
                 <motion.button
@@ -190,7 +193,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
-                Liens rapides
+                {t('footer.quickLinks')}
               </h3>
               <nav className="space-y-4">
                 {pageLinks.map((link, i) => (
@@ -238,7 +241,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
               {/* Réseaux sociaux */}
               <div>
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
-                  Suivez-nous
+                  {t('footer.followUs')}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {[
@@ -289,7 +292,7 @@ export function Footer({ setActiveSection, config }: FooterProps) {
           className="flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. Tous droits réservés
+            © {currentYear} {config.siteName}. {t('footer.rights')}
           </p>
 
           <motion.div
