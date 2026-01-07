@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Loader2, Calendar } from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
@@ -226,20 +226,66 @@ export function Blogs({ content = {} }: BlogProps) {
                                             onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setSelectedPost(post); }}
                                             className="group cursor-pointer bg-white dark:bg-[#443C34] rounded-[32px] p-4 flex flex-col gap-6 hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-[#D4A574] shadow-md overflow-hidden"
                                         >
-                                            <div className="aspect-[4/3] rounded-[24px] overflow-hidden">
-                                                <img src={post.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={post.title} />
+                                            <div className="aspect-[4/3] rounded-[24px] overflow-hidden relative">
+                                                <img
+                                                    src={post.image}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    alt={post.title}
+                                                />
+                                                {/* Badge catégorie optionnel */}
+                                                {post.category && (
+                                                    <div className="absolute top-4 left-4 bg-[#443C34]/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold">
+                                                        {post.category}
+                                                    </div>
+                                                )}
                                             </div>
+
                                             <div className="px-2 flex flex-col flex-1 bg-gradient-to-b from-transparent to-[#F8F5F0] dark:to-[#332C26] rounded-2xl p-4">
                                                 <h3 className="text-lg md:text-xl font-bold text-[#443C34] dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
                                                     {post.title}
                                                 </h3>
-                                                <p className="text-gray-500 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 mb-6">
+
+                                                <p className="text-gray-500 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 mb-6 flex-1">
                                                     {post.excerpt}
                                                 </p>
-                                                <div className="mt-auto flex items-center justify-between pt-4 border-t-2 border-[#D4A574]/30">
-                                                    <span className="text-xs font-bold text-[#8B7355] dark:text-[#D4A574]">{post.author}</span>
-                                                    <div className="w-8 h-8 rounded-full bg-[#F0E7D5] dark:bg-[#8B7355] flex items-center justify-center group-hover:bg-[#443C34] dark:group-hover:bg-[#D4A574] group-hover:text-white transition-all shadow-sm">
-                                                        <ArrowRight size={14} />
+
+                                                {/* Section auteur enrichie */}
+                                                <div className="mt-auto space-y-4">
+                                                    {/* Temps de lecture et date */}
+                                                    <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+                                                        <span className="flex items-center gap-1.5">
+                                                            <Clock size={14} className="text-[#8B7355] dark:text-[#D4A574]" />
+                                                            {post.readTime || '5 min'}
+                                                        </span>
+                                                        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                                                        <span className="flex items-center gap-1.5">
+                                                            <Calendar size={14} className="text-[#8B7355] dark:text-[#D4A574]" />
+                                                            {post.date || 'Jan 2024'}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Auteur avec avatar */}
+                                                    <div className="flex items-center justify-between pt-4 border-t-2 border-[#D4A574]/30">
+                                                        <div className="flex items-center gap-3">
+                                                            {post.authorAvatar ? (
+                                                                <img
+                                                                    src={post.authorAvatar}
+                                                                    alt={post.author}
+                                                                    className="w-8 h-8 rounded-full object-cover border-2 border-[#D4A574]/50"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8B7355] to-[#D4A574] flex items-center justify-center text-white text-xs font-bold">
+                                                                    {post.author?.charAt(0) || 'A'}
+                                                                </div>
+                                                            )}
+                                                            <span className="text-xs font-bold text-[#8B7355] dark:text-[#D4A574]">
+                                                                {post.author}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="w-8 h-8 rounded-full bg-[#F0E7D5] dark:bg-[#8B7355] flex items-center justify-center group-hover:bg-[#443C34] dark:group-hover:bg-[#D4A574] group-hover:text-white transition-all shadow-sm">
+                                                            <ArrowRight size={14} />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
