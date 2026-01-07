@@ -403,7 +403,7 @@ function App() {
                   className="min-h-screen bg-muted/30"
                 >
                   {!isAuthenticated ? (
-                    <AdminLogin onBack={() => window.location.href = '/fr'} />
+                    <AdminLogin onBack={() => window.location.href = '/en'} />
                   ) : (
                     <AdminDashboard
                       onLogout={() => {
@@ -421,13 +421,13 @@ function App() {
               } />
 
               {/* Redirection de la racine vers /fr */}
-              <Route path="/" element={<Navigate to="/fr" replace />} />
+              <Route path="/" element={<Navigate to="/en" replace />} />
 
               {/* Routes avec langue */}
               <Route path="/:lang/*" element={<LanguageRoutes />} />
 
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/fr" replace />} />
+              <Route path="*" element={<Navigate to="/en" replace />} />
             </Routes>
           )}
         </AnimatePresence>

@@ -61,7 +61,7 @@ export const LanguageSwitcher = () => {
 
   // Normaliser le code de langue pour l'affichage (priorité à l'URL)
   const displayLangCode = currentLangParam || i18n.language.split('-')[0].toLowerCase();
-  const currentLanguage = languages.find(lang => lang.code === displayLangCode) || languages[0];
+  const currentLanguage = languages.find(lang => lang.code === displayLangCode) || languages.find(lang => lang.code === 'en') || languages[0];
 
   // Fermer le dropdown au clic extérieur
   useEffect(() => {
