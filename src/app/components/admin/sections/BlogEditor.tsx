@@ -121,8 +121,14 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
 
   const handleAuthorChange = (id: number, name: string) => {
     const newAvatar = generateAuthorAvatar(name);
-    handleChange(id, 'author', name);
-    handleChange(id, 'authorAvatar', newAvatar);
+
+    setPosts(posts.map(post => {
+      if (post.id === id) {
+        return { ...post, author: name, authorAvatar: newAvatar };
+      }
+      return post;
+    }));
+    setHasChanges(true);
 
     if (editingPost && editingPost.id === id) {
       setEditingPost({ ...editingPost, author: name, authorAvatar: newAvatar });
@@ -408,11 +414,10 @@ export function BlogEditor({ posts: initialPosts, onSave }: BlogEditorProps) {
                     <button
                       key={tab.key}
                       onClick={() => setActiveTab(tab.key as any)}
-                      className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium transition-colors flex-1 sm:flex-initial ${
-                        activeTab === tab.key
+                      className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium transition-colors flex-1 sm:flex-initial ${activeTab === tab.key
                           ? 'bg-[#D4A373] text-white shadow-sm'
                           : 'text-[#634832]/60 hover:bg-[#FAF7F2]'
-                      }`}
+                        }`}
                     >
                       <tab.icon size={18} />
                       {tab.label}
