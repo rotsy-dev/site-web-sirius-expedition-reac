@@ -348,7 +348,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           <ChevronDown className="text-white w-5 md:w-6 h-5 md:h-6" strokeWidth={2.5} />
         </motion.button>
 
-        <motion.button 
+        {/* <motion.button 
           onClick={() => setIsPaused(!isPaused)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -358,7 +358,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
             <Play className="text-white w-4 md:w-5 h-4 md:h-5" fill="white" /> : 
             <Pause className="text-white w-4 md:w-5 h-4 md:h-5" fill="white" />
           }
-        </motion.button>
+        </motion.button> */}
 
         {/* Indicateurs - Horizontaux sur mobile, verticaux sur desktop */}
         <div className="absolute z-40 
