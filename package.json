@@ -79,8 +79,10 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-slick": "^0.23.13",
     "@vitejs/plugin-react": "4.7.0",
+    "netlify-plugin-cache": "^1.0.3",
     "tailwindcss": "4.1.12",
-    "vite": "6.3.5"
+    "vite": "6.3.5",
+    "vite-plugin-image-optimizer": "^2.0.3"
   },
   "peerDependencies": {
     "react": "18.3.1",
