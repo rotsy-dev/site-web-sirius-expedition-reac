@@ -292,10 +292,10 @@ function App() {
                       content={content}
                       onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
                     />
-                    <BestSellers
+                    {/* <BestSellers
                       tours={bestSellerTours}
                       content={content}
-                    />
+                    /> */}
                   </div>
                 )}
 

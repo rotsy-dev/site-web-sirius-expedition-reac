@@ -106,7 +106,11 @@
     "notSpecified": "Nicht angegeben",
     "none": "Keine",
     "failedToSend": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt unter",
-    "anyOtherInfo": "Jede andere nützliche Information..."
+    "anyOtherInfo": "Jede andere nützliche Information...",
+    "experienceSirius": "Sirius-Erlebnis",
+    "anAuthentic": "Ein authentisches",
+    "immersion": "Eintauchen",
+    "dscrVideo": "Unsere Rundreisen sind für diejenigen konzipiert, die die Seele Madagaskars suchen. Eine echte Verbindung mit dem Land und seinen Bewohnern."
   },
   "about": {
     "title": "Über Sirius Expedition",

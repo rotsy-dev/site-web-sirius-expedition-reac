@@ -470,7 +470,7 @@ export function Contact({ config, content = {} }: ContactProps) {
                     const address = encodeURIComponent(config.contact.address);
                     window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
                   }}
-                  className="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition-all z-10"
+                  className="absolute bottom-4 right-4 bg-[#443C34] hover:bg-[#332922] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition-all z-10"
                 >
                   <MapPin size={16} />
                   {t('contact.showAddress', { defaultValue: 'Show Address' })}

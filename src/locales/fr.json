@@ -106,7 +106,11 @@
     "notSpecified": "Non spécifié",
     "none": "Aucun",
     "failedToSend": "Échec de l'envoi du message. Veuillez réessayer ou nous contacter directement à",
-    "anyOtherInfo": "Toute autre information utile..."
+    "anyOtherInfo": "Toute autre information utile...",
+    "experienceSirius": "Expérience Sirius",
+    "anAuthentic": " Une immersion",
+    "immersion": "authentique",
+    "dscrVideo": "Nos circuits sont conçus pour ceux qui recherchent l'âme de Madagascar. Une véritable connexion avec la terre et ses habitants."
   },
   "about": {
     "title": "À propos de Sirius Expedition",

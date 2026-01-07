@@ -261,11 +261,29 @@ export function Blogs({ content = {} }: BlogProps) {
                             <ArrowLeft size={18} />
                             <span className="font-bold text-sm uppercase">Back to Blog</span>
                         </button>
-                        <div className="max-w-4xl mx-auto">
-                            <h1 className="text-3xl md:text-4xl lg:text-6xl font-black text-[#443C34] dark:text-white mb-8 text-center">{selectedPost.title}</h1>
-                            <img src={selectedPost.image} className="w-full h-[500px] object-cover rounded-[48px] mb-12 shadow-2xl border-4 border-[#D4A574]" alt="" />
-                            <div className="prose prose-xl dark:prose-invert mx-auto bg-white dark:bg-[#443C34] p-8 md:p-12 rounded-[32px] shadow-xl" dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
-                        </div>
+                            <div className="max-w-4xl mx-auto px-4 md:px-6">
+                                <h1 className="text-3xl md:text-4xl lg:text-6xl font-black text-[#443C34] dark:text-white mb-8 text-center">
+                                    {selectedPost.title}
+                                </h1>
+
+                                <img
+                                    src={selectedPost.image}
+                                    className="w-full h-64 md:h-96 lg:h-[500px] object-cover rounded-3xl md:rounded-[48px] mb-12 shadow-2xl border-4 border-[#D4A574]"
+                                    alt={selectedPost.title}
+                                />
+
+                                <div className="bg-white dark:bg-[#443C34] p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[32px] shadow-xl">
+                                    {selectedPost.content.split('\n\n').map((paragraph:any, index:any) => (
+                                        <p
+                                            key={index}
+                                            className={`text-base md:text-lg text-gray-700 dark:text-gray-200 mb-6 leading-relaxed text-justify ${index === 0 ? 'first-letter:text-6xl md:first-letter:text-7xl first-letter:font-bold first-letter:text-[#F0E7D5] first-letter:mr-3 first-letter:float-left first-letter:leading-none' : ''
+                                                }`}
+                                        >
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
                     </motion.div>
                 )}
             </AnimatePresence>

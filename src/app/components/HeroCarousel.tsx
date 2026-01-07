@@ -360,26 +360,28 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
           }
         </motion.button>
 
-        {/* Indicateurs VERTICAUX */}
-        <div className="absolute right-6 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2.5 bg-black/30 backdrop-blur-xl px-3 py-5 rounded-full border border-white/20">
-          {displaySlides.map((_, index) => (
-            <motion.button 
-              key={index}
-              onClick={() => { 
-                setDirection(index > currentIndex ? 1 : -1); 
-                setCurrentIndex(index); 
-              }}
-              whileHover={{ scale: 1.3 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <div className={`rounded-full transition-all duration-500 ${
-                index === currentIndex 
-                  ? 'h-10 w-2.5 bg-gradient-to-b from-[#2fb5a3] to-[#F0E7D5]' 
-                  : 'h-2.5 w-2.5 bg-white/40 hover:bg-white/60'
-              }`} />
-            </motion.button>
-          ))}
-        </div>
+        {/* Indicateurs - Horizontaux sur mobile, verticaux sur desktop */}
+        <div className="absolute z-40 
+          bottom-6 left-1/2 -translate-x-1/2 flex-row gap-2.5 md:flex-col md:right-6 lg:right-8 md:top-1/2 md:-translate-y-1/2 md:left-auto md:bottom-auto md:translate-x-0
+          flex bg-black/30 backdrop-blur-xl px-5 py-3 md:px-3 md:py-5 rounded-full border border-white/20">
+                  {displaySlides.map((_, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => {
+                        setDirection(index > currentIndex ? 1 : -1);
+                        setCurrentIndex(index);
+                      }}
+                      whileHover={{ scale: 1.3 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1" // Zone tactile plus grande
+                    >
+                      <div className={`rounded-full transition-all duration-500 ${index === currentIndex
+                          ? 'w-10 h-2.5 md:w-2.5 md:h-10 bg-gradient-to-r md:bg-gradient-to-b from-[#2fb5a3] to-[#F0E7D5]'
+                          : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/60'
+                        }`} />
+                    </motion.button>
+                  ))}
+                </div>
 
         {/* Compteur */}
         <motion.div 

@@ -223,22 +223,22 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
             className="relative w-full lg:w-[480px] lg:-ml-32 mt-[-50px] lg:mt-0 bg-[#EBE3D5] p-10 md:p-14 rounded-[2.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.3)] z-20"
           >
             <span className="text-[#A68966] font-bold uppercase tracking-widest text-xs mb-6 block">
-              Sirius Experience
+              {t('contact.experienceSirius')}
             </span>
             <h3 className="text-[#3D2F2B] text-3xl md:text-5xl font-black leading-tight mb-8">
-              An authentic <br /> <span className="italic font-serif font-medium">immersion.</span>
+              {t('contact.anAuthentic')} <br /> <span className="italic font-serif font-medium">  {t('contact.immersion')}.</span>
             </h3>
             <p className="text-[#3D2F2B]/70 text-lg leading-relaxed mb-10">
-              Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants.
+              {t('contact.dscrVideo')}
             </p>
-            <motion.button 
+            {/* <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-4 bg-[#3D2F2B] text-[#EBE3D5] px-10 py-5 rounded-full font-bold text-lg hover:bg-[#2A201D] transition-all group w-full justify-center lg:w-auto"
             >
-              Contact us 
+              {t('contact.title')}
               <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
-            </motion.button>
+            </motion.button> */}
           </motion.div>
         </div>
 
@@ -482,5 +482,3 @@ export function VideoGallery({ videos, config, content = {} }: VideoGalleryProps
     </section>
   )
 }
-
-// (Demo data & local App component removed – production uses real props from parent)

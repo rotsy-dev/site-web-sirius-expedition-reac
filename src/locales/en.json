@@ -134,7 +134,11 @@
     "notSpecified": "Not specified",
     "none": "None",
     "failedToSend": "Failed to send message. Please try again or contact us directly at",
-    "anyOtherInfo": "Any other useful information..."
+    "anyOtherInfo": "Any other useful information...",
+    "experienceSirius": "Sirius Experience",
+    "anAuthentic": "An authentic",
+    "immersion": "immersion",
+    "dscrVideo": "Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants."
   },
   "about": {
     "title": "About Sirius Expedition",
