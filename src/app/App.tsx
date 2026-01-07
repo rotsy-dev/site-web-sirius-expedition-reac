@@ -408,7 +408,7 @@ function App() {
                     <AdminDashboard
                       onLogout={() => {
                         logout();
-                        window.location.href = '/fr';
+                        window.location.href = '/en';
                       }}
                       onExport={exportContent}
                       onImport={importContent}
@@ -420,7 +420,7 @@ function App() {
                 </motion.div>
               } />
 
-              {/* Redirection de la racine vers /fr */}
+              {/* Redirection de la racine vers /en */}
               <Route path="/" element={<Navigate to="/en" replace />} />
 
               {/* Routes avec langue */}
