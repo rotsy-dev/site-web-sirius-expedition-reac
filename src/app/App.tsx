@@ -73,11 +73,10 @@ function App() {
       <div className="min-h-screen bg-background text-foreground">
         <AnimatePresence mode="wait">
           {loading ? (
-            /* --- 1. ÉCRAN DE CHARGEMENT --- */
             <motion.div
               key="loader"
               initial={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              exit={{ opacity: 0, transition: { duration: 0.3 } }}
               className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-black"
             >
               {/* Image de fond - Avenue des Baobabs */}
@@ -86,39 +85,39 @@ function App() {
                 style={{
                   backgroundImage: 'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071)',
                 }}
-                initial={{ scale: 1.2, opacity: 0 }}
+                initial={{ scale: 1.1, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 2, ease: "easeOut" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               />
 
-              {/* Flash blanc - effet de prise de photo */}
+              {/* Flash blanc - effet de prise de photo (réduit) */}
               <motion.div
                 className="absolute inset-0 bg-white"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.8, 0] }}
-                transition={{ duration: 0.5, delay: 0.8 }}
+                animate={{ opacity: [0, 0.6, 0] }}
+                transition={{ duration: 0.3, delay: 0.4 }}
               />
 
               {/* Overlay sombre progressif */}
               <motion.div
                 className="absolute inset-0 bg-black"
                 initial={{ opacity: 1 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 2, delay: 1.5 }}
+                animate={{ opacity: 0.6 }}
+                transition={{ duration: 1, delay: 0.5 }}
               />
 
-              {/* Icône appareil photo avec effet de clic */}
+              {/* Icône appareil photo avec effet de clic (accéléré) */}
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                initial={{ scale: 1.5, opacity: 0 }}
+                initial={{ scale: 1.3, opacity: 0 }}
                 animate={{
-                  scale: [1.5, 1, 1.05, 1],
+                  scale: [1.3, 1, 1.05, 1],
                   opacity: [0, 1, 1, 0]
                 }}
                 transition={{
-                  duration: 2.5,
+                  duration: 1.2,
                   times: [0, 0.3, 0.5, 1],
-                  delay: 0.5
+                  delay: 0.3
                 }}
               >
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
@@ -127,32 +126,32 @@ function App() {
                 </svg>
               </motion.div>
 
-              {/* Son effet "clic" visuel - cercles concentriques */}
+              {/* Cercles concentriques (simplifié) */}
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{
-                  scale: [0.8, 2.5],
+                  scale: [0.8, 2],
                   opacity: [0.6, 0]
                 }}
-                transition={{ duration: 1.2, delay: 0.6 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
               >
                 <div className="w-40 h-40 border-2 border-white rounded-full" />
               </motion.div>
 
-              {/* Contenu principal */}
+              {/* Contenu principal (apparaît plus vite) */}
               <motion.div
                 className="relative z-10 flex flex-col items-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2, duration: 1.2 }}
+                transition={{ delay: 1, duration: 0.8 }}
               >
                 {/* Nom de la marque */}
                 <div className="text-center mb-8">
                   <motion.h2
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 2.5, duration: 1.2 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
                     className="text-white font-bold tracking-[0.3em] text-4xl mb-4 drop-shadow-2xl"
                   >
                     SIRIUS EXPEDITION
@@ -161,25 +160,25 @@ function App() {
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ delay: 4, duration: 1 }}
+                    transition={{ delay: 1.8, duration: 0.6 }}
                     className="h-px w-48 bg-gradient-to-r from-transparent via-[#D4A373] to-transparent mx-auto mb-4"
                   />
 
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 5.2, duration: 1 }}
+                    transition={{ delay: 2.2, duration: 0.8 }}
                     className="text-[#D4A373] text-base tracking-[0.3em] font-light"
                   >
                     DISCOVER MADAGASCAR
                   </motion.p>
                 </div>
 
-                {/* Barre de progression simple et élégante */}
+                {/* Barre de progression simple */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 6.5, duration: 0.8 }}
+                  transition={{ delay: 2.8, duration: 0.5 }}
                   className="w-64 h-0.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm"
                 >
                   <motion.div
@@ -187,26 +186,26 @@ function App() {
                     animate={{
                       x: ['-200%', '200%'],
                     }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   />
                 </motion.div>
 
-                {/* Texte de chargement simple */}
+                {/* Texte de chargement */}
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: [0, 0.9, 0.4] }}
-                  transition={{ delay: 6.8, duration: 2, repeat: Infinity }}
+                  transition={{ delay: 3, duration: 1.5, repeat: Infinity }}
                   className="text-white/60 text-sm mt-6 tracking-[0.2em] font-light"
                 >
                   LOADING...
                 </motion.p>
               </motion.div>
 
-              {/* Cadres photo minimalistes */}
+              {/* Cadres photo minimalistes (apparaissent plus tôt) */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.3 }}
-                transition={{ delay: 3.5, duration: 1.5 }}
+                transition={{ delay: 1.5, duration: 0.8 }}
               >
                 <div className="absolute top-6 left-6 w-12 h-12 border-t border-l border-white/50" />
                 <div className="absolute top-6 right-6 w-12 h-12 border-t border-r border-white/50" />
@@ -259,7 +258,7 @@ function App() {
                   <>
                     <HeroCarousel
                       slides={content.heroSlides}
-                      content={content}
+                      // content={content}
                       onNavigateToContact={() => setActiveSection('contact')}
                       onNavigateToTours={() => setActiveSection('tours')}
                     />
