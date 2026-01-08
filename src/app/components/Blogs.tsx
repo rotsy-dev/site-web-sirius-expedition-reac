@@ -284,7 +284,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             </div>
                                                         </div>
                                                         <button className="flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border-2 border-[#D4A574] text-[#443C34] dark:text-white font-bold text-sm bg-white dark:bg-[#332C26] hover:bg-[#F0E7D5] dark:hover:bg-[#8B7355] transition-all group-hover:border-[#8B7355] w-fit shadow-md">
-                                                            Read Full Article
+                                                             {t('blog.readArticle')}
                                                             <div className="w-10 h-10 rounded-full bg-[#F0E7D5] dark:bg-[#8B7355] flex items-center justify-center group-hover:bg-[#443C34] dark:group-hover:bg-[#D4A574] group-hover:text-white transition-colors">
                                                                 <ArrowRight size={16} />
                                                             </div>
@@ -400,7 +400,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                                         {post.author}
                                                                     </span>
                                                                     <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                                                                        Author
+                                                                        {t('blog.author')}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -433,7 +433,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                     >
                         <button onClick={handleBack} className="group mb-12 flex items-center gap-3 px-6 py-3 rounded-full border-2 border-[#443C34] text-[#443C34] dark:text-white hover:bg-[#443C34] hover:text-white dark:hover:bg-[#D4A574] dark:hover:border-[#D4A574] transition-all shadow-md">
                             <ArrowLeft size={18} />
-                            <span className="font-bold text-sm uppercase">Back to Blog</span>
+                            <span className="font-bold text-sm uppercase"> {t('common.back')}</span>
                         </button>
                         <div className="max-w-4xl mx-auto px-4 md:px-6">
                             <h1 className="text-3xl md:text-4xl lg:text-4xl font-black text-[#443C34] dark:text-white mb-8 text-center">
@@ -483,7 +483,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                             </ul>
                         </div>
                         <button onClick={handleBack} className="px-6 py-3 bg-[#443C34] text-white rounded-full hover:bg-[#D4A574] transition-all">
-                            Retour aux blogs
+                           {t('common.back')}
                         </button>
                     </motion.div>
                 )}

@@ -26,6 +26,18 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 import { SITE_SECTIONS } from '../constants';
+import TermsPage from './pages/legal/TermsPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
+
+// Cache keys
+const CACHE_VERSION = '1.0';
+const CACHE_KEYS = {
+  heroSlides: `hero_slides_v${CACHE_VERSION}`,
+  bestSellers: `best_sellers_v${CACHE_VERSION}`,
+  videoGallery: `video_gallery_v${CACHE_VERSION}`,
+  reviews: `reviews_v${CACHE_VERSION}`,
+  tourSpecialties: `tour_specialties_v${CACHE_VERSION}`,
+};
 
 // Wrapper pour les routes avec langue
 const LanguageRoutes = () => {
@@ -44,20 +56,125 @@ const LanguageRoutes = () => {
     importContent,
   } = useContentManager();
 
-  // Sélectionner les circuits marqués comme "Best Seller"
-  const bestSellerTours = (content.tourSpecialties || []).filter(
-    (tour: any) => tour.isBestSeller
-  );
+  // ============= CACHE POUR HERO SLIDES =============
+  const [cachedHeroSlides, setCachedHeroSlides] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEYS.heroSlides);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Erreur cache heroSlides:', e);
+      }
+    }
+    return content.heroSlides || [];
+  });
+
+  useEffect(() => {
+    if (content.heroSlides && content.heroSlides.length > 0) {
+      setCachedHeroSlides(content.heroSlides);
+      localStorage.setItem(CACHE_KEYS.heroSlides, JSON.stringify(content.heroSlides));
+      console.log('✅ Hero slides cached');
+    }
+  }, [content.heroSlides]);
+
+  // ============= CACHE POUR BEST SELLERS =============
+  const [cachedBestSellers, setCachedBestSellers] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEYS.bestSellers);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Erreur cache bestSellers:', e);
+      }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    const bestSellerTours = (content.tourSpecialties || []).filter(
+      (tour: any) => tour.isBestSeller
+    );
+    if (bestSellerTours.length > 0) {
+      setCachedBestSellers(bestSellerTours);
+      localStorage.setItem(CACHE_KEYS.bestSellers, JSON.stringify(bestSellerTours));
+      console.log('✅ Best sellers cached');
+    }
+  }, [content.tourSpecialties]);
+
+  // ============= CACHE POUR VIDEO GALLERY =============
+  const [cachedVideoGallery, setCachedVideoGallery] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEYS.videoGallery);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Erreur cache videoGallery:', e);
+      }
+    }
+    return content.videoGallery || [];
+  });
+
+  useEffect(() => {
+    if (content.videoGallery && content.videoGallery.length > 0) {
+      setCachedVideoGallery(content.videoGallery);
+      localStorage.setItem(CACHE_KEYS.videoGallery, JSON.stringify(content.videoGallery));
+      console.log('✅ Video gallery cached');
+    }
+  }, [content.videoGallery]);
+
+  // ============= CACHE POUR REVIEWS =============
+  const [cachedReviews, setCachedReviews] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEYS.reviews);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Erreur cache reviews:', e);
+      }
+    }
+    return content.reviews || [];
+  });
+
+  useEffect(() => {
+    if (content.reviews && content.reviews.length > 0) {
+      setCachedReviews(content.reviews);
+      localStorage.setItem(CACHE_KEYS.reviews, JSON.stringify(content.reviews));
+      console.log('✅ Reviews cached');
+    }
+  }, [content.reviews]);
+
+  // ============= CACHE POUR TOUR SPECIALTIES =============
+  const [cachedTourSpecialties, setCachedTourSpecialties] = useState(() => {
+    const cached = localStorage.getItem(CACHE_KEYS.tourSpecialties);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.error('Erreur cache tourSpecialties:', e);
+      }
+    }
+    return content.tourSpecialties || [];
+  });
+
+  useEffect(() => {
+    if (content.tourSpecialties && content.tourSpecialties.length > 0) {
+      setCachedTourSpecialties(content.tourSpecialties);
+      localStorage.setItem(CACHE_KEYS.tourSpecialties, JSON.stringify(content.tourSpecialties));
+      console.log('✅ Tour specialties cached');
+    }
+  }, [content.tourSpecialties]);
 
   // Fonction pour naviguer avec la langue
   const setActiveSection = (section: string) => {
     const routes: Record<string, string> = {
       'home': `/${lang}`,
       'tours': `/${lang}/tours`,
-      'blogs': `/${lang}/blogs`,
+      'blogs': `/${lang}/blog`,
       'contact': `/${lang}/contact`,
       'quote': `/${lang}/quote`,
       'about': `/${lang}/about`,
+      'terms': `/${lang}/terms`,
+      'privacy': `/${lang}/privacy`,
     };
     navigate(routes[section] || `/${lang}`);
   };
@@ -71,6 +188,8 @@ const LanguageRoutes = () => {
     if (path === `/${lang}/contact`) return 'contact';
     if (path === `/${lang}/quote`) return 'quote';
     if (path === `/${lang}/about`) return 'about';
+    if (path === `/${lang}/terms`) return 'terms';
+    if (path === `/${lang}/privacy`) return 'privacy';
     return 'home';
   };
 
@@ -115,26 +234,26 @@ const LanguageRoutes = () => {
           <Route index element={
             <>
               <HeroCarousel
-                slides={content.heroSlides}
+                slides={cachedHeroSlides}
                 onNavigateToContact={() => setActiveSection('contact')}
                 onNavigateToTours={() => setActiveSection('tours')}
               />
               <BestSellers
-                tours={bestSellerTours}
+                tours={cachedBestSellers}
                 content={content}
                 onNavigateToTour={() => {
                   setActiveSection('tours');
                 }}
               />
               <VideoGallery
-                videos={content.videoGallery || []}
+                videos={cachedVideoGallery}
                 config={content.siteConfig}
                 onNavigateToContact={() => setActiveSection('contact')}
                 content={content}
               />
               <MadagascarGallery content={content} />
               <Reviews
-                reviews={content.reviews}
+                reviews={cachedReviews}
                 config={content.siteConfig as any}
                 content={content}
               />
@@ -145,7 +264,7 @@ const LanguageRoutes = () => {
           <Route path="tours" element={
             <div className="min-h-screen bg-[#FAF7F2]">
               <TourSpecialties
-                specialties={content.tourSpecialties}
+                specialties={cachedTourSpecialties}
                 initialSelectedTour={pendingTour}
                 content={content}
                 onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
@@ -154,11 +273,11 @@ const LanguageRoutes = () => {
           } />
 
           {/* Page Liste des Blogs */}
-          <Route path="/blog" element={<Blogs content={content} />} />
+          <Route path="blog" element={<Blogs content={content} />} />
 
           {/* Page Détail du Blog (Slug) */}
-         
-          <Route path="/blog/:slug" element={<Blogs content={content} isDetail={true} />} />
+          <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
+
           {/* Page Contact */}
           <Route path="contact" element={
             <Contact
@@ -182,6 +301,8 @@ const LanguageRoutes = () => {
               content={content}
             />
           } />
+          <Route path='terms' element={<TermsPage/>}/>
+          <Route path='privacy' element={<PrivacyPage/>}/>
         </Routes>
       </main>
 
@@ -268,7 +389,7 @@ function App() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
               />
 
-              {/* Flash blanc - effet de prise de photo (réduit) */}
+              {/* Flash blanc - effet de prise de photo */}
               <motion.div
                 className="absolute inset-0 bg-white"
                 initial={{ opacity: 0 }}
@@ -284,7 +405,7 @@ function App() {
                 transition={{ duration: 1, delay: 0.5 }}
               />
 
-              {/* Icône appareil photo avec effet de clic (accéléré) */}
+              {/* Icône appareil photo avec effet de clic */}
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 initial={{ scale: 1.3, opacity: 0 }}
@@ -304,7 +425,7 @@ function App() {
                 </svg>
               </motion.div>
 
-              {/* Cercles concentriques (simplifié) */}
+              {/* Cercles concentriques */}
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -317,7 +438,7 @@ function App() {
                 <div className="w-40 h-40 border-2 border-white rounded-full" />
               </motion.div>
 
-              {/* Contenu principal (apparaît plus vite) */}
+              {/* Contenu principal */}
               <motion.div
                 className="relative z-10 flex flex-col items-center"
                 initial={{ opacity: 0, y: 20 }}
@@ -379,7 +500,7 @@ function App() {
                 </motion.p>
               </motion.div>
 
-              {/* Cadres photo minimalistes (apparaissent plus tôt) */}
+              {/* Cadres photo minimalistes */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.3 }}

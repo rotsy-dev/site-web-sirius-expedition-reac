@@ -12,6 +12,10 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
+// Cache configuration
+const CACHE_VERSION = '1.0';
+const CACHE_KEY = `site_content_v${CACHE_VERSION}`;
+
 // ✅ STRUCTURE MISE À JOUR AVEC "OUR STORY"
 const defaultContent = {
     pageHeaders: {
@@ -117,7 +121,22 @@ const defaultContent = {
 };
 
 export function useContentManager() {
-    const [content, setContent] = useState(defaultContent);
+    // ✅ CHARGEMENT INITIAL DEPUIS LE CACHE
+    const [content, setContent] = useState(() => {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                console.log('⚡ Contenu chargé depuis le cache');
+                return parsed;
+            }
+        } catch (e) {
+            console.error('❌ Erreur lecture cache:', e);
+        }
+        console.log('📦 Utilisation du contenu par défaut');
+        return defaultContent;
+    });
+
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -139,6 +158,8 @@ export function useContentManager() {
 
         const loadContent = async () => {
             try {
+                console.log('🔄 Chargement depuis Firebase...');
+                
                 const collections = [
                     'heroSlides', 'bestSellers', 'tourSpecialties',
                     'reviews', 'blogPosts', 'faqs', 'videoGallery', 'imageGallery'
@@ -150,7 +171,7 @@ export function useContentManager() {
                 const [configSnap, pageHeadersSnap, storySnap, ...collectionSnapshots] = await Promise.all([
                     getDoc(doc(db, 'siteConfig', 'main')),
                     getDoc(doc(db, 'pageHeaders', 'main')),
-                    getDoc(doc(db, 'ourStory', 'main')), // <--- Récupération Histoire
+                    getDoc(doc(db, 'ourStory', 'main')),
                     ...collections.map(coll =>
                         getDocs(query(collection(db, coll), orderBy("id", "asc")))
                     )
@@ -160,7 +181,7 @@ export function useContentManager() {
                 collections.forEach((coll, index) => {
                     const docs = collectionSnapshots[index].docs.map(d => d.data());
                     fetchedContent[coll] = docs;
-                    // Debug pour imageGallery
+                    
                     if (coll === 'imageGallery') {
                         console.log('useContentManager - imageGallery chargé:', docs);
                         console.log('useContentManager - nombre d\'images:', docs.length);
@@ -191,7 +212,27 @@ export function useContentManager() {
                     };
                 }
 
+                // ✅ MISE À JOUR DU STATE ET DU CACHE
                 setContent(fetchedContent);
+                
+                // Sauvegarder dans le cache
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(fetchedContent));
+                    console.log('✅ Contenu mis en cache');
+                    
+                    // Nettoyer les anciens caches
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith('site_content_v') && key !== CACHE_KEY) {
+                            localStorage.removeItem(key);
+                            console.log('🗑️ Ancien cache supprimé:', key);
+                        }
+                    });
+                } catch (cacheError) {
+                    console.warn('⚠️ Impossible de mettre en cache:', cacheError);
+                }
+
+                console.log('✅ Contenu chargé depuis Firebase');
+                
             } catch (err) {
                 console.error('❌ Erreur chargement Firebase:', err);
             } finally {
@@ -206,7 +247,10 @@ export function useContentManager() {
 
     const updateSection = async (section: string, data: any) => {
         const previousContent = { ...content };
-        setContent(prev => ({ ...prev, [section]: data }));
+        
+        // Mise à jour optimiste du state
+        const updatedContent = { ...content, [section]: data };
+        setContent(updatedContent);
 
         try {
             const batch = writeBatch(db);
@@ -227,9 +271,18 @@ export function useContentManager() {
             }
 
             await batch.commit();
+            
+            // ✅ Mettre à jour le cache après sauvegarde réussie
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(updatedContent));
+                console.log('✅ Cache mis à jour après modification');
+            } catch (cacheError) {
+                console.warn('⚠️ Impossible de mettre à jour le cache:', cacheError);
+            }
+            
         } catch (err) {
             console.error('❌ Echec synchro Firebase:', err);
-            setContent(previousContent);
+            setContent(previousContent); // Rollback
             alert('❌ Erreur de sauvegarde.');
         }
     };
@@ -253,9 +306,14 @@ export function useContentManager() {
             // Reset des documents uniques
             batch.set(doc(db, 'siteConfig', 'main'), defaultContent.siteConfig);
             batch.set(doc(db, 'pageHeaders', 'main'), defaultContent.pageHeaders);
-            batch.set(doc(db, 'ourStory', 'main'), defaultContent.ourStory); // <--- Reset Histoire
+            batch.set(doc(db, 'ourStory', 'main'), defaultContent.ourStory);
 
             await batch.commit();
+            
+            // ✅ Supprimer le cache
+            localStorage.removeItem(CACHE_KEY);
+            console.log('🗑️ Cache supprimé');
+            
             alert('✅ Contenu réinitialisé !');
             window.location.reload();
         } catch (err) {
@@ -291,6 +349,10 @@ export function useContentManager() {
                 }
             }
             await batch.commit();
+            
+            // ✅ Supprimer le cache pour forcer le rechargement
+            localStorage.removeItem(CACHE_KEY);
+            
             alert('✅ Import réussi !');
             window.location.reload();
         } catch (err) {
