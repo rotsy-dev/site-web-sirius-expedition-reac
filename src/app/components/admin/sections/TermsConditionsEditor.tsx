@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../../../firebase/config';
-import { motion, Reorder } from 'framer-motion';
-import {
-    Save, FileText, Plus, Trash2, 
-    GripVertical, Image as ImageIcon, Mail, AlertCircle
-} from 'lucide-react';
+import { Reorder } from 'framer-motion';
+import { Save, FileText, Plus, Trash2, GripVertical, AlertCircle, Heading } from 'lucide-react';
 
-// Import de l'éditeur Rich Text
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -15,14 +11,13 @@ type Lang = 'en' | 'fr' | 'de' | 'it';
 
 interface Section {
     id: string;
-    title: string; // Utilisé pour le numéro dans le rond beige
-    content: string; // Titres personnalisés et paragraphes
+    subtitle: string; // Titre du paragraphe personnalisable
+    content: string;  // Corps du texte
 }
 
 interface TermsData {
     title: string;
     heroSubtitle: string;
-    heroImage: string;
     lastUpdated: string;
     version: string;
     sections: Section[];
@@ -36,7 +31,6 @@ const LANGUAGES: Record<Lang, string> = {
 
 const quillModules = {
     toolbar: [
-        [{ 'header': [2, 3, false] }],
         ['bold', 'italic', 'underline'],
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
         ['clean']
@@ -46,7 +40,7 @@ const quillModules = {
 export default function TermsConditionsEditor() {
     const [lang, setLang] = useState<Lang>('en');
     const [data, setData] = useState<TermsData>({
-        title: '', heroSubtitle: '', heroImage: '',
+        title: '', heroSubtitle: '',
         lastUpdated: new Date().toISOString().split('T')[0],
         version: '1.0', sections: [], contactEmail: '', jurisdiction: ''
     });
@@ -62,16 +56,13 @@ export default function TermsConditionsEditor() {
         try {
             const ref = doc(db, 'terms_conditions', language);
             const snap = await getDoc(ref);
-            if (snap.exists()) {
-                setData(snap.data() as TermsData);
-            }
+            if (snap.exists()) setData(snap.data() as TermsData);
         } catch (error) { console.error(error); }
         setLoading(false);
     };
 
     const addSection = () => {
-        const nextNum = data.sections.length + 1;
-        const newSection: Section = { id: Date.now().toString(), title: `${nextNum}`, content: '' };
+        const newSection: Section = { id: Date.now().toString(), subtitle: '', content: '' };
         setData(prev => ({ ...prev, sections: [...prev.sections, newSection] }));
     };
 
@@ -101,7 +92,7 @@ export default function TermsConditionsEditor() {
             <div className="flex justify-between items-center bg-white p-6 rounded-2xl border shadow-sm">
                 <div className="flex items-center gap-3">
                     <FileText className="text-blue-600" />
-                    <h1 className="text-xl font-bold">Éditeur Légal</h1>
+                    <h1 className="text-xl font-bold">Configuration des Conditions</h1>
                 </div>
                 <div className="flex gap-2">
                     {(Object.keys(LANGUAGES) as Lang[]).map((l) => (
@@ -116,36 +107,39 @@ export default function TermsConditionsEditor() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="space-y-6">
                     <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <label className="text-xs font-bold uppercase text-gray-400">En-tête de page</label>
+                        <label className="text-xs font-bold uppercase text-gray-400">En-tête</label>
                         <input className="w-full p-3 bg-gray-50 rounded-xl border-none" value={data.title} onChange={e => setData({...data, title: e.target.value})} placeholder="Titre de la page" />
-                        <textarea className="w-full p-3 bg-gray-50 rounded-xl border-none h-24" value={data.heroSubtitle} onChange={e => setData({...data, heroSubtitle: e.target.value})} placeholder="Sous-titre" />
+                        <textarea className="w-full p-3 bg-gray-50 rounded-xl border-none h-24" value={data.heroSubtitle} onChange={e => setData({...data, heroSubtitle: e.target.value})} placeholder="Description" />
                     </div>
                 </div>
 
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-bold text-lg">Paragraphes dynamiques</h3>
+                    <div className="flex justify-between items-center text-[#443C34]">
+                        <h3 className="font-bold text-lg">Paragraphes</h3>
                         <button onClick={addSection} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm">
-                            <Plus size={16} /> Ajouter un bloc
+                            <Plus size={16} /> Ajouter un paragraphe
                         </button>
                     </div>
 
                     <Reorder.Group axis="y" values={data.sections} onReorder={(newOrder) => setData({ ...data, sections: newOrder })} className="space-y-6">
-                        {data.sections.map((section, index) => (
+                        {data.sections.map((section) => (
                             <Reorder.Item key={section.id} value={section} className="bg-white border rounded-2xl p-6 shadow-sm">
-                                <div className="flex items-center gap-3 mb-4 bg-gray-50 p-2 rounded-lg">
-                                    <GripVertical className="text-gray-300 cursor-grab" />
-                                    <input 
-                                        className="w-12 text-center font-bold bg-white border rounded-lg p-1 text-blue-600" 
-                                        value={section.title} 
-                                        onChange={e => updateSection(section.id, 'title', e.target.value)}
-                                    />
-                                    <span className="text-xs text-gray-400 flex-1 italic">Note : Ce texte s'affiche dans le rond à gauche</span>
-                                    <button onClick={() => setData(prev => ({...prev, sections: prev.sections.filter(s => s.id !== section.id)}))} className="text-red-400">
-                                        <Trash2 size={18} />
-                                    </button>
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg">
+                                        <GripVertical className="text-gray-300 cursor-grab" />
+                                        <Heading size={18} className="text-gray-400" />
+                                        <input 
+                                            className="flex-1 font-bold text-[#443C34] bg-transparent border-none focus:ring-0" 
+                                            value={section.subtitle} 
+                                            onChange={e => updateSection(section.id, 'subtitle', e.target.value)}
+                                            placeholder="Titre personnalisé (ex: Payment, Deposit...)"
+                                        />
+                                        <button onClick={() => setData(prev => ({...prev, sections: prev.sections.filter(s => s.id !== section.id)}))} className="text-red-400">
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                    <ReactQuill theme="snow" modules={quillModules} value={section.content} onChange={(val) => updateSection(section.id, 'content', val)} placeholder="Rédigez le texte ici..." />
                                 </div>
-                                <ReactQuill theme="snow" modules={quillModules} value={section.content} onChange={(val) => updateSection(section.id, 'content', val)} placeholder="Titre (H2) + Paragraphe..." />
                             </Reorder.Item>
                         ))}
                     </Reorder.Group>
@@ -153,7 +147,7 @@ export default function TermsConditionsEditor() {
                     <div className="bg-white p-6 rounded-2xl border shadow-lg space-y-4 border-t-4 border-t-blue-600">
                         <input className="w-full p-3 border rounded-xl" placeholder="Raison de la mise à jour..." value={changeReason} onChange={e => setChangeReason(e.target.value)} />
                         <button onClick={saveTerms} disabled={saving || !changeReason.trim()} className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold flex justify-center items-center gap-2">
-                            <Save size={20} /> {saving ? 'Envoi...' : 'Enregistrer et Publier'}
+                            <Save size={20} /> Enregistrer et Publier
                         </button>
                     </div>
                 </div>

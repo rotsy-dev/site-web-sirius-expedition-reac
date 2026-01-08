@@ -24,41 +24,36 @@ export default function TermsPage() {
 
     return (
         <div className="bg-white min-h-screen">
-            {/* Header Style Travelia */}
-            <header className="bg-[#FAF7F2] py-24 px-6 border-b border-gray-100">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold text-[#443C34] mb-6">{data.title}</h1>
-                    <p className="text-[#443C34]/60 text-lg max-w-2xl mx-auto mb-10">{data.heroSubtitle}</p>
-                    
-                    {/* Infos de version style Travelia */}
-                    <div className="flex flex-wrap justify-center gap-6 text-[#443C34]/50 text-sm">
-                        <div className="flex items-center gap-2"><Clock size={16}/> Updated: {data.lastUpdated}</div>
-                        <div className="flex items-center gap-2"><Scale size={16}/> Jurisdiction: {data.jurisdiction}</div>
-                        <div className="flex items-center gap-2"><ShieldCheck size={16}/> Version: {data.version}</div>
+            <header className="bg-[#FAF7F2] py-24 px-6 border-b border-gray-100 text-center">
+                <div className="max-w-4xl mx-auto">
+                    <h1 className="text-4xl md:text-5xl font-bold text-[#443C34] mb-6 tracking-tight">{data.title}</h1>
+                    <p className="text-[#443C34]/60 text-lg mb-10 leading-relaxed">{data.heroSubtitle}</p>
+                    <div className="flex flex-wrap justify-center gap-6 text-[#443C34]/40 text-xs font-bold uppercase tracking-widest">
+                        <div className="flex items-center gap-2"><Clock size={14}/> Updated: {data.lastUpdated}</div>
+                        <div className="flex items-center gap-2"><Scale size={14}/> Jurisdiction: {data.jurisdiction}</div>
+                        <div className="flex items-center gap-2"><ShieldCheck size={14}/> Version: {data.version}</div>
                     </div>
                 </div>
             </header>
 
-            {/* Contenu Principal */}
             <main className="max-w-4xl mx-auto px-6 py-20">
-                <div className="space-y-20">
-                    {data.sections?.map((section: any, index: number) => (
-                        <div key={section.id} className="flex flex-col md:flex-row gap-6 md:gap-12 group">
-                            {/* Le Numéro (Rond beige) */}
-                            <div className="flex-shrink-0">
-                                <div className="w-12 h-12 rounded-full bg-[#F5EFE6] text-[#443C34] flex items-center justify-center font-bold text-base shadow-sm group-hover:bg-[#443C34] group-hover:text-white transition-all duration-300">
-                                    {section.title || index + 1}
-                                </div>
-                            </div>
+                <div className="space-y-16">
+                    {data.sections?.map((section: any) => (
+                        <div key={section.id} className="group">
+                            {/* TITRE PERSONNALISÉ STYLE TRAVELIA/SIRIUS */}
+                            {section.subtitle && (
+                                <h2 className="text-3xl font-extrabold text-[#443C34] mb-6 flex items-center gap-4">
+                                    <span className="h-px w-12 bg-[#443C34]/20 inline-block"></span>
+                                    {section.subtitle}
+                                </h2>
+                            )}
 
-                            {/* Le Texte Rich Text */}
-                            <div className="flex-1">
+                            {/* CONTENU SANS NUMÉRO */}
+                            <div className="md:pl-16">
                                 <div 
                                     className="prose prose-stone max-w-none 
-                                    prose-h2:text-2xl prose-h2:font-bold prose-h2:text-[#443C34] prose-h2:mb-4 prose-h2:mt-0
-                                    prose-h3:text-xl prose-h3:font-bold prose-h3:text-[#443C34]/90 prose-h3:mt-6
-                                    prose-p:text-[#443C34]/75 prose-p:leading-relaxed prose-p:text-lg
-                                    prose-li:text-[#443C34]/75 prose-li:my-1
+                                    prose-p:text-[#443C34]/80 prose-p:leading-relaxed prose-p:text-lg
+                                    prose-li:text-[#443C34]/80 prose-li:my-2
                                     prose-strong:text-[#443C34] prose-strong:font-bold"
                                     dangerouslySetInnerHTML={{ __html: section.content }}
                                 />
@@ -66,15 +61,6 @@ export default function TermsPage() {
                         </div>
                     ))}
                 </div>
-
-                {/* Footer de contact Légal */}
-                {/* <div className="mt-32 p-12 bg-[#FAF7F2] rounded-[3rem] text-center border border-[#F5EFE6]">
-                    <h3 className="text-2xl font-bold text-[#443C34] mb-4">Questions about our terms?</h3>
-                    <p className="text-[#443C34]/60 mb-8">Contact our legal team for any clarification regarding your booking.</p>
-                    <a href={`mailto:${data.contactEmail}`} className="inline-block px-8 py-4 bg-[#443C34] text-white rounded-2xl font-bold hover:bg-black transition-colors">
-                        Contact Support
-                    </a>
-                </div> */}
             </main>
         </div>
     );
