@@ -39,6 +39,22 @@ const CACHE_KEYS = {
   tourSpecialties: `tour_specialties_v${CACHE_VERSION}`,
 };
 
+// Langues supportées
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'it'];
+
+// Détection de la langue du navigateur
+const getBrowserLanguage = (): string => {
+  const browserLang = navigator.language.split('-')[0];
+  return SUPPORTED_LANGUAGES.includes(browserLang) ? browserLang : 'en';
+};
+
+// Fonction pour obtenir la langue depuis le chemin
+const getLangFromPath = (pathname: string): string => {
+  const pathParts = pathname.split('/');
+  const langCode = pathParts[1];
+  return SUPPORTED_LANGUAGES.includes(langCode) ? langCode : getBrowserLanguage();
+};
+
 // Wrapper pour les routes avec langue
 const LanguageRoutes = () => {
   const { lang } = useParams<{ lang: string }>();
@@ -55,6 +71,10 @@ const LanguageRoutes = () => {
     exportContent,
     importContent,
   } = useContentManager();
+
+  // Déterminer la langue actuelle
+  const currentLang = lang || getLangFromPath(location.pathname);
+  const isValidLang = SUPPORTED_LANGUAGES.includes(currentLang);
 
   // ============= CACHE POUR HERO SLIDES =============
   const [cachedHeroSlides, setCachedHeroSlides] = useState(() => {
@@ -167,33 +187,43 @@ const LanguageRoutes = () => {
   // Fonction pour naviguer avec la langue
   const setActiveSection = (section: string) => {
     const routes: Record<string, string> = {
-      'home': `/${lang}`,
-      'tours': `/${lang}/tours`,
-      'blogs': `/${lang}/blog`,
-      'contact': `/${lang}/contact`,
-      'quote': `/${lang}/quote`,
-      'about': `/${lang}/about`,
-      'terms': `/${lang}/terms`,
-      'privacy': `/${lang}/privacy`,
+      'home': `/${currentLang}`,
+      'tours': `/${currentLang}/tours`,
+      'blogs': `/${currentLang}/blog`,
+      'contact': `/${currentLang}/contact`,
+      'quote': `/${currentLang}/quote`,
+      'about': `/${currentLang}/about`,
+      'terms': `/${currentLang}/terms-and-conditions`,
+      'privacy': `/${currentLang}/privacy-policy`,
     };
-    navigate(routes[section] || `/${lang}`);
+    
+    const route = routes[section] || `/${currentLang}`;
+    navigate(route);
   };
 
   // Déterminer la section active basée sur l'URL
   const getActiveSection = () => {
     const path = location.pathname;
-    if (path === `/${lang}` || path === `/${lang}/`) return 'home';
-    if (path.startsWith(`/${lang}/tours`)) return 'tours';
-    if (path.startsWith(`/${lang}/blog`)) return 'blogs';
-    if (path === `/${lang}/contact`) return 'contact';
-    if (path === `/${lang}/quote`) return 'quote';
-    if (path === `/${lang}/about`) return 'about';
-    if (path === `/${lang}/terms`) return 'terms';
-    if (path === `/${lang}/privacy`) return 'privacy';
+    const langPrefix = `/${currentLang}`;
+    
+    if (path === langPrefix || path === `${langPrefix}/`) return 'home';
+    if (path.startsWith(`${langPrefix}/tours`)) return 'tours';
+    if (path.startsWith(`${langPrefix}/blog`)) return 'blogs';
+    if (path === `${langPrefix}/contact`) return 'contact';
+    if (path === `${langPrefix}/quote`) return 'quote';
+    if (path === `${langPrefix}/about`) return 'about';
+    if (path === `${langPrefix}/terms-and-conditions`) return 'terms';
+    if (path === `${langPrefix}/privacy-policy`) return 'privacy';
+    
     return 'home';
   };
 
   const activeSection = getActiveSection();
+
+  // Redirection si la langue n'est pas valide
+  if (!isValidLang) {
+    return <Navigate to={`/${getBrowserLanguage()}`} replace />;
+  }
 
   // UseEffect pour scroller en haut à chaque changement de route
   useEffect(() => {
@@ -226,6 +256,7 @@ const LanguageRoutes = () => {
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         siteConfig={content.siteConfig}
+        currentLang={currentLang}
       />
 
       <main>
@@ -237,6 +268,7 @@ const LanguageRoutes = () => {
                 slides={cachedHeroSlides}
                 onNavigateToContact={() => setActiveSection('contact')}
                 onNavigateToTours={() => setActiveSection('tours')}
+                lang={currentLang}
               />
               <BestSellers
                 tours={cachedBestSellers}
@@ -244,18 +276,21 @@ const LanguageRoutes = () => {
                 onNavigateToTour={() => {
                   setActiveSection('tours');
                 }}
+                lang={currentLang}
               />
               <VideoGallery
                 videos={cachedVideoGallery}
                 config={content.siteConfig}
                 onNavigateToContact={() => setActiveSection('contact')}
                 content={content}
+                lang={currentLang}
               />
-              <MadagascarGallery content={content} />
+              <MadagascarGallery content={content} lang={currentLang} />
               <Reviews
                 reviews={cachedReviews}
                 config={content.siteConfig as any}
                 content={content}
+                lang={currentLang}
               />
             </>
           } />
@@ -268,21 +303,34 @@ const LanguageRoutes = () => {
                 initialSelectedTour={pendingTour}
                 content={content}
                 onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
+                lang={currentLang}
               />
             </div>
           } />
 
           {/* Page Liste des Blogs */}
-          <Route path="blog" element={<Blogs content={content} />} />
+          <Route path="blog" element={
+            <Blogs 
+              content={content} 
+              lang={currentLang}
+            />
+          } />
 
           {/* Page Détail du Blog (Slug) */}
-          <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
+          <Route path="blog/:slug" element={
+            <Blogs 
+              content={content} 
+              isDetail={true} 
+              lang={currentLang}
+            />
+          } />
 
           {/* Page Contact */}
           <Route path="contact" element={
             <Contact
               config={content.siteConfig}
               content={content}
+              lang={currentLang}
             />
           } />
 
@@ -291,6 +339,7 @@ const LanguageRoutes = () => {
             <QuoteRequest
               config={content.siteConfig}
               content={content}
+              lang={currentLang}
             />
           } />
 
@@ -299,16 +348,33 @@ const LanguageRoutes = () => {
             <AboutUs
               config={content.siteConfig}
               content={content}
+              lang={currentLang}
             />
           } />
-          <Route path='terms' element={<TermsPage/>}/>
-          <Route path='privacy' element={<PrivacyPage/>}/>
+
+          {/* Pages légales avec langue - PASSEZ currentLang en prop */}
+          <Route path="terms-and-conditions" element={<TermsPage currentLang={currentLang} />} />
+          <Route path="privacy-policy" element={<PrivacyPage currentLang={currentLang} />} />
+
+          {/* Redirections pour anciennes URLs */}
+          <Route path="terms" element={
+            <Navigate to={`/${currentLang}/terms-and-conditions`} replace />
+          } />
+          <Route path="privacy" element={
+            <Navigate to={`/${currentLang}/privacy-policy`} replace />
+          } />
+
+          {/* Route de fallback */}
+          <Route path="*" element={
+            <Navigate to={`/${currentLang}`} replace />
+          } />
         </Routes>
       </main>
 
       <Footer
         setActiveSection={setActiveSection}
         config={content.siteConfig as any}
+        currentLang={currentLang}
       />
 
       {/* BOUTON SCROLL TO TOP */}
@@ -350,6 +416,7 @@ const LanguageRoutes = () => {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
         config={content.siteConfig}
+        lang={currentLang}
       />
     </motion.div>
   );
@@ -367,9 +434,33 @@ function App() {
     content,
   } = useContentManager();
 
+  // Fonction utilitaire pour générer les balises hreflang
+  const renderHreflangTags = () => {
+    const baseUrl = window.location.origin;
+    
+    return (
+      <>
+        {SUPPORTED_LANGUAGES.map(lang => (
+          <link 
+            key={lang} 
+            rel="alternate" 
+            href={`${baseUrl}/${lang}`} 
+            hrefLang={lang} 
+          />
+        ))}
+        <link rel="alternate" href={baseUrl} hrefLang="x-default" />
+      </>
+    );
+  };
+
   return (
     <ToastProvider>
       <div className="min-h-screen bg-background text-foreground">
+        {/* Ajout des balises hreflang pour le SEO */}
+        <head>
+          {renderHreflangTags()}
+        </head>
+        
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -541,14 +632,26 @@ function App() {
                 </motion.div>
               } />
 
-              {/* Redirection de la racine vers /en */}
-              <Route path="/" element={<Navigate to="/en" replace />} />
+              {/* Redirection de la racine vers la langue du navigateur */}
+              <Route path="/" element={
+                <Navigate to={`/${getBrowserLanguage()}`} replace />
+              } />
+
+              {/* Redirections pour les anciennes URLs sans langue */}
+              <Route path="/terms-and-conditions" element={
+                <Navigate to={`/${getBrowserLanguage()}/terms-and-conditions`} replace />
+              } />
+              <Route path="/privacy-policy" element={
+                <Navigate to={`/${getBrowserLanguage()}/privacy-policy`} replace />
+              } />
 
               {/* Routes avec langue */}
               <Route path="/:lang/*" element={<LanguageRoutes />} />
 
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/en" replace />} />
+              {/* Fallback pour toutes les autres routes */}
+              <Route path="*" element={
+                <Navigate to={`/${getBrowserLanguage()}`} replace />
+              } />
             </Routes>
           )}
         </AnimatePresence>
