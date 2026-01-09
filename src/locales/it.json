@@ -206,7 +206,12 @@
     "save": "Salva",
     "delete": "Elimina",
     "edit": "Modifica",
-    "view": "Visualizza"
+    "view": "Visualizza",
+    "termsAndConditions": "Termini e condizioni",
+    "tableOfContents": "Indice",
+    "updated": "Aggiornato",
+    "legalDocument": "Documento legale",
+    "verify": "Verifica"
   },
   "admin": {
     "dashboard": "Dashboard",

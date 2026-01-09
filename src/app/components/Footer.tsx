@@ -119,15 +119,20 @@ export function Footer({ config }: FooterProps) {
   ]
 
   const corporateLinks = [
-    { label: t('footer.legalNotice'), path: `/${currentLang}/legal-notice` },
     { label: t('footer.termsOfUse'), path: `/${currentLang}/terms` },
     { label: t('footer.privacyPolicy'), path: `/${currentLang}/privacy` },
     { label: t('footer.cookieManagement'), path: `/${currentLang}/cookies` },
   ]
 
   return (
-    <footer className="relative bg-[#443C34] text-white overflow-hidden">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+    <footer className="relative bg-gradient-to-br from-[#1a1410] via-[#2a201d] to-[#1a1410] text-white overflow-hidden">
+      {/* Effets de fond */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
+      </div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 z-10">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -137,56 +142,50 @@ export function Footer({ config }: FooterProps) {
         >
           {/* Section gauche */}
           <motion.div variants={itemVariants} className="space-y-8">
-            {/* Logo */}
+            {/* Logo et description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              className="space-y-4"
             >
-              <h1 className="text-3xl sm:text-4xl font-bold text-white">
+              <h1 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F0E7D5] to-white">
                 {config.siteName}
               </h1>
-              <p className="text-sm text-white/60 mt-1">{t('footer.description')}</p>
+              <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md">
+                {t('footer.description')}
+              </p>
             </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md"
-            >
-              {t('footer.description')}
-            </motion.p>
-
-            {/* Newsletter */}
+            {/* Newsletter moderne */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              whileHover={{ scale: 1.02 }}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-md"
+              className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 lg:p-8 max-w-md shadow-2xl"
             >
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Mail className="w-5 h-5 text-[#F5E6D3]" />
+              <h3 className="text-xl font-bold mb-2 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] rounded-xl">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
                 {t('footer.newsletter')}
               </h3>
-              <p className="text-white/60 text-sm mb-4">{t('footer.newsletterText')}</p>
-              <div className="flex gap-2">
+              <p className="text-white/60 text-sm mb-6">{t('footer.newsletterText')}</p>
+              <div className="flex gap-3">
                 <motion.input
                   whileFocus={{ scale: 1.02 }}
                   type="email"
                   placeholder={t('footer.emailPlaceholder')}
-                  className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#F5E6D3] transition-colors text-white"
+                  className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#D4A574] focus:bg-white/15 transition-all text-white backdrop-blur-xl"
                 />
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-shrink-0 bg-[#F5E6D3] hover:bg-[#EBD8C0] px-4 sm:px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center text-[#443C34]"
+                  className="cursor-pointer flex-shrink-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] hover:from-[#C4965F] hover:to-[#D4A574] px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center text-[#4B3935] shadow-xl"
                 >
-                  <ArrowUpRight className="w-4 h-4" />
+                  <ArrowUpRight className="w-5 h-5" />
                 </motion.button>
               </div>
             </motion.div>
@@ -210,14 +209,14 @@ export function Footer({ config }: FooterProps) {
                   >
                     <Link
                       to={link.path}
-                      className="block text-white/80 hover:text-white transition-all duration-200"
+                      className="group block text-white/70 hover:text-white transition-all duration-300"
                     >
                       <motion.span
-                        whileHover={{ x: 5, scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="inline-block"
+                        whileHover={{ x: 5 }}
+                        className="inline-flex items-center gap-2"
                       >
-                        {link.label}
+                        <span>{link.label}</span>
+                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </motion.span>
                     </Link>
                   </motion.div>
@@ -242,13 +241,14 @@ export function Footer({ config }: FooterProps) {
                   >
                     <Link
                       to={link.path}
-                      className="block text-white/80 hover:text-white transition-all duration-200"
+                      className="group block text-white/70 hover:text-white transition-all duration-300"
                     >
                       <motion.span
-                        whileHover={{ x: 5, scale: 1.05 }}
-                        className="inline-block"
+                        whileHover={{ x: 5 }}
+                        className="inline-flex items-center gap-2"
                       >
-                        {link.label}
+                        <span>{link.label}</span>
+                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </motion.span>
                     </Link>
                   </motion.div>
@@ -275,14 +275,14 @@ export function Footer({ config }: FooterProps) {
                       initial="hidden"
                       whileInView="visible"
                       viewport={{ once: true }}
-                      whileHover={{ scale: 1.15, rotate: 5 }}
+                      whileHover={{ scale: 1.15, rotate: 5, y: -5 }}
                       whileTap={{ scale: 0.9 }}
                       href={href}
                       target={href !== '#' ? "_blank" : undefined}
                       rel={href !== '#' ? "noopener noreferrer" : undefined}
-                      className="group w-11 h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300"
+                      className="group relative w-12 h-12 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center hover:bg-gradient-to-r hover:from-[#D4A574] hover:to-[#C4965F] hover:border-transparent transition-all duration-300 shadow-lg hover:shadow-2xl"
                     >
-                      <Icon className="w-5 h-5 text-white/80 group-hover:text-[#443C34] transition-colors" />
+                      <Icon className="w-5 h-5 text-white/80 group-hover:text-white transition-colors relative z-10" />
                     </motion.a>
                   ))}
                 </div>
@@ -291,14 +291,16 @@ export function Footer({ config }: FooterProps) {
           </motion.div>
         </motion.div>
 
-        {/* Séparateur */}
+        {/* Séparateur moderne */}
         <motion.div
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="h-px bg-white/10 my-10 origin-left"
-        />
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          className="relative h-px my-12 origin-left"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        </motion.div>
 
         {/* Copyright */}
         <motion.div

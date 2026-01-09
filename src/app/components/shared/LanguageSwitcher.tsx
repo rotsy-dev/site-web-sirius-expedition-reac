@@ -61,7 +61,7 @@ export const LanguageSwitcher = () => {
 
   // Normaliser le code de langue pour l'affichage (priorité à l'URL)
   const displayLangCode = currentLangParam || i18n.language.split('-')[0].toLowerCase();
-  const currentLanguage = languages.find(lang => lang.code === displayLangCode) || languages[0];
+  const currentLanguage = languages.find(lang => lang.code === displayLangCode) || languages.find(lang => lang.code === 'en') || languages[0];
 
   // Fermer le dropdown au clic extérieur
   useEffect(() => {
@@ -103,7 +103,7 @@ export const LanguageSwitcher = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isTranslating}
-        className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative"
+        className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative"
         aria-label="Change language"
       >
         {isTranslating ? (

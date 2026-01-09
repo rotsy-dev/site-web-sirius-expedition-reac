@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, MessageCircle } from 'lucide-react';
@@ -20,12 +20,30 @@ import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
 import { QuoteRequest } from './components/QuoteRequest';
 import { MadagascarGallery } from './components/MadagascarGallery';
+import { CookieConsent } from '../components/common/CookieConsent';
+import { VisitorCounter } from '../components/common/VisitorCounter';
 
 // Composants Admin
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 import { SITE_SECTIONS } from '../constants';
+
+// ============================================
+// LAZY LOADING - Pages légales
+// ============================================
+const TermsPage = lazy(() => import('./pages/legal/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'));
+const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
+
+// ============================================
+// LOADER POUR PAGES LAZY
+// ============================================
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+    <div className="w-12 h-12 border-3 border-[#A68966] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 // Cache keys
 const CACHE_VERSION = '1.0';
@@ -71,7 +89,6 @@ const LanguageRoutes = () => {
     if (content.heroSlides && content.heroSlides.length > 0) {
       setCachedHeroSlides(content.heroSlides);
       localStorage.setItem(CACHE_KEYS.heroSlides, JSON.stringify(content.heroSlides));
-      console.log('✅ Hero slides cached');
     }
   }, [content.heroSlides]);
 
@@ -95,7 +112,6 @@ const LanguageRoutes = () => {
     if (bestSellerTours.length > 0) {
       setCachedBestSellers(bestSellerTours);
       localStorage.setItem(CACHE_KEYS.bestSellers, JSON.stringify(bestSellerTours));
-      console.log('✅ Best sellers cached');
     }
   }, [content.tourSpecialties]);
 
@@ -116,7 +132,6 @@ const LanguageRoutes = () => {
     if (content.videoGallery && content.videoGallery.length > 0) {
       setCachedVideoGallery(content.videoGallery);
       localStorage.setItem(CACHE_KEYS.videoGallery, JSON.stringify(content.videoGallery));
-      console.log('✅ Video gallery cached');
     }
   }, [content.videoGallery]);
 
@@ -137,7 +152,6 @@ const LanguageRoutes = () => {
     if (content.reviews && content.reviews.length > 0) {
       setCachedReviews(content.reviews);
       localStorage.setItem(CACHE_KEYS.reviews, JSON.stringify(content.reviews));
-      console.log('✅ Reviews cached');
     }
   }, [content.reviews]);
 
@@ -158,7 +172,6 @@ const LanguageRoutes = () => {
     if (content.tourSpecialties && content.tourSpecialties.length > 0) {
       setCachedTourSpecialties(content.tourSpecialties);
       localStorage.setItem(CACHE_KEYS.tourSpecialties, JSON.stringify(content.tourSpecialties));
-      console.log('✅ Tour specialties cached');
     }
   }, [content.tourSpecialties]);
 
@@ -194,14 +207,22 @@ const LanguageRoutes = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // UseEffect pour détecter le scroll
+  // UseEffect pour détecter le scroll (throttled)
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setShowScrollTop(window.scrollY > 500);
+      }, 100);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -223,79 +244,86 @@ const LanguageRoutes = () => {
       />
 
       <main>
-        <Routes>
-          {/* Page d'accueil */}
-          <Route index element={
-            <>
-              <HeroCarousel
-                slides={cachedHeroSlides}
-                onNavigateToContact={() => setActiveSection('contact')}
-                onNavigateToTours={() => setActiveSection('tours')}
-              />
-              <BestSellers
-                tours={cachedBestSellers}
-                content={content}
-                onNavigateToTour={() => {
-                  setActiveSection('tours');
-                }}
-              />
-              <VideoGallery
-                videos={cachedVideoGallery}
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Page d'accueil */}
+            <Route index element={
+              <>
+                <HeroCarousel
+                  slides={cachedHeroSlides}
+                  onNavigateToContact={() => setActiveSection('contact')}
+                  onNavigateToTours={() => setActiveSection('tours')}
+                />
+                <BestSellers
+                  tours={cachedBestSellers}
+                  content={content}
+                  onNavigateToTour={() => {
+                    setActiveSection('tours');
+                  }}
+                />
+                <VideoGallery
+                  videos={cachedVideoGallery}
+                  config={content.siteConfig}
+                  onNavigateToContact={() => setActiveSection('contact')}
+                  content={content}
+                />
+                <MadagascarGallery content={content} />
+                <Reviews
+                  reviews={cachedReviews}
+                  config={content.siteConfig as any}
+                  content={content}
+                />
+              </>
+            } />
+
+            {/* Page Tours */}
+            <Route path="tours" element={
+              <div className="min-h-screen bg-[#FAF7F2]">
+                <TourSpecialties
+                  specialties={cachedTourSpecialties}
+                  initialSelectedTour={pendingTour}
+                  content={content}
+                  onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
+                />
+              </div>
+            } />
+
+            {/* Page Liste des Blogs */}
+            <Route path="blog" element={<Blogs content={content} />} />
+
+            {/* Page Détail du Blog (Slug) */}
+            <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
+
+            {/* Page Contact */}
+            <Route path="contact" element={
+              <Contact
                 config={content.siteConfig}
-                onNavigateToContact={() => setActiveSection('contact')}
                 content={content}
               />
-              <MadagascarGallery content={content} />
-              <Reviews
-                reviews={cachedReviews}
-                config={content.siteConfig as any}
+            } />
+
+            {/* Page Devis */}
+            <Route path="quote" element={
+              <QuoteRequest
+                config={content.siteConfig}
                 content={content}
               />
-            </>
-          } />
+            } />
 
-          {/* Page Tours */}
-          <Route path="tours" element={
-            <div className="min-h-screen bg-[#FAF7F2]">
-              <TourSpecialties
-                specialties={cachedTourSpecialties}
-                initialSelectedTour={pendingTour}
+            {/* Page À propos */}
+            <Route path="about" element={
+              <AboutUs
+                config={content.siteConfig}
                 content={content}
-                onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
               />
-            </div>
-          } />
+            } />
 
-          {/* Page Liste des Blogs */}
-          <Route path="blog" element={<Blogs content={content} />} />
-
-          {/* Page Détail du Blog (Slug) */}
-          <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
-
-          {/* Page Contact */}
-          <Route path="contact" element={
-            <Contact
-              config={content.siteConfig}
-              content={content}
-            />
-          } />
-
-          {/* Page Devis */}
-          <Route path="quote" element={
-            <QuoteRequest
-              config={content.siteConfig}
-              content={content}
-            />
-          } />
-
-          {/* Page À propos */}
-          <Route path="about" element={
-            <AboutUs
-              config={content.siteConfig}
-              content={content}
-            />
-          } />
-        </Routes>
+            {/* ========== PAGES LÉGALES (LAZY) ========== */}
+            <Route path="terms" element={<TermsPage currentLang={lang || 'en'} />} />
+            <Route path="privacy" element={<PrivacyPage currentLang={lang || 'en'} />} />
+            <Route path="cookies" element={<CookiesPage currentLang={lang || 'en'} />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <Footer
@@ -311,7 +339,7 @@ const LanguageRoutes = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#A68966] text-white rounded-full shadow-2xl hover:bg-[#8B7355] transition-all flex items-center justify-center group"
+            className="cursor-pointer fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#A68966] text-white rounded-full shadow-2xl hover:bg-[#8B7355] transition-all flex items-center justify-center group"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -328,7 +356,7 @@ const LanguageRoutes = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0, y: 20 }}
             onClick={() => setIsContactModalOpen(true)}
-            className={`fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
+            className={`cursor-pointer fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -358,6 +386,27 @@ function App() {
     resetToDefaults,
     content,
   } = useContentManager();
+
+  // État pour contrôler l'affichage du contenu après le loader
+  const [contentReady, setContentReady] = useState(false);
+
+  // Délai avant d'afficher le contenu pour éviter le flash du footer
+  useEffect(() => {
+    if (!loading && !contentReady) {
+      const timer = setTimeout(() => {
+        setContentReady(true);
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, contentReady]);
+
+  // Reset contentReady quand loading recommence
+  useEffect(() => {
+    if (loading) {
+      setContentReady(false);
+    }
+  }, [loading]);
 
   return (
     <ToastProvider>
@@ -504,7 +553,7 @@ function App() {
                 <div className="absolute bottom-6 right-6 w-12 h-12 border-b border-r border-white/50" />
               </motion.div>
             </motion.div>
-          ) : (
+          ) : contentReady ? (
             <Routes>
               {/* Route Admin */}
               <Route path="/admin" element={
@@ -542,9 +591,11 @@ function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/en" replace />} />
             </Routes>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
+      <CookieConsent />
+      <VisitorCounter />
     </ToastProvider>
   );
 }

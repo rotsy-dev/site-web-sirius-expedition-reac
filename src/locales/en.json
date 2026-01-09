@@ -57,7 +57,13 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "view": "View"
+    "view": "View",
+    "termsAndConditions": "Terms and Conditions",
+    "tableOfContents": "Table of Contents",
+    "updated": "Updated",
+    "legalDocument": "Legal Document",
+    "verify": "Verify"
+
   },
   "tours": {
     "from": "From",
@@ -260,5 +266,19 @@
       "datePeriod": "2026-01-05 ~ 2026-12-05",
       "message": "Any other useful information..."
     }
+  },
+  "cookies": {
+    "title": "Cookie Management",
+    "description": "We use cookies to improve your experience. You can customize your preferences.",
+    "learnMore": "Learn more",
+    "settings": "Settings",
+    "acceptNecessary": "Accept essential only",
+    "acceptAll": "Accept all",
+    "necessary": "Necessary cookies",
+    "necessaryDesc": "These cookies are essential for the website to function.",
+    "analytics": "Analytics cookies",
+    "analyticsDesc": "These cookies help us understand how visitors use the site.",
+    "marketing": "Marketing cookies",
+    "marketingDesc": "These cookies are used to provide you with personalized advertisements."
   }
 }

@@ -61,6 +61,7 @@
     "react-hook-form": "7.55.0",
     "react-i18next": "^16.5.1",
     "react-popper": "2.3.0",
+    "react-quill": "^2.0.0",
     "react-resizable-panels": "2.1.7",
     "react-responsive-masonry": "2.7.1",
     "react-router-dom": "^7.11.0",
@@ -81,6 +82,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "netlify-plugin-cache": "^1.0.3",
     "tailwindcss": "4.1.12",
+    "terser": "^5.44.1",
     "vite": "6.3.5",
     "vite-plugin-image-optimizer": "^2.0.3"
   },

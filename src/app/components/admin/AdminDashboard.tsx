@@ -18,19 +18,25 @@ import {
     Type,
     HistoryIcon,
     Menu,
-    X
+    X,
+    FileText,
+    ShieldCheck
+    
 } from 'lucide-react';
 import { HeroEditor } from './sections/HeroEditor';
 import { ToursEditor } from './sections/ToursEditor';
 import { TourSpecialtiesEditor } from './sections/TourSpecialtiesEditor';
 import { ReviewsEditor } from './sections/ReviewsEditor';
 import { BlogEditor } from './sections/BlogEditor';
+import TermsConditionsEditor from './sections/TermsConditionsEditor';
 import { FAQEditor } from './sections/FAQEditor';
 import { ConfigEditor } from './sections/ConfigEditor';
 import VideoConfigEditor from './sections/VideoConfigEditor';
 import { PageHeadersEditor } from './sections/PageHeadersEditor';
 import { AboutEditor } from './sections/AboutEditor';
 import { GalleryEditor } from './sections/GalleryEditor';
+import  PrivacyPolicyEditor  from './sections/PrivacyPolicyEditor';
+
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -65,6 +71,8 @@ export function AdminDashboard({
         { id: 'gallery', label: 'Image Gallery', icon: Image },
         { id: 'headers', label: 'Page Headers', icon: Type },
         { id: 'about', label: 'Our Story', icon: HistoryIcon },
+        { id: 'terms', label: 'Terms & Conditions', icon: FileText},
+        { id : 'Privacy', label: 'Privacy Policy', icon: ShieldCheck}
     ];
 
     const handleImport = () => {
@@ -340,6 +348,9 @@ export function AdminDashboard({
                                 onSave={(config) => onUpdateSection('siteConfig', config)}
                             />
                         )}
+
+                        {activeTab === 'terms' && <TermsConditionsEditor />}
+                        {activeTab === 'Privacy' && <PrivacyPolicyEditor />}
                     </div>
                 </main>
             </div>
