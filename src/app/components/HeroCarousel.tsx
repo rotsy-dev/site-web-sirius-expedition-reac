@@ -72,7 +72,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
               </div>
 
               {/* Contenu principal - Design Premium */}
-              <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pt-20 sm:pt-24 md:pt-0">
+              <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8 -mt-10 lg:px-12 sm:pt-24 md:pt-0">
                 <div className="max-w-6xl w-full">
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -98,7 +98,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.8, delay: 0.4 }}
-                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tight"
+                      className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tight"
                     >
                       <span className="block bg-gradient-to-r from-white via-[#F0E7D5] to-white bg-clip-text text-transparent">
                         {slide.title}
@@ -110,7 +110,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.8, delay: 0.6 }}
-                      className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-8 md:mb-10 max-w-3xl leading-relaxed font-light px-2 sm:px-0"
+                      className="text-base sm:text-lg md:text-xl lg:text-1xl text-white/90 mb-6 sm:mb-8 md:mb-10 max-w-3xl leading-relaxed font-light px-2 sm:px-0"
                     >
                       {slide.subtitle}
                     </motion.p>
@@ -161,7 +161,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
       </AnimatePresence>
 
       {/* Navigation latérale moderne */}
-      <div className="absolute z-40 right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+      <div className="absolute z-40 right-2 top-1/2 -translate-y-1/2 flex flex-col gap-3">
         {displaySlides.map((_, i) => (
           <motion.button
             key={i}
@@ -186,13 +186,13 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
       </div>
 
       {/* Scroll indicator - À droite pour mobile, centré pour desktop */}
-      <motion.div
+     <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 right-4 sm:right-8 md:left-1/2 md:-translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 mb-10"
       >
-        <span className="text-white/60 text-xs font-medium uppercase tracking-wider hidden sm:block">Scroll</span>
+        <span className="text-white/60 text-xs font-medium uppercase tracking-wider">Scroll</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}

@@ -610,7 +610,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 onClick={handleBack}
-                                className="absolute top-16 sm:top-20 left-4 sm:left-6 z-[60] cursor-pointer group inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all shadow-lg text-xs sm:text-sm"
+                                className="absolute top-26 sm:top-100 left-4 sm:left-6 z-[60] cursor-pointer group inline-flex  gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all shadow-lg text-xs sm:text-sm"
                             >
                                 <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
                                 <span className="font-bold uppercase hidden sm:inline">{t('common.back')}</span>
@@ -619,24 +619,24 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                             {/* Contenu du hero */}
                             <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center pt-8 sm:pt-12 md:pt-28">
 
-                                <motion.div
+                                {/* <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
                                     className="mb-6"
                                 >
                                     {selectedPost.category && (
-                                        <span className="inline-block px-5 py-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white rounded-full font-bold text-sm shadow-xl mb-4">
+                                        <span className="inline-block top px-5 py-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white rounded-full font-bold text-sm shadow-xl mb-4">
                                             {selectedPost.category}
                                         </span>
                                     )}
-                                </motion.div>
+                                </motion.div> */}
 
                                 <motion.h1
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 }}
-                                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight drop-shadow-2xl px-2 sm:px-4"
+                                    className="text-2xl sm:-mt-20 sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-black text-white mb-4 sm:mb-6 leading-tight drop-shadow-2xl px-2 sm:px-4"
                                 >
                                     {(translatedPosts?.find((p: any) => p.id === selectedPost.id)?.title) || selectedPost.title}
                                 </motion.h1>
