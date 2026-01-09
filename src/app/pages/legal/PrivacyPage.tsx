@@ -7,16 +7,16 @@ import { useTranslation } from 'react-i18next';
 
 interface Section {
   id: string;
-  title: string;
-  subtitle: string;
-  content: string;
+  title: string;    // Champ admin (ne doit PAS être traduit)
+  subtitle: string; // Doit être traduit
+  content: string;  // Doit être traduit
 }
 
 interface PrivacyData {
-  title: string;
-  subtitle: string;
-  lastUpdated: string;
-  sections: Section[];
+  title: string;        // Doit être traduit
+  subtitle: string;     // Doit être traduit
+  lastUpdated: string;  // Ne doit PAS être traduit (c'est une date)
+  sections: Section[];  // Les sections doivent être traduites
 }
 
 interface PrivacyPageProps {
@@ -36,12 +36,53 @@ export default function PrivacyPage({ currentLang }: PrivacyPageProps) {
   const [activeSection, setActiveSection] = useState<string>('');
 
   // --- TRADUCTION MÉMOÏSÉE ---
-  const translationFields = useMemo(() => ['title', 'subtitle', 'content'], []);
-  const { translatedContent: translatedData, isLoading: isTranslating } = useTranslatedContent(data, translationFields);
+  // Séparer la traduction des champs principaux et des sections
+  const mainFields = useMemo(() => ['title', 'subtitle'], []);
+  const sectionFields = useMemo(() => ['subtitle', 'content'], []);
 
+  // Données principales à traduire
+  const mainDataToTranslate = useMemo(() =>
+    data ? { title: data.title, subtitle: data.subtitle } : null,
+    [data?.title, data?.subtitle]
+  );
+
+  // Sections à traduire
+  const sectionsToTranslate = useMemo(() =>
+    data?.sections || null,
+    [data?.sections]
+  );
+
+  const { translatedContent: translatedMainData, isLoading: isTranslatingMain } = useTranslatedContent(
+    mainDataToTranslate,
+    mainFields
+  );
+
+  const { translatedContent: translatedSections, isLoading: isTranslatingSections } = useTranslatedContent(
+    sectionsToTranslate,
+    sectionFields
+  );
+
+  const isTranslating = isTranslatingMain || isTranslatingSections;
+
+  // Combiner les données traduites
   const displayData = useMemo(() => {
-    return (translatedData as PrivacyData | null) || data;
-  }, [translatedData, data]);
+    if (!data) return null;
+    return {
+      ...data,
+      title: (translatedMainData as any)?.title || data.title,
+      subtitle: (translatedMainData as any)?.subtitle || data.subtitle,
+      // Pour les sections, on garde le champ `title` admin non traduit
+      // et on applique la traduction aux champs `subtitle` et `content`
+      sections: (translatedSections as Section[] || data.sections).map((section, index) => ({
+        ...section,
+        // Si une traduction existe pour cette section, on l'utilise
+        subtitle: translatedSections?.[index]?.subtitle || section.subtitle,
+        content: translatedSections?.[index]?.content || section.content,
+        // Le champ `title` (admin) reste inchangé
+        title: section.title
+      }))
+    };
+  }, [data, translatedMainData, translatedSections]);
 
   // --- EFFETS ---
   useEffect(() => {
@@ -54,6 +95,7 @@ export default function PrivacyPage({ currentLang }: PrivacyPageProps) {
         if (snap.exists()) {
           finalData = snap.data() as PrivacyData;
         } else {
+          // Fallback sur l'anglais si la langue demandée n'existe pas
           const englishSnap = await getDoc(doc(db, 'privacy_policies', 'en'));
           if (englishSnap.exists()) finalData = englishSnap.data() as PrivacyData;
         }
