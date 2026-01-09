@@ -104,7 +104,7 @@ export default function PrivacyPage({ currentLang }: PrivacyPageProps) {
   return (
     <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE7] min-h-screen">
       {/* HEADER AVEC IMAGE DE FOND */}
-      <header className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+      <header className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden pt-32">
         {/* Image de fond */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -183,8 +183,8 @@ export default function PrivacyPage({ currentLang }: PrivacyPageProps) {
                     key={section.id}
                     href={`#section-${section.id}`}
                     className={`block py-3 px-4 rounded-xl text-sm transition-all duration-200 ${activeSection === section.id
-                        ? 'bg-gradient-to-r from-[#8B7355] to-[#A68966] text-white shadow-md transform scale-105'
-                        : 'text-[#443C34]/70 hover:bg-[#F5EFE7] hover:text-[#443C34]'
+                      ? 'bg-gradient-to-r from-[#8B7355] to-[#A68966] text-white shadow-md transform scale-105'
+                      : 'text-[#443C34]/70 hover:bg-[#F5EFE7] hover:text-[#443C34]'
                       }`}
                   >
                     <span className="font-semibold">{idx + 1}.</span> {section.subtitle}
