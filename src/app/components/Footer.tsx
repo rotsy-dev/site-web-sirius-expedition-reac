@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { VisitorCounter } from '../../components/common/VisitorCounter'
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -342,6 +343,11 @@ export function Footer({ config }: FooterProps) {
             </motion.div>
           </motion.div>
         </motion.div>
+      </div>
+      
+      {/* Visitor Counter intégré dans le footer */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <VisitorCounter />
       </div>
     </footer>
   )

@@ -4,6 +4,7 @@ import { db } from '../../../firebase/config';
 import { Clock, Scale, FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslatedContent } from '../../../hooks/useTranslatedContent';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 interface Section {
     id: string;
@@ -124,62 +125,50 @@ export default function TermsPage({ currentLang }: TermsPageProps) {
     if (!displayData) return null;
 
     return (
-        <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE7] min-h-screen">
-            {/* HEADER AVEC IMAGE DE FOND */}
-            <header className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-                {/* Image de fond */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                        backgroundImage: 'url(https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070)',
-                    }}
-                />
+        <div className="min-h-screen bg-[#F0E7D5] dark:bg-[#1a1410] font-sans overflow-x-hidden">
+            {/* HEADER AVEC IMAGE DE FOND - Style comme CookiesPage */}
+            <section className="relative h-[55vh] flex items-center justify-center overflow-hidden">
+                <motion.div
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 1.5 }}
+                    className="absolute inset-0"
+                >
+                    <img
+                        src="https://images.unsplash.com/photo-1659944984855-776187144baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW9iYWIlMjB0cmVlcyUyME1hZGFnYXNjYXIlMjBzdW5zZXR8ZW58MXx8fHwxNzY0NTkxODc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                        alt="Madagascar Safari Baobab"
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    {/* Overlay sombre pour la lisibilité */}
+                    <div className="absolute inset-0 bg-black/40" />
+                </motion.div>
 
-                {/* Overlay gradient mocha/vanilla */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#443C34]/85 via-[#6B5744]/80 to-[#8B7355]/75" />
-
-                {/* Texture subtile */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
-
-                {/* Contenu du header */}
-                <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full border border-[#D4A373]/30 shadow-lg mb-8">
-                        <Scale className="w-5 h-5 text-[#8B7355]" />
-                        <span className="text-sm font-semibold text-[#443C34] uppercase tracking-wider">
+                <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mb-10">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                        <span className="inline-block px-4 py-1 bg-[#D4A574] text-white rounded-full text-xs font-bold tracking-widest uppercase mb-4">
                             {t('common.termsAndConditions')}
                         </span>
-                    </div>
-
-                    {/* Titre principal */}
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl leading-tight">
+                    </motion.div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg"
+                    >
                         {displayData.title}
-                    </h1>
-
-                    {/* Ligne décorative */}
-                    <div className="h-1 w-32 bg-gradient-to-r from-transparent via-[#D4A373] to-transparent mx-auto mb-6" />
-
-                    {/* Sous-titre */}
-                    <p className="text-xl md:text-2xl text-[#F5EFE7] max-w-3xl mx-auto leading-relaxed font-light mb-8">
-                        {displayData.subtitle}
-                    </p>
-
-                    {/* Date de mise à jour */}
-                    <div className="inline-flex items-center gap-2 bg-[#443C34]/50 backdrop-blur-md text-[#F5EFE7] px-5 py-2.5 rounded-full border border-white/20">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm font-medium">
-                            {t('common.updated')}: {displayData.lastUpdated}
-                        </span>
-                    </div>
+                    </motion.h1>
                 </div>
 
-                {/* Effet de vague en bas */}
-                <div className="absolute bottom-0 left-0 right-0">
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-16 md:h-24">
-                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#FAF7F2" />
+                {/* --- DESSIN DE LA VAGUE (SVG) --- */}
+                <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
+                    <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                        <path
+                            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
+                            className="fill-[#F0E7D5] dark:fill-[#1a1410]"
+                        ></path>
                     </svg>
                 </div>
-            </header>
+            </section>
 
             {/* Indicateur de traduction */}
             {isTranslating && (
@@ -189,8 +178,9 @@ export default function TermsPage({ currentLang }: TermsPageProps) {
                 </div>
             )}
 
-            {/* CONTENU PRINCIPAL */}
-            <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-[320px_1fr] gap-12">
+            {/* --- CONTENT SECTION --- */}
+            <section className="relative z-30 py-10 px-4">
+                <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-[320px_1fr] gap-12">
                 {/* SIDEBAR - Table des matières */}
                 <aside className="hidden lg:block">
                     <div className="sticky top-24">
@@ -254,10 +244,8 @@ export default function TermsPage({ currentLang }: TermsPageProps) {
                         </section>
                     ))}
                 </main>
-            </div>
-
-            {/* Footer décoratif */}
-            <div className="h-20 bg-gradient-to-b from-transparent to-[#443C34]/5" />
+                </div>
+            </section>
         </div>
     );
 }

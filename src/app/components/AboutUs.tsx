@@ -163,7 +163,7 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
 
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden ">
       {/* Hero Section avec Background Image */}
       <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
         <motion.div

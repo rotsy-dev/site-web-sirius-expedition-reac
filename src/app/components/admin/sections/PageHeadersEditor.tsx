@@ -46,76 +46,87 @@ export function PageHeadersEditor({ headers, onSave }: PageHeadersEditorProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* En-tête avec responsivité */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Page Headers</h2>
-          <p className="text-muted-foreground">Gérez les titres, badges et sous-titres de chaque section</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Page Headers</h2>
+          <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
+            Gérez les titres, badges et sous-titres de chaque section
+          </p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleSave}
           disabled={!hasChanges}
-          className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold shadow-lg disabled:opacity-50 text-sm sm:text-base"
         >
-          <Save size={18} />
-          Sauvegarder
+          <Save size={16} className="sm:w-4 sm:h-4 md:w-5 md:h-5" />
+          <span>Sauvegarder</span>
         </motion.button>
       </div>
 
-      <div className="grid gap-8">
+      {/* Grille responsive pour les sections */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 md:gap-8">
         {PAGES.map((page, index) => (
           <motion.div
             key={page.key}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="bg-card rounded-2xl border border-border p-6"
+            className="bg-card rounded-xl sm:rounded-2xl border border-border p-4 sm:p-5 md:p-6"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-3xl">{page.icon}</span>
-              <h3 className="text-xl font-bold text-foreground">{page.label}</h3>
+            {/* En-tête de la section */}
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+              <span className="text-2xl sm:text-3xl">{page.icon}</span>
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">
+                {page.label}
+              </h3>
             </div>
 
-            <div className="space-y-4">
+            {/* Champs de formulaire */}
+            <div className="space-y-3 sm:space-y-4">
+              {/* Champ Badge */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Tag size={16} className="text-accent" />
-                  Badge
+                <label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
+                  <Tag size={14} className="sm:w-4 sm:h-4 text-accent" />
+                  <span>Badge</span>
                 </label>
                 <input
                   type="text"
                   value={localHeaders[page.key]?.badge || ''}
                   onChange={(e) => handleChange(page.key, 'badge', e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-muted border border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary text-sm sm:text-base"
                   placeholder="Featured Destinations"
                 />
               </div>
 
+              {/* Champ Titre Principal */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Type size={16} className="text-accent" />
-                  Titre Principal
+                <label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
+                  <Type size={14} className="sm:w-4 sm:h-4 text-accent" />
+                  <span>Titre Principal</span>
                 </label>
                 <input
                   type="text"
                   value={localHeaders[page.key]?.title || ''}
                   onChange={(e) => handleChange(page.key, 'title', e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-muted border border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary text-sm sm:text-base"
                   placeholder="Your Next Adventure Awaits"
                 />
               </div>
 
+              {/* Champ Sous-titre */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <FileText size={16} className="text-accent" />
-                  Sous-titre
+                <label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
+                  <FileText size={14} className="sm:w-4 sm:h-4 text-accent" />
+                  <span>Sous-titre</span>
                 </label>
                 <textarea
                   value={localHeaders[page.key]?.subtitle || ''}
                   onChange={(e) => handleChange(page.key, 'subtitle', e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:ring-2 focus:ring-primary resize-none"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-muted border border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
                   placeholder="Handpicked experiences loved by thousands of travelers"
                 />
               </div>
