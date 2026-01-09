@@ -317,7 +317,7 @@ export function Contact({ config, content = {} }: ContactProps) {
                 whileTap={{ scale: submitted || isSubmitting ? 1 : 0.98 }}
                 onClick={handleSubmit}
                 disabled={submitted || isSubmitting}
-                className="w-full bg-[#443C34] text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-[#332C26] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-lg hover:shadow-2xl"
+                className="cursor-pointer w-full bg-[#443C34] text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-[#332C26] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-lg hover:shadow-2xl"
               >
                 {submitted ? (
                   <>
@@ -470,7 +470,7 @@ export function Contact({ config, content = {} }: ContactProps) {
                     const address = encodeURIComponent(config.contact.address);
                     window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
                   }}
-                  className="absolute bottom-4 right-4 bg-[#443C34] hover:bg-[#332922] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition-all z-10"
+                  className="cursor-pointer absolute bottom-4 right-4 bg-[#443C34] hover:bg-[#332922] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 transition-all z-10"
                 >
                   <MapPin size={16} />
                   {t('contact.showAddress', { defaultValue: 'Show Address' })}

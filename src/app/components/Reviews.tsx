@@ -57,6 +57,7 @@ function AnimatedStar({ index, rating, delay }: { index: number, rating: number,
 
 // Carte de review avec effet 3D amélioré
 function ReviewCard({ review, index }: { review: Review, index: number }) {
+  const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -156,12 +157,15 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
               transition={{ type: "spring", stiffness: 200 }}
-              className="absolute top-8 left-8 z-20"
+              // On remplace left-8 par right-4 (mobile) et right-8 (desktop)
+              className="absolute top-4 right-4 md:top-8 md:right-8 z-20"
               style={{ translateZ: 70 }}
             >
-              <div className="bg-[#A68966] text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl">
-                <Verified size={16} fill="white" />
-                <span className="text-xs font-bold">Vérifié</span>
+              <div className="bg-[#A68966] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-2 shadow-xl">
+                <Verified size={14} className="md:w-4 md:h-4" fill="white" />
+                <span className="text-[10px] md:text-xs font-bold whitespace-nowrap">
+                  {t('common.verify')}
+                </span>
               </div>
             </motion.div>
           )}
@@ -181,7 +185,7 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
           </div>
 
           <motion.p
-            className="text-[#4B3935] text-lg md:text-2xl leading-relaxed font-serif italic mb-6 md:mb-10"
+            className="text-[#4B3935] text-lg md:text-1xl leading-relaxed font-serif italic mb-6 md:mb-10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}

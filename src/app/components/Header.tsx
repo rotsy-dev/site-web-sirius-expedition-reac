@@ -128,14 +128,14 @@ export function Header({ siteConfig }: HeaderProps) {
           </div>
 
           {/* Actions Desktop */}
-          <div className="hidden lg:flex items-center gap-0 ml-auto">
+          <div className="cursor-pointer hidden lg:flex items-center gap-0 ml-auto">
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => navigate(`/${currentLang}/quote`)}
-              className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg bg-[#D4A574] hover:bg-[#C4965F] text-[#4B3935] transition-all overflow-hidden group"
+              className="cursor-pointer relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg bg-[#D4A574] hover:bg-[#C4965F] text-[#4B3935] transition-all overflow-hidden group"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <div className="cursor-pointer absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               <Calendar size={15} strokeWidth={2.5} className="relative z-10" />
               <span className="relative z-10">{t("nav.quote")}</span>
             </motion.button>
@@ -148,7 +148,7 @@ export function Header({ siteConfig }: HeaderProps) {
               whileHover={{ scale: 1.05, y: -1 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/admin')}
-              className="p-2.5 rounded-full border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-sm transition-all"
+              className="cursor-pointer p-2.5 rounded-full border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-sm transition-all"
             >
               <LogIn size={18} />
             </motion.button>
@@ -202,15 +202,15 @@ export function Header({ siteConfig }: HeaderProps) {
 
                 <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-2" />
 
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-center gap-2 py-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                <div className="cursor-pointer flex flex-col gap-3">
+                  <div className="cursor-pointer flex items-center justify-center gap-2 py-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
                     <Languages size={18} className="text-zinc-600" />
                     <LanguageSwitcher />
                   </div>
 
                   <button
                     onClick={() => { navigate(`/${currentLang}/quote`); setMobileMenuOpen(false); }}
-                    className="w-full py-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 bg-[#D4A574] text-[#4B3935]"
+                    className="cursor-pointer w-full py-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 bg-[#D4A574] text-[#4B3935]"
                   >
                     <Calendar size={18} strokeWidth={2.5} />
                     <span>{t("nav.quote")}</span>
@@ -218,7 +218,7 @@ export function Header({ siteConfig }: HeaderProps) {
 
                   <button
                     onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}
-                    className="w-full py-4 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                    className="cursor-pointer w-full py-4 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                   >
                     <LogIn size={18} />
                     <span>{t("nav.login")}</span>

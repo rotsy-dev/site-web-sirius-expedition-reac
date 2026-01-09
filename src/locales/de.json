@@ -206,7 +206,13 @@
     "save": "Speichern",
     "delete": "Löschen",
     "edit": "Bearbeiten",
-    "view": "Anzeigen"
+    "view": "Anzeigen",
+    "termsAndConditions": "Allgemeine Geschäftsbedingungen",
+    "tableOfContents": "Inhaltsverzeichnis",
+    "updated": "Aktualisiert",
+    "legalDocument": "Rechtliches Dokument",
+    "verify": "Überprüfen"
+
   },
   "admin": {
     "dashboard": "Dashboard",

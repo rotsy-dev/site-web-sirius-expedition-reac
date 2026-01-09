@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, MessageCircle } from 'lucide-react';
@@ -26,8 +26,21 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useContentManager } from '../hooks/useContentManager';
 import { SITE_SECTIONS } from '../constants';
-import TermsPage from './pages/legal/TermsPage';
-import PrivacyPage from './pages/legal/PrivacyPage';
+
+// ============================================
+// LAZY LOADING - Pages légales
+// ============================================
+const TermsPage = lazy(() => import('./pages/legal/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'));
+
+// ============================================
+// LOADER POUR PAGES LAZY
+// ============================================
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+    <div className="w-12 h-12 border-3 border-[#A68966] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 // Cache keys
 const CACHE_VERSION = '1.0';
@@ -37,22 +50,6 @@ const CACHE_KEYS = {
   videoGallery: `video_gallery_v${CACHE_VERSION}`,
   reviews: `reviews_v${CACHE_VERSION}`,
   tourSpecialties: `tour_specialties_v${CACHE_VERSION}`,
-};
-
-// Langues supportées
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'it'];
-
-// Détection de la langue du navigateur
-const getBrowserLanguage = (): string => {
-  const browserLang = navigator.language.split('-')[0];
-  return SUPPORTED_LANGUAGES.includes(browserLang) ? browserLang : 'en';
-};
-
-// Fonction pour obtenir la langue depuis le chemin
-const getLangFromPath = (pathname: string): string => {
-  const pathParts = pathname.split('/');
-  const langCode = pathParts[1];
-  return SUPPORTED_LANGUAGES.includes(langCode) ? langCode : getBrowserLanguage();
 };
 
 // Wrapper pour les routes avec langue
@@ -72,10 +69,6 @@ const LanguageRoutes = () => {
     importContent,
   } = useContentManager();
 
-  // Déterminer la langue actuelle
-  const currentLang = lang || getLangFromPath(location.pathname);
-  const isValidLang = SUPPORTED_LANGUAGES.includes(currentLang);
-
   // ============= CACHE POUR HERO SLIDES =============
   const [cachedHeroSlides, setCachedHeroSlides] = useState(() => {
     const cached = localStorage.getItem(CACHE_KEYS.heroSlides);
@@ -93,7 +86,6 @@ const LanguageRoutes = () => {
     if (content.heroSlides && content.heroSlides.length > 0) {
       setCachedHeroSlides(content.heroSlides);
       localStorage.setItem(CACHE_KEYS.heroSlides, JSON.stringify(content.heroSlides));
-      console.log('✅ Hero slides cached');
     }
   }, [content.heroSlides]);
 
@@ -117,7 +109,6 @@ const LanguageRoutes = () => {
     if (bestSellerTours.length > 0) {
       setCachedBestSellers(bestSellerTours);
       localStorage.setItem(CACHE_KEYS.bestSellers, JSON.stringify(bestSellerTours));
-      console.log('✅ Best sellers cached');
     }
   }, [content.tourSpecialties]);
 
@@ -138,7 +129,6 @@ const LanguageRoutes = () => {
     if (content.videoGallery && content.videoGallery.length > 0) {
       setCachedVideoGallery(content.videoGallery);
       localStorage.setItem(CACHE_KEYS.videoGallery, JSON.stringify(content.videoGallery));
-      console.log('✅ Video gallery cached');
     }
   }, [content.videoGallery]);
 
@@ -159,7 +149,6 @@ const LanguageRoutes = () => {
     if (content.reviews && content.reviews.length > 0) {
       setCachedReviews(content.reviews);
       localStorage.setItem(CACHE_KEYS.reviews, JSON.stringify(content.reviews));
-      console.log('✅ Reviews cached');
     }
   }, [content.reviews]);
 
@@ -180,64 +169,57 @@ const LanguageRoutes = () => {
     if (content.tourSpecialties && content.tourSpecialties.length > 0) {
       setCachedTourSpecialties(content.tourSpecialties);
       localStorage.setItem(CACHE_KEYS.tourSpecialties, JSON.stringify(content.tourSpecialties));
-      console.log('✅ Tour specialties cached');
     }
   }, [content.tourSpecialties]);
 
   // Fonction pour naviguer avec la langue
   const setActiveSection = (section: string) => {
     const routes: Record<string, string> = {
-      'home': `/${currentLang}`,
-      'tours': `/${currentLang}/tours`,
-      'blogs': `/${currentLang}/blog`,
-      'contact': `/${currentLang}/contact`,
-      'quote': `/${currentLang}/quote`,
-      'about': `/${currentLang}/about`,
-      'terms': `/${currentLang}/terms-and-conditions`,
-      'privacy': `/${currentLang}/privacy-policy`,
+      'home': `/${lang}`,
+      'tours': `/${lang}/tours`,
+      'blogs': `/${lang}/blog`,
+      'contact': `/${lang}/contact`,
+      'quote': `/${lang}/quote`,
+      'about': `/${lang}/about`,
     };
-    
-    const route = routes[section] || `/${currentLang}`;
-    navigate(route);
+    navigate(routes[section] || `/${lang}`);
   };
 
   // Déterminer la section active basée sur l'URL
   const getActiveSection = () => {
     const path = location.pathname;
-    const langPrefix = `/${currentLang}`;
-    
-    if (path === langPrefix || path === `${langPrefix}/`) return 'home';
-    if (path.startsWith(`${langPrefix}/tours`)) return 'tours';
-    if (path.startsWith(`${langPrefix}/blog`)) return 'blogs';
-    if (path === `${langPrefix}/contact`) return 'contact';
-    if (path === `${langPrefix}/quote`) return 'quote';
-    if (path === `${langPrefix}/about`) return 'about';
-    if (path === `${langPrefix}/terms-and-conditions`) return 'terms';
-    if (path === `${langPrefix}/privacy-policy`) return 'privacy';
-    
+    if (path === `/${lang}` || path === `/${lang}/`) return 'home';
+    if (path.startsWith(`/${lang}/tours`)) return 'tours';
+    if (path.startsWith(`/${lang}/blog`)) return 'blogs';
+    if (path === `/${lang}/contact`) return 'contact';
+    if (path === `/${lang}/quote`) return 'quote';
+    if (path === `/${lang}/about`) return 'about';
     return 'home';
   };
 
   const activeSection = getActiveSection();
-
-  // Redirection si la langue n'est pas valide
-  if (!isValidLang) {
-    return <Navigate to={`/${getBrowserLanguage()}`} replace />;
-  }
 
   // UseEffect pour scroller en haut à chaque changement de route
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // UseEffect pour détecter le scroll
+  // UseEffect pour détecter le scroll (throttled)
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setShowScrollTop(window.scrollY > 500);
+      }, 100);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -256,125 +238,93 @@ const LanguageRoutes = () => {
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         siteConfig={content.siteConfig}
-        currentLang={currentLang}
       />
 
       <main>
-        <Routes>
-          {/* Page d'accueil */}
-          <Route index element={
-            <>
-              <HeroCarousel
-                slides={cachedHeroSlides}
-                onNavigateToContact={() => setActiveSection('contact')}
-                onNavigateToTours={() => setActiveSection('tours')}
-                lang={currentLang}
-              />
-              <BestSellers
-                tours={cachedBestSellers}
-                content={content}
-                onNavigateToTour={() => {
-                  setActiveSection('tours');
-                }}
-                lang={currentLang}
-              />
-              <VideoGallery
-                videos={cachedVideoGallery}
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Page d'accueil */}
+            <Route index element={
+              <>
+                <HeroCarousel
+                  slides={cachedHeroSlides}
+                  onNavigateToContact={() => setActiveSection('contact')}
+                  onNavigateToTours={() => setActiveSection('tours')}
+                />
+                <BestSellers
+                  tours={cachedBestSellers}
+                  content={content}
+                  onNavigateToTour={() => {
+                    setActiveSection('tours');
+                  }}
+                />
+                <VideoGallery
+                  videos={cachedVideoGallery}
+                  config={content.siteConfig}
+                  onNavigateToContact={() => setActiveSection('contact')}
+                  content={content}
+                />
+                <MadagascarGallery content={content} />
+                <Reviews
+                  reviews={cachedReviews}
+                  config={content.siteConfig as any}
+                  content={content}
+                />
+              </>
+            } />
+
+            {/* Page Tours */}
+            <Route path="tours" element={
+              <div className="min-h-screen bg-[#FAF7F2]">
+                <TourSpecialties
+                  specialties={cachedTourSpecialties}
+                  initialSelectedTour={pendingTour}
+                  content={content}
+                  onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
+                />
+              </div>
+            } />
+
+            {/* Page Liste des Blogs */}
+            <Route path="blog" element={<Blogs content={content} />} />
+
+            {/* Page Détail du Blog (Slug) */}
+            <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
+
+            {/* Page Contact */}
+            <Route path="contact" element={
+              <Contact
                 config={content.siteConfig}
-                onNavigateToContact={() => setActiveSection('contact')}
                 content={content}
-                lang={currentLang}
               />
-              <MadagascarGallery content={content} lang={currentLang} />
-              <Reviews
-                reviews={cachedReviews}
-                config={content.siteConfig as any}
+            } />
+
+            {/* Page Devis */}
+            <Route path="quote" element={
+              <QuoteRequest
+                config={content.siteConfig}
                 content={content}
-                lang={currentLang}
               />
-            </>
-          } />
+            } />
 
-          {/* Page Tours */}
-          <Route path="tours" element={
-            <div className="min-h-screen bg-[#FAF7F2]">
-              <TourSpecialties
-                specialties={cachedTourSpecialties}
-                initialSelectedTour={pendingTour}
+            {/* Page À propos */}
+            <Route path="about" element={
+              <AboutUs
+                config={content.siteConfig}
                 content={content}
-                onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
-                lang={currentLang}
               />
-            </div>
-          } />
+            } />
 
-          {/* Page Liste des Blogs */}
-          <Route path="blog" element={
-            <Blogs 
-              content={content} 
-              lang={currentLang}
-            />
-          } />
-
-          {/* Page Détail du Blog (Slug) */}
-          <Route path="blog/:slug" element={
-            <Blogs 
-              content={content} 
-              isDetail={true} 
-              lang={currentLang}
-            />
-          } />
-
-          {/* Page Contact */}
-          <Route path="contact" element={
-            <Contact
-              config={content.siteConfig}
-              content={content}
-              lang={currentLang}
-            />
-          } />
-
-          {/* Page Devis */}
-          <Route path="quote" element={
-            <QuoteRequest
-              config={content.siteConfig}
-              content={content}
-              lang={currentLang}
-            />
-          } />
-
-          {/* Page À propos */}
-          <Route path="about" element={
-            <AboutUs
-              config={content.siteConfig}
-              content={content}
-              lang={currentLang}
-            />
-          } />
-
-          {/* Pages légales avec langue - PASSEZ currentLang en prop */}
-          <Route path="terms-and-conditions" element={<TermsPage currentLang={currentLang} />} />
-          <Route path="privacy-policy" element={<PrivacyPage currentLang={currentLang} />} />
-
-          {/* Redirections pour anciennes URLs */}
-          <Route path="terms" element={
-            <Navigate to={`/${currentLang}/terms-and-conditions`} replace />
-          } />
-          <Route path="privacy" element={
-            <Navigate to={`/${currentLang}/privacy-policy`} replace />
-          } />
-
-          {/* Route de fallback */}
-          <Route path="*" element={
-            <Navigate to={`/${currentLang}`} replace />
-          } />
-        </Routes>
+            {/* ========== PAGES LÉGALES (LAZY) ========== */}
+            <Route path="terms" element={<TermsPage currentLang={lang || 'en'} />} />
+            <Route path="privacy" element={<PrivacyPage currentLang={lang || 'en'} />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <Footer
         setActiveSection={setActiveSection}
         config={content.siteConfig as any}
-        currentLang={currentLang}
       />
 
       {/* BOUTON SCROLL TO TOP */}
@@ -385,7 +335,7 @@ const LanguageRoutes = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#A68966] text-white rounded-full shadow-2xl hover:bg-[#8B7355] transition-all flex items-center justify-center group"
+            className="cursor-pointer fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#A68966] text-white rounded-full shadow-2xl hover:bg-[#8B7355] transition-all flex items-center justify-center group"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -402,7 +352,7 @@ const LanguageRoutes = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0, y: 20 }}
             onClick={() => setIsContactModalOpen(true)}
-            className={`fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
+            className={`cursor-pointer fixed right-8 z-50 w-14 h-14 bg-[#443C34] text-white rounded-full shadow-2xl hover:bg-[#2c2620] transition-all flex items-center justify-center group ${showScrollTop ? 'bottom-24' : 'bottom-8'}`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -416,7 +366,6 @@ const LanguageRoutes = () => {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
         config={content.siteConfig}
-        lang={currentLang}
       />
     </motion.div>
   );
@@ -434,33 +383,30 @@ function App() {
     content,
   } = useContentManager();
 
-  // Fonction utilitaire pour générer les balises hreflang
-  const renderHreflangTags = () => {
-    const baseUrl = window.location.origin;
-    
-    return (
-      <>
-        {SUPPORTED_LANGUAGES.map(lang => (
-          <link 
-            key={lang} 
-            rel="alternate" 
-            href={`${baseUrl}/${lang}`} 
-            hrefLang={lang} 
-          />
-        ))}
-        <link rel="alternate" href={baseUrl} hrefLang="x-default" />
-      </>
-    );
-  };
+  // État pour contrôler l'affichage du contenu après le loader
+  const [contentReady, setContentReady] = useState(false);
+
+  // Délai avant d'afficher le contenu pour éviter le flash du footer
+  useEffect(() => {
+    if (!loading && !contentReady) {
+      const timer = setTimeout(() => {
+        setContentReady(true);
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, contentReady]);
+
+  // Reset contentReady quand loading recommence
+  useEffect(() => {
+    if (loading) {
+      setContentReady(false);
+    }
+  }, [loading]);
 
   return (
     <ToastProvider>
       <div className="min-h-screen bg-background text-foreground">
-        {/* Ajout des balises hreflang pour le SEO */}
-        <head>
-          {renderHreflangTags()}
-        </head>
-        
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -603,7 +549,7 @@ function App() {
                 <div className="absolute bottom-6 right-6 w-12 h-12 border-b border-r border-white/50" />
               </motion.div>
             </motion.div>
-          ) : (
+          ) : contentReady ? (
             <Routes>
               {/* Route Admin */}
               <Route path="/admin" element={
@@ -632,28 +578,16 @@ function App() {
                 </motion.div>
               } />
 
-              {/* Redirection de la racine vers la langue du navigateur */}
-              <Route path="/" element={
-                <Navigate to={`/${getBrowserLanguage()}`} replace />
-              } />
-
-              {/* Redirections pour les anciennes URLs sans langue */}
-              <Route path="/terms-and-conditions" element={
-                <Navigate to={`/${getBrowserLanguage()}/terms-and-conditions`} replace />
-              } />
-              <Route path="/privacy-policy" element={
-                <Navigate to={`/${getBrowserLanguage()}/privacy-policy`} replace />
-              } />
+              {/* Redirection de la racine vers /en */}
+              <Route path="/" element={<Navigate to="/en" replace />} />
 
               {/* Routes avec langue */}
               <Route path="/:lang/*" element={<LanguageRoutes />} />
 
-              {/* Fallback pour toutes les autres routes */}
-              <Route path="*" element={
-                <Navigate to={`/${getBrowserLanguage()}`} replace />
-              } />
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/en" replace />} />
             </Routes>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </ToastProvider>

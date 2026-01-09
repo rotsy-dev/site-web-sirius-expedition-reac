@@ -3,7 +3,6 @@ import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection } from 'fireba
 import { db } from '../../../../firebase/config';
 import { Reorder } from 'framer-motion';
 import { Save, FileText, Plus, Trash2, GripVertical, Heading } from 'lucide-react';
-
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -15,14 +14,11 @@ interface Section {
     content: string;
 }
 
-interface PrivacyData {
+interface TermsData {
     title: string;
-    heroSubtitle: string;
+    subtitle: string;
     lastUpdated: string;
-    version: string;
     sections: Section[];
-    contactEmail: string;
-    jurisdiction: string;
 }
 
 const LANGUAGES: Record<Lang, string> = {
@@ -33,50 +29,45 @@ const quillModules = {
     toolbar: [
         ['bold', 'italic', 'underline'],
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['link'],
         ['clean']
     ],
 };
 
 export default function TermsConditionsEditor() {
     const [lang, setLang] = useState<Lang>('en');
-    const [data, setData] = useState<PrivacyData>({
+    const [data, setData] = useState<TermsData>({
         title: '',
-        heroSubtitle: '',
+        subtitle: '',
         lastUpdated: new Date().toISOString().split('T')[0],
-        version: '1.0',
         sections: [],
-        contactEmail: '',
-        jurisdiction: ''
     });
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [changeReason, setChangeReason] = useState('');
 
-    useEffect(() => { loadPrivacy(lang); }, [lang]);
+    useEffect(() => { loadTerms(lang); }, [lang]);
 
-    const loadPrivacy = async (language: Lang) => {
+    const loadTerms = async (language: Lang) => {
         setLoading(true);
         try {
-            const ref = doc(db, 'privacy_policy', language);
+            const ref = doc(db, 'terms_conditions', language);
             const snap = await getDoc(ref);
             if (snap.exists()) {
-                setData(snap.data() as PrivacyData);
+                setData(snap.data() as TermsData);
             } else {
-                // Données par défaut si rien n'existe
+                // Données par défaut
                 setData({
-                    title: language === 'fr' ? 'Politique de Confidentialité' : 
-                           language === 'de' ? 'Datenschutzrichtlinie' :
-                           language === 'it' ? 'Informativa sulla Privacy' : 'Privacy Policy',
-                    heroSubtitle: language === 'fr' ? 'Comment nous protégeons vos données personnelles' :
-                                  language === 'de' ? 'Wie wir Ihre persönlichen Daten schützen' :
-                                  language === 'it' ? 'Come proteggiamo i tuoi dati personali' :
-                                  'How we protect your personal data',
+                    title: language === 'fr' ? 'Conditions Générales' :
+                        language === 'de' ? 'Allgemeine Geschäftsbedingungen' :
+                            language === 'it' ? 'Termini e Condizioni' : 'Terms & Conditions',
+                    subtitle: language === 'fr' ? 'Conditions régissant l\'utilisation de nos services' :
+                        language === 'de' ? 'Bedingungen für die Nutzung unserer Dienste' :
+                            language === 'it' ? 'Condizioni che regolano l\'uso dei nostri servizi' :
+                                'Terms governing the use of our services',
                     lastUpdated: new Date().toISOString().split('T')[0],
-                    version: '1.0',
                     sections: [],
-                    contactEmail: '',
-                    jurisdiction: ''
                 });
             }
         } catch (error) {
@@ -108,29 +99,29 @@ export default function TermsConditionsEditor() {
         }));
     };
 
-    const savePrivacy = async () => {
+    const saveTerms = async () => {
         if (!changeReason.trim()) {
             alert('Veuillez indiquer une raison pour cette mise à jour');
             return;
         }
-        
+
         setSaving(true);
         try {
-            // Sauvegarder dans privacy_policy/{lang}
-            await setDoc(doc(db, 'privacy_policy', lang), {
+            // Sauvegarder dans terms_conditions/{lang}
+            await setDoc(doc(db, 'terms_conditions', lang), {
                 ...data,
                 updatedAt: serverTimestamp()
             });
-            
+
             // Archiver dans l'historique
-            await addDoc(collection(db, 'privacy_policy_history'), {
+            await addDoc(collection(db, 'terms_conditions_history'), {
                 ...data,
                 language: lang,
                 changeReason,
                 timestamp: serverTimestamp()
             });
-            
-            alert('✅ Politique de confidentialité publiée avec succès !');
+
+            alert('✅ Conditions générales publiées avec succès !');
             setChangeReason('');
         } catch (e) {
             console.error('Erreur de sauvegarde:', e);
@@ -152,19 +143,18 @@ export default function TermsConditionsEditor() {
             {/* En-tête avec sélecteur de langue */}
             <div className="flex justify-between items-center bg-white p-6 rounded-2xl border shadow-sm">
                 <div className="flex items-center gap-3">
-                    <FileText className="text-blue-600" />
-                    <h1 className="text-xl font-bold">Configuration Politique de Confidentialité</h1>
+                    <FileText className="text-[#443C34]" />
+                    <h1 className="text-xl font-bold">Configuration Conditions Générales</h1>
                 </div>
                 <div className="flex gap-2">
                     {(Object.keys(LANGUAGES) as Lang[]).map((l) => (
                         <button
                             key={l}
                             onClick={() => setLang(l)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                lang === l
-                                    ? 'bg-blue-600 text-white'
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${lang === l
+                                    ? 'bg-[#443C34] text-[#F0E7D5]'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             {LANGUAGES[l]}
                         </button>
@@ -176,40 +166,28 @@ export default function TermsConditionsEditor() {
                 {/* Colonne gauche - Métadonnées */}
                 <div className="space-y-6">
                     <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <label className="text-xs font-bold uppercase text-gray-400">En-tête</label>
+                        <label className="text-xs font-bold uppercase text-gray-400">En-tête de page</label>
                         <input
-                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-[#443C34]"
                             value={data.title}
                             onChange={e => setData({ ...data, title: e.target.value })}
-                            placeholder="Titre de la page"
+                            placeholder="Titre principal (ex: Terms & Conditions)"
                         />
                         <textarea
-                            className="w-full p-3 bg-gray-50 rounded-xl border-none h-24 focus:ring-2 focus:ring-blue-500"
-                            value={data.heroSubtitle}
-                            onChange={e => setData({ ...data, heroSubtitle: e.target.value })}
-                            placeholder="Description"
+                            className="w-full p-3 bg-gray-50 rounded-xl border-none h-24 focus:ring-2 focus:ring-[#443C34]"
+                            value={data.subtitle}
+                            onChange={e => setData({ ...data, subtitle: e.target.value })}
+                            placeholder="Sous-titre descriptif"
                         />
                     </div>
 
                     <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <label className="text-xs font-bold uppercase text-gray-400">Informations</label>
+                        <label className="text-xs font-bold uppercase text-gray-400">Date de mise à jour</label>
                         <input
-                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-blue-500"
-                            value={data.contactEmail}
-                            onChange={e => setData({ ...data, contactEmail: e.target.value })}
-                            placeholder="Email de contact"
-                        />
-                        <input
-                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-blue-500"
-                            value={data.jurisdiction}
-                            onChange={e => setData({ ...data, jurisdiction: e.target.value })}
-                            placeholder="Juridiction"
-                        />
-                        <input
-                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-blue-500"
-                            value={data.version}
-                            onChange={e => setData({ ...data, version: e.target.value })}
-                            placeholder="Version"
+                            type="date"
+                            className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-[#443C34]"
+                            value={data.lastUpdated}
+                            onChange={e => setData({ ...data, lastUpdated: e.target.value })}
                         />
                     </div>
                 </div>
@@ -217,10 +195,10 @@ export default function TermsConditionsEditor() {
                 {/* Colonne droite - Sections */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex justify-between items-center text-[#443C34]">
-                        <h3 className="font-bold text-lg">Sections</h3>
+                        <h3 className="font-bold text-lg">Sections du document</h3>
                         <button
                             onClick={addSection}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm hover:bg-blue-700 transition-colors"
+                            className="bg-[#443C34] text-[#F0E7D5] px-4 py-2 rounded-xl flex items-center gap-2 text-sm hover:bg-[#443C34]/90 transition-colors"
                         >
                             <Plus size={16} /> Ajouter une section
                         </button>
@@ -246,7 +224,7 @@ export default function TermsConditionsEditor() {
                                             className="flex-1 font-bold text-[#443C34] bg-transparent border-none focus:ring-0"
                                             value={section.subtitle}
                                             onChange={e => updateSection(section.id, 'subtitle', e.target.value)}
-                                            placeholder="Titre de la section (ex: Data Collection, Cookies...)"
+                                            placeholder="Titre de la section (ex: Service Agreement, Payment Terms...)"
                                         />
                                         <button
                                             onClick={() => deleteSection(section.id)}
@@ -274,7 +252,7 @@ export default function TermsConditionsEditor() {
                             <p className="text-gray-500 mb-4">Aucune section pour le moment</p>
                             <button
                                 onClick={addSection}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition-colors"
+                                className="bg-[#443C34] text-[#F0E7D5] px-6 py-2 rounded-xl hover:bg-[#443C34]/90 transition-colors"
                             >
                                 Créer la première section
                             </button>
@@ -282,22 +260,21 @@ export default function TermsConditionsEditor() {
                     )}
 
                     {/* Zone de publication */}
-                    <div className="bg-white p-6 rounded-2xl border shadow-lg space-y-4 border-t-4 border-t-blue-600">
+                    <div className="bg-white p-6 rounded-2xl border shadow-lg space-y-4 border-t-4 border-t-[#443C34]">
                         <label className="text-sm font-bold text-gray-700">Raison de la mise à jour *</label>
                         <input
-                            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
-                            placeholder="Ex: Mise à jour RGPD, Ajout politique cookies..."
+                            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[#443C34]"
+                            placeholder="Ex: Mise à jour des conditions de paiement..."
                             value={changeReason}
                             onChange={e => setChangeReason(e.target.value)}
                         />
                         <button
-                            onClick={savePrivacy}
+                            onClick={saveTerms}
                             disabled={saving || !changeReason.trim()}
-                            className={`w-full py-4 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors ${
-                                saving || !changeReason.trim()
+                            className={`w-full py-4 rounded-xl font-bold flex justify-center items-center gap-2 transition-colors ${saving || !changeReason.trim()
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
+                                    : 'bg-[#443C34] text-[#F0E7D5] hover:bg-[#443C34]/90'
+                                }`}
                         >
                             <Save size={20} />
                             {saving ? 'Publication en cours...' : 'Enregistrer et Publier'}

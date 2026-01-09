@@ -94,7 +94,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                   >
                     <button 
                       onClick={onNavigateToTours}
-                      className="px-8 py-3 bg-[#2fb5a3] hover:bg-[#26a393] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-sm"
+                      className="cursor-pointer px-8 py-3 bg-[#2fb5a3] hover:bg-[#26a393] text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-sm"
                     >
                       {slide.cta}
                     </button>
@@ -102,7 +102,7 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                     {onNavigateToContact && (
                       <button 
                         onClick={onNavigateToContact}
-                        className="px-8 py-3 rounded-xl border border-[#F3E5AB]/20 bg-[#2C1E16] text-[#F3E5AB] font-bold hover:bg-[#3D2B1F] transition-all shadow-xl active:scale-95 text-sm"
+                        className="cursor-pointer px-8 py-3 rounded-xl border border-[#F3E5AB]/20 bg-[#2C1E16] text-[#F3E5AB] font-bold hover:bg-[#3D2B1F] transition-all shadow-xl active:scale-95 text-sm"
                       >
                         {t('contact.title')}
                       </button>

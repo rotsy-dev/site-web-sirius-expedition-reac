@@ -119,7 +119,6 @@ export function Footer({ config }: FooterProps) {
   ]
 
   const corporateLinks = [
-    { label: t('footer.legalNotice'), path: `/${currentLang}/legal-notice` },
     { label: t('footer.termsOfUse'), path: `/${currentLang}/terms` },
     { label: t('footer.privacyPolicy'), path: `/${currentLang}/privacy` },
     { label: t('footer.cookieManagement'), path: `/${currentLang}/cookies` },
@@ -184,7 +183,7 @@ export function Footer({ config }: FooterProps) {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-shrink-0 bg-[#F5E6D3] hover:bg-[#EBD8C0] px-4 sm:px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center text-[#443C34]"
+                  className="cursor-pointer flex-shrink-0 bg-[#F5E6D3] hover:bg-[#EBD8C0] px-4 sm:px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center text-[#443C34]"
                 >
                   <ArrowUpRight className="w-4 h-4" />
                 </motion.button>

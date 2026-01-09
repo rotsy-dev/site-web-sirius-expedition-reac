@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Clock, Loader2, Calendar, Eye } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Loader2, Calendar, Eye, Share2, Facebook, Twitter, Linkedin, Link2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
@@ -24,6 +24,161 @@ const HERO_IMAGE = "https://images.unsplash.com/photo-1659944984855-776187144baf
 
 const CACHE_VERSION = '2.0';
 const CACHE_KEY = `blog_posts_cache_v${CACHE_VERSION}`;
+
+// ============================================
+// COMPOSANT : PARTAGE SUR LES RÉSEAUX SOCIAUX
+// ============================================
+const SocialShare = ({ post }: any) => {
+    const [copied, setCopied] = useState(false);
+
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const title = post.title;
+
+    const shareLinks = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+    };
+
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
+    const handleShare = (platform: keyof typeof shareLinks) => {
+        window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap items-center gap-3 p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-2xl shadow-lg border-2 border-[#D4A574]/20"
+        >
+            <div className="flex items-center gap-2 text-[#443C34] dark:text-white font-bold">
+                <Share2 size={20} />
+                <span className="text-sm">Partager :</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleShare('facebook')}
+                    className="cursor-pointer w-10 h-10 rounded-full bg-[#1877F2] hover:bg-[#0d5dbf] text-white flex items-center justify-center shadow-md transition-all"
+                    aria-label="Partager sur Facebook"
+                >
+                    <Facebook size={18} fill="white" />
+                </motion.button>
+
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleShare('twitter')}
+                    className="cursor-pointer w-10 h-10 rounded-full bg-[#1DA1F2] hover:bg-[#0d8bd9] text-white flex items-center justify-center shadow-md transition-all"
+                    aria-label="Partager sur Twitter"
+                >
+                    <Twitter size={18} fill="white" />
+                </motion.button>
+
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleShare('linkedin')}
+                    className="cursor-pointer w-10 h-10 rounded-full bg-[#0A66C2] hover:bg-[#084d94] text-white flex items-center justify-center shadow-md transition-all"
+                    aria-label="Partager sur LinkedIn"
+                >
+                    <Linkedin size={18} fill="white" />
+                </motion.button>
+
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={copyToClipboard}
+                    className={` cursor-pointer w-10 h-10 rounded-full ${copied ? 'bg-green-500' : 'bg-[#8B7355] hover:bg-[#6B5535]'
+                        } text-white flex items-center justify-center shadow-md transition-all`}
+                    aria-label="Copier le lien"
+                >
+                    {copied ? <Check size={18} /> : <Link2 size={18} />}
+                </motion.button>
+            </div>
+
+            {copied && (
+                <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-xs font-medium text-green-600 dark:text-green-400"
+                >
+                    Lien copié !
+                </motion.span>
+            )}
+        </motion.div>
+    );
+};
+
+// ============================================
+// COMPOSANT : NAVIGATION ENTRE ARTICLES
+// ============================================
+const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
+    const currentIndex = posts.findIndex((p: any) => p.id === currentPost.id);
+    const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+    const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
+    const NavCard = ({ post, direction, onClick }: any) => (
+        <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onClick(post)}
+            className={`cursor-pointer group flex-1 p-4 md:p-6 rounded-2xl bg-white dark:bg-[#443C34] border-2 border-[#D4A574]/20 hover:border-[#D4A574] shadow-lg hover:shadow-xl transition-all ${direction === 'prev' ? 'text-left' : 'text-right'
+                }`}
+        >
+            <div className={`cursor-pointer flex items-center gap-3 mb-3 text-xs font-bold text-[#8B7355] dark:text-[#D4A574] ${direction === 'next' ? 'flex-row-reverse' : ''
+                }`}>
+                {direction === 'prev' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                <span className="uppercase tracking-wider">
+                    {direction === 'prev' ? 'Prev' : 'Next'}
+                </span>
+            </div>
+
+            <h3 className="text-base md:text-lg font-bold text-[#443C34] dark:text-white line-clamp-2 group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
+                {post.title}
+            </h3>
+
+            {post.excerpt && (
+                <p className="cursor-pointer mt-2 text-xs md:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                    {post.excerpt}
+                </p>
+            )}
+        </motion.button>
+    );
+
+    if (!prevPost && !nextPost) return null;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row gap-4 mt-12"
+        >
+            {prevPost ? (
+                <NavCard post={prevPost} direction="prev" onClick={onNavigate} />
+            ) : (
+                <div className="flex-1 hidden md:block" />
+            )}
+
+            {nextPost ? (
+                <NavCard post={nextPost} direction="next" onClick={onNavigate} />
+            ) : (
+                <div className="flex-1 hidden md:block" />
+            )}
+        </motion.div>
+    );
+};
 
 export function Blogs({ content = {}, isDetail = false }: BlogProps) {
     const { t } = useTranslation();
@@ -99,33 +254,33 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                 const postsSnap = await getDocs(collection(db, 'blogPosts'));
                 const freshPosts = postsSnap.docs.map(d => {
                     const data = d.data();
-                    return { 
-                        id: d.id, 
+                    return {
+                        id: d.id,
                         ...data,
                         slug: data.slug || d.id
                     };
                 });
-                
+
                 // Trier par ID
                 freshPosts.sort((a: any, b: any) => {
                     const idA = parseInt(a.id) || 0;
                     const idB = parseInt(b.id) || 0;
                     return idA - idB;
                 });
-                
+
                 console.log(`✅ ${freshPosts.length} posts mis à jour depuis Firestore`);
-                
+
                 // Mettre à jour les posts ET le cache
                 setPosts(freshPosts);
                 localStorage.setItem(CACHE_KEY, JSON.stringify(freshPosts));
-                
+
                 // Nettoyer les anciens caches
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('blog_posts_cache') && key !== CACHE_KEY) {
                         localStorage.removeItem(key);
                     }
                 });
-                
+
             } catch (error) {
                 console.error("❌ Erreur lors du chargement des posts:", error);
             }
@@ -138,7 +293,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
     useEffect(() => {
         if (posts.length > 0 && isDetail && slug) {
             const found = posts.find(p => p.slug === slug) || posts.find(p => p.id === slug);
-            
+
             if (found) {
                 console.log('✅ Post trouvé:', { id: found.id, slug: found.slug });
                 setSelectedPost(found);
@@ -191,9 +346,8 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                         <img
                                             src={HERO_IMAGE}
                                             alt="Madagascar Blog"
-                                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                                                heroImageLoaded ? 'opacity-100' : 'opacity-0'
-                                            }`}
+                                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                                                }`}
                                             loading="eager"
                                             fetchPriority="high"
                                         />
@@ -236,7 +390,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 >
                                     {header.subtitle || t('sections.blogsSubtitle')}
                                 </motion.p>
-                                
+
                                 {isTranslatingPosts && (
                                     <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -283,8 +437,8 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                                 {featuredPost.author} <span className="text-[#8B7355] dark:text-[#D4A574] mx-2">•</span> {featuredPost.date}
                                                             </div>
                                                         </div>
-                                                        <button className="flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border-2 border-[#D4A574] text-[#443C34] dark:text-white font-bold text-sm bg-white dark:bg-[#332C26] hover:bg-[#F0E7D5] dark:hover:bg-[#8B7355] transition-all group-hover:border-[#8B7355] w-fit shadow-md">
-                                                             {t('blog.readArticle')}
+                                                            <button className="cursor-pointer flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border-2 border-[#D4A574] text-[#443C34] dark:text-white font-bold text-sm bg-white dark:bg-[#332C26] hover:bg-[#F0E7D5] dark:hover:bg-[#8B7355] transition-all group-hover:border-[#8B7355] w-fit shadow-md">
+                                                            {t('blog.readArticle')}
                                                             <div className="w-10 h-10 rounded-full bg-[#F0E7D5] dark:bg-[#8B7355] flex items-center justify-center group-hover:bg-[#443C34] dark:group-hover:bg-[#D4A574] group-hover:text-white transition-colors">
                                                                 <ArrowRight size={16} />
                                                             </div>
@@ -294,11 +448,10 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                         {!imagesLoaded[featuredPost.id] && (
                                                             <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
                                                         )}
-                                                        <img 
-                                                            src={featuredPost.image} 
-                                                            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ${
-                                                                imagesLoaded[featuredPost.id] ? 'opacity-100' : 'opacity-0'
-                                                            }`}
+                                                        <img
+                                                            src={featuredPost.image}
+                                                            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ${imagesLoaded[featuredPost.id] ? 'opacity-100' : 'opacity-0'
+                                                                }`}
                                                             alt={featuredPost.title}
                                                             loading="lazy"
                                                         />
@@ -312,7 +465,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                             </motion.section>
                                         )}
 
-                                        {/* Grille d'articles - DESIGN AMÉLIORÉ */}
+                                        {/* Grille d'articles */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                             {displayPosts.slice(1).map((post, idx) => (
                                                 <motion.article
@@ -323,50 +476,41 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                     onClick={() => openPost(post)}
                                                     className="group cursor-pointer bg-white dark:bg-[#443C34] rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-[#D4A574] shadow-lg hover:-translate-y-2"
                                                 >
-                                                    {/* Image avec overlay gradient */}
                                                     <div className="relative aspect-[16/10] overflow-hidden">
                                                         {!imagesLoaded[post.id] && (
                                                             <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
                                                         )}
                                                         <img
                                                             src={post.image}
-                                                            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
-                                                                imagesLoaded[post.id] ? 'opacity-100' : 'opacity-0'
-                                                            }`}
+                                                            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${imagesLoaded[post.id] ? 'opacity-100' : 'opacity-0'
+                                                                }`}
                                                             alt={post.title}
                                                             loading="lazy"
                                                         />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                                        
-                                                        {/* Badge catégorie */}
+
                                                         {post.category && (
                                                             <div className="absolute top-4 left-4 bg-[#D4A574] backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
                                                                 {post.category}
                                                             </div>
                                                         )}
 
-                                                        {/* Icône de lecture */}
                                                         <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-white/90 dark:bg-[#443C34]/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-xl">
                                                             <Eye size={20} className="text-[#443C34] dark:text-[#D4A574]" />
                                                         </div>
                                                     </div>
 
-                                                    {/* Contenu de la card */}
                                                     <div className="p-6 space-y-4">
-                                                        {/* Titre */}
                                                         <h3 className="text-xl font-bold text-[#443C34] dark:text-white line-clamp-2 leading-tight group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors min-h-[3.5rem]">
                                                             {post.title}
                                                         </h3>
 
-                                                        {/* Excerpt */}
                                                         <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3 min-h-[4.5rem]">
                                                             {post.excerpt}
                                                         </p>
 
-                                                        {/* Séparateur */}
                                                         <div className="h-px bg-gradient-to-r from-transparent via-[#D4A574]/30 to-transparent" />
 
-                                                        {/* Meta informations */}
                                                         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                                             <div className="flex items-center gap-3">
                                                                 <span className="flex items-center gap-1.5 font-medium">
@@ -381,7 +525,6 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             </div>
                                                         </div>
 
-                                                        {/* Auteur */}
                                                         <div className="flex items-center justify-between pt-4 border-t-2 border-[#F0E7D5] dark:border-[#332C26]">
                                                             <div className="flex items-center gap-3">
                                                                 {post.authorAvatar ? (
@@ -405,8 +548,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                                 </div>
                                                             </div>
 
-                                                            {/* Bouton de lecture */}
-                                                            <motion.div 
+                                                            <motion.div
                                                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                                                 whileTap={{ scale: 0.9 }}
                                                                 className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F0E7D5] to-[#E5D8C0] dark:from-[#8B7355] dark:to-[#6B5535] flex items-center justify-center group-hover:from-[#D4A574] group-hover:to-[#C49564] transition-all shadow-md"
@@ -431,10 +573,11 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                         animate={{ opacity: 1, y: 0 }}
                         className="max-w-[1400px] mx-auto px-6 pt-32 pb-20"
                     >
-                        <button onClick={handleBack} className="group mb-12 flex items-center gap-3 px-6 py-3 rounded-full border-2 border-[#443C34] text-[#443C34] dark:text-white hover:bg-[#443C34] hover:text-white dark:hover:bg-[#D4A574] dark:hover:border-[#D4A574] transition-all shadow-md">
+                        <button onClick={handleBack} className="cursor-pointer group mb-12 flex items-center gap-3 px-6 py-3 rounded-full border-2 border-[#443C34] text-[#443C34] dark:text-white hover:bg-[#443C34] hover:text-white dark:hover:bg-[#D4A574] dark:hover:border-[#D4A574] transition-all shadow-md">
                             <ArrowLeft size={18} />
-                            <span className="font-bold text-sm uppercase"> {t('common.back')}</span>
+                            <span className="font-bold text-sm uppercase">{t('common.back')}</span>
                         </button>
+
                         <div className="max-w-4xl mx-auto px-4 md:px-6">
                             <h1 className="text-3xl md:text-4xl lg:text-4xl font-black text-[#443C34] dark:text-white mb-8 text-center">
                                 {(translatedPosts?.find((p: any) => p.id === selectedPost.id)?.title) || selectedPost.title}
@@ -446,7 +589,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 alt={selectedPost.title}
                             />
 
-                            <div className="bg-white dark:bg-[#443C34] p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[32px] shadow-xl">
+                            <div className="bg-white dark:bg-[#443C34] p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[32px] shadow-xl mb-8">
                                 {((translatedPosts?.find((p: any) => p.id === selectedPost.id)?.content) || selectedPost.content || '').split('\n\n').map((paragraph: string, index: number) => (
                                     <p
                                         key={index}
@@ -456,6 +599,16 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                     </p>
                                 ))}
                             </div>
+
+                            {/* NOUVEAU : Partage sur les réseaux sociaux */}
+                            <SocialShare post={selectedPost} />
+
+                            {/* NOUVEAU : Navigation entre articles */}
+                            <BlogNavigation
+                                posts={displayPosts}
+                                currentPost={selectedPost}
+                                onNavigate={openPost}
+                            />
                         </div>
                     </motion.div>
                 ) : (
@@ -482,8 +635,8 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 ))}
                             </ul>
                         </div>
-                        <button onClick={handleBack} className="px-6 py-3 bg-[#443C34] text-white rounded-full hover:bg-[#D4A574] transition-all">
-                           {t('common.back')}
+                        <button onClick={handleBack} className="cursor-pointer px-6 py-3 bg-[#443C34] text-white rounded-full hover:bg-[#D4A574] transition-all">
+                            {t('common.back')}
                         </button>
                     </motion.div>
                 )}

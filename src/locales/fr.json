@@ -191,7 +191,12 @@
     "save": "Enregistrer",
     "delete": "Supprimer",
     "edit": "Modifier",
-    "view": "Voir"
+    "view": "Voir",
+    "termsAndConditions": "Conditions générales",
+    "tableOfContents": "Table des matières",
+    "updated": "Mis à jour",
+    "legalDocument": "Document légal",
+    "verify": "Vérifier"
   },
   "admin": {
     "dashboard": "Tableau de bord",

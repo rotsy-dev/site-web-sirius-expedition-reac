@@ -101,7 +101,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors border border-gray-100 shadow-sm"
+          className="cursor-pointer absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors border border-gray-100 shadow-sm"
         >
           <X className="w-5 h-5 text-gray-800" />
         </button>
@@ -340,7 +340,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleAskQuote}
-            className="bg-gradient-to-r from-[#8B7355] to-[#6B5744] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:shadow-xl transition-all shadow-lg"
+            className="cursor-pointer bg-gradient-to-r from-[#8B7355] to-[#6B5744] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:shadow-xl transition-all shadow-lg"
           >
             {t('tourSpecialties.modal.askQuote')}
           </motion.button>

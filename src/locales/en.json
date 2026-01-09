@@ -57,7 +57,13 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "view": "View"
+    "view": "View",
+    "termsAndConditions": "Terms and Conditions",
+    "tableOfContents": "Table of Contents",
+    "updated": "Updated",
+    "legalDocument": "Legal Document",
+    "verify": "Verify"
+
   },
   "tours": {
     "from": "From",

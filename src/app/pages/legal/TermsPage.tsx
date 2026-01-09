@@ -1,210 +1,263 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
-import { Clock, Scale, ShieldCheck, Globe } from 'lucide-react';
+import { Clock, Scale, FileText, AlertCircle, Loader2 } from 'lucide-react';
+import { useTranslatedContent } from '../../../hooks/useTranslatedContent';
+import { useTranslation } from 'react-i18next';
 
-// MODIF : Ajouter l'interface pour les props
+interface Section {
+    id: string;
+    subtitle: string;
+    content: string;
+}
+
+interface TermsData {
+    title: string;
+    subtitle: string;
+    lastUpdated: string;
+    sections: Section[];
+}
+
 interface TermsPageProps {
-  currentLang: string;
+    currentLang: string;
 }
 
 export default function TermsPage({ currentLang }: TermsPageProps) {
-    const navigate = useNavigate();
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    
-    // MODIF : Utiliser la prop directement
-    // const currentLang = lang || 'en';
+    const { t } = useTranslation();
 
-    // Traductions pour les textes fixes
-    const translations = {
-        loading: {
-            en: 'Loading...',
-            fr: 'Chargement...',
-            de: 'Laden...',
-            it: 'Caricamento...'
-        },
-        notFound: {
-            en: 'Content not found.',
-            fr: 'Contenu non trouvé.',
-            de: 'Inhalt nicht gefunden.',
-            it: 'Contenuto non trovato.'
-        },
-        updated: {
-            en: 'Updated',
-            fr: 'Mis à jour',
-            de: 'Aktualisiert',
-            it: 'Aggiornato'
-        },
-        jurisdiction: {
-            en: 'Jurisdiction',
-            fr: 'Juridiction',
-            de: 'Gerichtsbarkeit',
-            it: 'Giurisdizione'
-        },
-        version: {
-            en: 'Version',
-            fr: 'Version',
-            de: 'Version',
-            it: 'Versione'
-        },
-        notAvailable: {
-            en: 'Terms and conditions are not yet available in this language.',
-            fr: 'Les conditions générales ne sont pas encore disponibles dans cette langue.',
-            de: 'Die Allgemeinen Geschäftsbedingungen sind in dieser Sprache noch nicht verfügbar.',
-            it: 'I Termini e Condizioni non sono ancora disponibili in questa lingua.'
-        }
-    };
+    // --- GESTION DU CACHE ---
+    const [data, setData] = useState<TermsData | null>(() => {
+        const cached = localStorage.getItem(`cache_terms_${currentLang}`);
+        return cached ? JSON.parse(cached) : null;
+    });
 
-    // Fonction pour changer de langue
-    const handleLanguageChange = (newLang: string) => {
-        navigate(`/${newLang}/terms-and-conditions`);
-    };
+    const [loading, setLoading] = useState(!data);
+    const [activeSection, setActiveSection] = useState<string>('');
 
+    // --- TRADUCTION MÉMOÏSÉE ---
+    const mainFields = useMemo(() => ['title', 'subtitle'], []);
+    const sectionFields = useMemo(() => ['subtitle', 'content'], []);
+
+    const mainDataToTranslate = useMemo(() =>
+        data ? { title: data.title, subtitle: data.subtitle } : null,
+        [data?.title, data?.subtitle]
+    );
+
+    const { translatedContent: translatedMainData, isLoading: isTranslatingMain } = useTranslatedContent(
+        mainDataToTranslate,
+        mainFields
+    );
+
+    const { translatedContent: translatedSections, isLoading: isTranslatingSections } = useTranslatedContent(
+        data?.sections || null,
+        sectionFields
+    );
+
+    const isTranslating = isTranslatingMain || isTranslatingSections;
+
+    const displayData = useMemo(() => {
+        if (!data) return null;
+        return {
+            ...data,
+            title: (translatedMainData as any)?.title || data.title,
+            subtitle: (translatedMainData as any)?.subtitle || data.subtitle,
+            sections: (translatedSections as Section[]) || data.sections
+        };
+    }, [data, translatedMainData, translatedSections]);
+
+    // --- EFFETS ---
     useEffect(() => {
-        if (!currentLang) return;
-        
-        console.log(`Chargement des données pour la langue: ${currentLang}`);
-
         const fetchData = async () => {
+            if (!data) setLoading(true);
             try {
-                let snap = await getDoc(doc(db, 'privacy_policy', currentLang));
-                
+                const snap = await getDoc(doc(db, 'terms_conditions', currentLang));
+                let finalData: TermsData | null = null;
+
                 if (snap.exists()) {
-                    console.log(`Données trouvées pour ${currentLang}:`, snap.data());
-                    setData(snap.data());
+                    finalData = snap.data() as TermsData;
                 } else {
-                    console.log(`Document non trouvé pour ${currentLang}, fallback vers anglais`);
-                    const englishSnap = await getDoc(doc(db, 'privacy_policy', 'en'));
-                    if (englishSnap.exists()) {
-                        setData(englishSnap.data());
-                    } else {
-                        setData({
-                            title: translations.notFound[currentLang as keyof typeof translations.notFound] || 'Content not found',
-                            heroSubtitle: '',
-                            lastUpdated: new Date().toISOString().split('T')[0],
-                            version: '1.0',
-                            contactEmail: '',
-                            jurisdiction: 'Madagascar',
-                            sections: []
-                        });
-                    }
+                    const englishSnap = await getDoc(doc(db, 'terms_conditions', 'en'));
+                    if (englishSnap.exists()) finalData = englishSnap.data() as TermsData;
+                }
+
+                if (finalData) {
+                    setData(finalData);
+                    localStorage.setItem(`cache_terms_${currentLang}`, JSON.stringify(finalData));
                 }
             } catch (error) {
-                console.error('Erreur de chargement:', error);
-                setData({
-                    title: currentLang === 'fr' ? 'Conditions Générales' : 'Terms & Conditions',
-                    heroSubtitle: currentLang === 'fr' ? 'Veuillez patienter...' : 'Please check back later.',
-                    lastUpdated: new Date().toISOString().split('T')[0],
-                    version: '1.0',
-                    contactEmail: '',
-                    jurisdiction: 'Madagascar',
-                    sections: []
-                });
+                console.error('Error loading terms:', error);
             }
             setLoading(false);
-            window.scrollTo(0, 0);
         };
-        
+
         fetchData();
-    }, [currentLang]); // MODIF : Seulement currentLang comme dépendance
+        window.scrollTo(0, 0);
+    }, [currentLang]);
 
-    console.log('Current lang:', currentLang);
-    console.log('Data loaded:', data);
+    useEffect(() => {
+        const handleScroll = () => {
+            const sections = document.querySelectorAll('[data-section-id]');
+            let current = '';
+            sections.forEach((section) => {
+                const sectionTop = (section as HTMLElement).offsetTop;
+                if (window.scrollY >= sectionTop - 150) {
+                    current = section.getAttribute('data-section-id') || '';
+                }
+            });
+            setActiveSection(current);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [displayData]);
 
-    if (loading) {
+    if (loading && !displayData) {
         return (
-            <div className="h-screen flex items-center justify-center">
-                <div className="text-lg text-[#443C34]">
-                    {translations.loading[currentLang as keyof typeof translations.loading] || 'Loading...'}
+            <div className="h-screen flex items-center justify-center bg-gradient-to-br from-[#F5EFE7] to-[#E8DCC8]">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-[#8B7355]/20 border-t-[#8B7355] rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-[#443C34] font-medium">{t('common.loading')}</p>
                 </div>
             </div>
         );
     }
 
-    if (!data) {
-        return (
-            <div className="h-screen flex items-center justify-center">
-                <div className="text-lg text-[#443C34]">
-                    {translations.notFound[currentLang as keyof typeof translations.notFound] || 'Content not found.'}
-                </div>
-            </div>
-        );
-    }
+    if (!displayData) return null;
 
     return (
-        <div className="bg-white min-h-screen pt-16">
-            <header className="bg-[#FAF7F2] py-24 px-6 border-b border-gray-100 text-center">
-                <div className="max-w-4xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-bold text-[#443C34] mb-6 tracking-tight">
-                        {data.title}
+        <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE7] min-h-screen">
+            {/* HEADER AVEC IMAGE DE FOND */}
+            <header className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+                {/* Image de fond */}
+                <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                        backgroundImage: 'url(https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070)',
+                    }}
+                />
+
+                {/* Overlay gradient mocha/vanilla */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#443C34]/85 via-[#6B5744]/80 to-[#8B7355]/75" />
+
+                {/* Texture subtile */}
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+
+                {/* Contenu du header */}
+                <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full border border-[#D4A373]/30 shadow-lg mb-8">
+                        <Scale className="w-5 h-5 text-[#8B7355]" />
+                        <span className="text-sm font-semibold text-[#443C34] uppercase tracking-wider">
+                            {t('common.termsAndConditions')}
+                        </span>
+                    </div>
+
+                    {/* Titre principal */}
+                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl leading-tight">
+                        {displayData.title}
                     </h1>
-                    <p className="text-[#443C34]/60 text-lg mb-10 leading-relaxed">
-                        {data.heroSubtitle}
+
+                    {/* Ligne décorative */}
+                    <div className="h-1 w-32 bg-gradient-to-r from-transparent via-[#D4A373] to-transparent mx-auto mb-6" />
+
+                    {/* Sous-titre */}
+                    <p className="text-xl md:text-2xl text-[#F5EFE7] max-w-3xl mx-auto leading-relaxed font-light mb-8">
+                        {displayData.subtitle}
                     </p>
-                    <div className="flex flex-wrap justify-center gap-6 text-[#443C34]/40 text-xs font-bold uppercase tracking-widest">
-                        <div className="flex items-center gap-2">
-                            <Clock size={14}/> 
-                            {translations.updated[currentLang as keyof typeof translations.updated]}: {data.lastUpdated}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Scale size={14}/> 
-                            {translations.jurisdiction[currentLang as keyof typeof translations.jurisdiction]}: {data.jurisdiction}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck size={14}/> 
-                            {translations.version[currentLang as keyof typeof translations.version]}: {data.version}
-                        </div>
-                        {data.contactEmail && (
-                            <div className="flex items-center gap-2">
-                                <Globe size={14}/> 
-                                Email: {data.contactEmail}
-                            </div>
-                        )}
+
+                    {/* Date de mise à jour */}
+                    <div className="inline-flex items-center gap-2 bg-[#443C34]/50 backdrop-blur-md text-[#F5EFE7] px-5 py-2.5 rounded-full border border-white/20">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                            {t('common.updated')}: {displayData.lastUpdated}
+                        </span>
                     </div>
-                    <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-                        <Globe size={16} />
-                        {currentLang.toUpperCase()} - {translations.jurisdiction[currentLang as keyof typeof translations.jurisdiction]}: {data.jurisdiction}
-                    </div>
+                </div>
+
+                {/* Effet de vague en bas */}
+                <div className="absolute bottom-0 left-0 right-0">
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-16 md:h-24">
+                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#FAF7F2" />
+                    </svg>
                 </div>
             </header>
 
-            <main className="max-w-4xl mx-auto px-6 py-20">
-                {data.sections && data.sections.length > 0 ? (
-                    <div className="space-y-16">
-                        {data.sections.map((section: any) => (
-                            <div key={section.id} className="group">
-                                {section.subtitle && (
-                                    <h2 className="text-3xl font-extrabold text-[#443C34] mb-6 flex items-center gap-4">
-                                        <span className="h-px w-12 bg-[#443C34]/20 inline-block"></span>
-                                        {section.subtitle}
-                                    </h2>
-                                )}
-                                <div className="md:pl-16">
-                                    <div 
-                                        className="prose prose-stone max-w-none 
-                                        prose-p:text-[#443C34]/80 prose-p:leading-relaxed prose-p:text-lg
-                                        prose-li:text-[#443C34]/80 prose-li:my-2
-                                        prose-strong:text-[#443C34] prose-strong:font-bold"
-                                        dangerouslySetInnerHTML={{ __html: section.content }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20">
-                        <p className="text-[#443C34]/60 text-lg">
-                            {translations.notFound[currentLang as keyof typeof translations.notFound]}
-                        </p>
-                        <p className="text-[#443C34]/40 mt-4">
-                            {translations.notAvailable[currentLang as keyof typeof translations.notAvailable]}
-                        </p>
+            {/* Indicateur de traduction */}
+            {isTranslating && (
+                <div className="bg-[#8B7355]/10 border-b border-[#D4A373]/20 py-3 sticky top-0 z-20 backdrop-blur-md flex justify-center items-center gap-2 text-sm text-[#443C34]">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="font-medium">{t('common.translating')}</span>
+                </div>
+            )}
 
+            {/* CONTENU PRINCIPAL */}
+            <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-[320px_1fr] gap-12">
+                {/* SIDEBAR - Table des matières */}
+                <aside className="hidden lg:block">
+                    <div className="sticky top-24">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-[#D4A373]/20 shadow-xl">
+                            <h3 className="font-bold text-[#443C34] text-lg mb-6 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-[#8B7355]" />
+                                {t('common.tableOfContents')}
+                            </h3>
+                            <nav className="space-y-1">
+                                {displayData.sections?.map((section, idx) => (
+                                    <a
+                                        key={section.id}
+                                        href={`#section-${section.id}`}
+                                        className={`block py-3 px-4 rounded-xl text-sm transition-all duration-200 ${activeSection === section.id
+                                                ? 'bg-gradient-to-r from-[#8B7355] to-[#A68966] text-white shadow-md transform scale-105'
+                                                : 'text-[#443C34]/70 hover:bg-[#F5EFE7] hover:text-[#443C34]'
+                                            }`}
+                                    >
+                                        <span className="font-semibold">{idx + 1}.</span> {section.subtitle}
+                                    </a>
+                                ))}
+                            </nav>
+                        </div>
                     </div>
-                )}
-            </main>
+                </aside>
+
+                {/* SECTIONS DE CONTENU */}
+                <main className="space-y-12">
+                    {displayData.sections?.map((section, idx) => (
+                        <section
+                            key={section.id}
+                            id={`section-${section.id}`}
+                            data-section-id={section.id}
+                            className="scroll-mt-32"
+                        >
+                            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-[#D4A373]/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                {/* Numéro de section stylisé */}
+                                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-[#8B7355] to-[#A68966] text-white rounded-full font-bold text-lg mb-6 shadow-md">
+                                    {idx + 1}
+                                </div>
+
+                                {/* Titre de section */}
+                                <h2 className="text-3xl md:text-4xl font-bold text-[#443C34] mb-6 leading-tight">
+                                    {section.subtitle}
+                                </h2>
+
+                                {/* Ligne décorative */}
+                                <div className="h-px w-20 bg-gradient-to-r from-[#D4A373] to-transparent mb-8" />
+
+                                {/* Contenu */}
+                                <div
+                                    className="prose prose-lg prose-stone max-w-none text-[#443C34]/80 leading-relaxed"
+                                    dangerouslySetInnerHTML={{ __html: section.content }}
+                                    style={{
+                                        '--tw-prose-headings': '#443C34',
+                                        '--tw-prose-links': '#8B7355',
+                                        '--tw-prose-bold': '#443C34',
+                                    } as any}
+                                />
+                            </div>
+                        </section>
+                    ))}
+                </main>
+            </div>
+
+            {/* Footer décoratif */}
+            <div className="h-20 bg-gradient-to-b from-transparent to-[#443C34]/5" />
         </div>
     );
 }

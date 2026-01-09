@@ -452,7 +452,7 @@ export function QuoteRequest({ config, content = {} }: QuoteRequestProps) {
                 whileHover={{ scale: submitted || isSubmitting ? 1 : 1.02 }}
                 whileTap={{ scale: submitted || isSubmitting ? 1 : 0.98 }}
                 disabled={submitted || isSubmitting}
-                className="w-full bg-[#443C34] text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-[#332C26] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-lg hover:shadow-2xl"
+                className="cursor-pointer w-full bg-[#443C34] text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-[#332C26] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-8 shadow-lg hover:shadow-2xl"
               >
                 {submitted ? (
                   <>
