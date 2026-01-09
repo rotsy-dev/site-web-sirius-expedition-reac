@@ -262,6 +262,19 @@
     "badge": "Découvrir Madagascar",
     "title": "Madagascar en images",
     "subtitle": "Explorez la beauté et la diversité de l'île Rouge"
+  },
+  "cookies": {
+    "title": "Gestion des Cookies",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez personnaliser vos préférences.",
+    "learnMore": "En savoir plus",
+    "settings": "Paramètres",
+    "acceptNecessary": "Accepter uniquement les essentiels",
+    "acceptAll": "Tout accepter",
+    "necessary": "Cookies nécessaires",
+    "necessaryDesc": "Ces cookies sont essentiels au fonctionnement du site.",
+    "analytics": "Cookies analytiques",
+    "analyticsDesc": "Ces cookies nous aident à comprendre comment les visiteurs utilisent le site.",
+    "marketing": "Cookies marketing",
+    "marketingDesc": "Ces cookies sont utilisés pour vous proposer des publicités personnalisées."
   }
-
 }

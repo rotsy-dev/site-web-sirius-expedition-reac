@@ -361,6 +361,15 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
                             </motion.div>
 
+                            <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
+                                <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                                    <path
+                                        d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
+                                        className="fill-[#F0E7D5] dark:fill-[#1a1410]"
+                                    ></path>
+                                </svg>
+                            </div>
+
                             <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -569,36 +578,152 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                     /* DÉTAIL DE L'ARTICLE */
                     <motion.div
                         key="detail"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="max-w-[1400px] mx-auto px-6 pt-32 pb-20"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="min-h-screen"
                     >
-                        <button onClick={handleBack} className="cursor-pointer group mb-12 flex items-center gap-3 px-6 py-3 rounded-full border-2 border-[#443C34] text-[#443C34] dark:text-white hover:bg-[#443C34] hover:text-white dark:hover:bg-[#D4A574] dark:hover:border-[#D4A574] transition-all shadow-md">
-                            <ArrowLeft size={18} />
-                            <span className="font-bold text-sm uppercase">{t('common.back')}</span>
-                        </button>
+                        {/* Hero Section avec image en background */}
+                        <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
+                            <motion.div
+                                initial={{ scale: 1.1 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 1.2, ease: "easeOut" }}
+                                className="absolute inset-0 overflow-hidden"
+                            >
+                                {selectedPost.image && (
+                                    <>
+                                        <img
+                                            src={selectedPost.image}
+                                            alt={selectedPost.title}
+                                            className="absolute inset-0 w-full h-full object-cover"
+                                            loading="eager"
+                                            fetchPriority="high"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/80" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/60" />
+                                    </>
+                                )}
+                            </motion.div>
 
-                        <div className="max-w-4xl mx-auto px-4 md:px-6">
-                            <h1 className="text-3xl md:text-4xl lg:text-4xl font-black text-[#443C34] dark:text-white mb-8 text-center">
-                                {(translatedPosts?.find((p: any) => p.id === selectedPost.id)?.title) || selectedPost.title}
-                            </h1>
+                            {/* Contenu du hero */}
+                            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+                                <motion.button
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={handleBack}
+                                    className="cursor-pointer group mb-8 inline-flex items-center gap-3 px-6 py-3 rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all shadow-lg"
+                                >
+                                    <ArrowLeft size={18} />
+                                    <span className="font-bold text-sm uppercase">{t('common.back')}</span>
+                                </motion.button>
 
-                            <img
-                                src={selectedPost.image}
-                                className="w-full h-64 md:h-96 lg:h-[500px] object-cover rounded-3xl md:rounded-[48px] mb-12 shadow-2xl border-4 border-[#D4A574]"
-                                alt={selectedPost.title}
-                            />
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-6"
+                                >
+                                    {selectedPost.category && (
+                                        <span className="inline-block px-5 py-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white rounded-full font-bold text-sm shadow-xl mb-4">
+                                            {selectedPost.category}
+                                        </span>
+                                    )}
+                                </motion.div>
 
+                                <motion.h1
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="text-4xl md:text-5xl lg:text-6xl xl:text-5xl font-black text-white mb-6 leading-tight drop-shadow-2xl px-4"
+                                >
+                                    {(translatedPosts?.find((p: any) => p.id === selectedPost.id)?.title) || selectedPost.title}
+                                </motion.h1>
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className="flex flex-wrap items-center justify-center gap-4 text-white/90 text-sm md:text-base"
+                                >
+                                    <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
+                                        <Calendar size={18} />
+                                        {selectedPost.date || new Date().toLocaleDateString()}
+                                    </span>
+                                    <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
+                                        <Clock size={18} />
+                                        {selectedPost.readTime || '5 min'} de lecture
+                                    </span>
+                                    {selectedPost.views && (
+                                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
+                                            <Eye size={18} />
+                                            {selectedPost.views} vues
+                                        </span>
+                                    )}
+                                </motion.div>
+                            </div>
+                        </section>
+
+                        {/* Contenu de l'article */}
+                        <div className="max-w-[1400px] mx-auto px-6 -mt-20 relative z-10 pb-20">
+                            <div className="max-w-4xl mx-auto px-4 md:px-6">
+                                {/* Auteur */}
+                                <div className="flex items-center gap-4 mb-8 pb-6 border-b-2 border-[#F0E7D5] dark:border-[#332C26] bg-white dark:bg-[#443C34] p-6 rounded-2xl shadow-xl">
+                                    {selectedPost.authorAvatar ? (
+                                        <img
+                                            src={selectedPost.authorAvatar}
+                                            alt={selectedPost.author}
+                                            className="w-16 h-16 rounded-full object-cover border-3 border-[#D4A574] shadow-lg"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#8B7355] to-[#D4A574] flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                                            {selectedPost.author?.charAt(0) || 'A'}
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <p className="font-black text-[#443C34] dark:text-white text-xl">
+                                            {selectedPost.author || 'Auteur'}
+                                        </p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            {t('blog.author') || 'Auteur de l\'article'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            {/* Excerpt si disponible */}
+                            {selectedPost.excerpt && (
+                                <div className="mb-8 p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-2xl border-l-4 border-[#D4A574]">
+                                    <p className="text-lg md:text-xl text-[#443C34] dark:text-white font-semibold italic leading-relaxed">
+                                        {selectedPost.excerpt}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Contenu */}
                             <div className="bg-white dark:bg-[#443C34] p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[32px] shadow-xl mb-8">
                                 {((translatedPosts?.find((p: any) => p.id === selectedPost.id)?.content) || selectedPost.content || '').split('\n\n').map((paragraph: string, index: number) => (
                                     <p
                                         key={index}
-                                        className={`text-base md:text-lg text-gray-700 dark:text-gray-200 mb-6 leading-relaxed text-justify ${index === 0 ? 'first-letter:text-6xl md:first-letter:text-7xl first-letter:font-bold first-letter:text-[#F0E7D5] first-letter:mr-3 first-letter:float-left first-letter:leading-none' : ''}`}
+                                        className={`text-base md:text-lg text-gray-700 dark:text-gray-200 mb-6 leading-relaxed text-justify ${index === 0 ? 'first-letter:text-6xl md:first-letter:text-7xl first-letter:font-bold first-letter:text-[#D4A574] first-letter:mr-3 first-letter:float-left first-letter:leading-none' : ''}`}
                                     >
                                         {paragraph}
                                     </p>
                                 ))}
                             </div>
+
+                            {/* Tags si disponibles */}
+                            {selectedPost.tags && selectedPost.tags.length > 0 && (
+                                <div className="mb-8 flex flex-wrap gap-2">
+                                    <span className="text-sm font-bold text-[#443C34] dark:text-white mr-2">Tags :</span>
+                                    {selectedPost.tags.map((tag: string, idx: number) => (
+                                        <span
+                                            key={idx}
+                                            className="px-4 py-1.5 bg-[#F0E7D5] dark:bg-[#332C26] text-[#8B7355] dark:text-[#D4A574] rounded-full text-xs font-semibold border border-[#D4A574]/30"
+                                        >
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
 
                             {/* NOUVEAU : Partage sur les réseaux sociaux */}
                             <SocialShare post={selectedPost} />
@@ -609,6 +734,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 currentPost={selectedPost}
                                 onNavigate={openPost}
                             />
+                            </div>
                         </div>
                     </motion.div>
                 ) : (

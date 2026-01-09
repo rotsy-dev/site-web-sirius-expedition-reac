@@ -20,6 +20,8 @@ import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
 import { QuoteRequest } from './components/QuoteRequest';
 import { MadagascarGallery } from './components/MadagascarGallery';
+import { CookieConsent } from '../components/common/CookieConsent';
+import { VisitorCounter } from '../components/common/VisitorCounter';
 
 // Composants Admin
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -32,6 +34,7 @@ import { SITE_SECTIONS } from '../constants';
 // ============================================
 const TermsPage = lazy(() => import('./pages/legal/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'));
+const CookiesPage = lazy(() => import('./pages/legal/CookiesPage'));
 
 // ============================================
 // LOADER POUR PAGES LAZY
@@ -318,6 +321,7 @@ const LanguageRoutes = () => {
             {/* ========== PAGES LÉGALES (LAZY) ========== */}
             <Route path="terms" element={<TermsPage currentLang={lang || 'en'} />} />
             <Route path="privacy" element={<PrivacyPage currentLang={lang || 'en'} />} />
+            <Route path="cookies" element={<CookiesPage currentLang={lang || 'en'} />} />
           </Routes>
         </Suspense>
       </main>
@@ -590,6 +594,8 @@ function App() {
           ) : null}
         </AnimatePresence>
       </div>
+      <CookieConsent />
+      <VisitorCounter />
     </ToastProvider>
   );
 }

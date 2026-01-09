@@ -41,6 +41,14 @@
   --sidebar-ring: #A1887F;
   --mocha: #4B3935;
   --vanilla: #F0E7D5;
+  --mocha-dark: #3D2F2B;
+  --mocha-light: #6B5B52;
+  --vanilla-light: #F8F3E8;
+  --vanilla-dark: #E8DCC8;
+  --accent-travel: #2FB5A3;
+  --accent-travel-hover: #26A393;
+  --gold: #D4A574;
+  --gold-hover: #C4965F;
 }
 
 .dark {
@@ -121,6 +129,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-mocha: var(--mocha);
   --color-vanilla: var(--vanilla);
+  --color-mocha-dark: var(--mocha-dark);
+  --color-mocha-light: var(--mocha-light);
+  --color-vanilla-light: var(--vanilla-light);
+  --color-vanilla-dark: var(--vanilla-dark);
+  --color-accent-travel: var(--accent-travel);
+  --color-accent-travel-hover: var(--accent-travel-hover);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
 }
 
 @layer base {

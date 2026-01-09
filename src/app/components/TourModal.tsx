@@ -92,7 +92,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2rem] shadow-2xl"
+        className="relative bg-gradient-to-br from-white via-[#FAF7F2] to-white w-full max-w-7xl max-h-[98vh] overflow-y-auto rounded-[2.5rem] shadow-2xl border-4 border-[#D4A574]/20"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#D4A574 #F0E7D5'
@@ -101,108 +101,170 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="cursor-pointer absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors border border-gray-100 shadow-sm"
+          className="cursor-pointer absolute top-6 right-6 z-10 p-3 bg-white/90 backdrop-blur-xl rounded-full hover:bg-white transition-all border-2 border-[#D4A574]/30 shadow-xl hover:shadow-2xl hover:scale-110"
         >
-          <X className="w-5 h-5 text-gray-800" />
+          <X className="w-5 h-5 text-[#4B3935]" />
         </button>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-0">
-          {/* Mobile Gallery (Top) - Visible ONLY on mobile */}
-          <div className="lg:hidden h-64 w-full relative">
+        <div className="flex flex-col">
+          {/* Image en haut - Toutes les tailles */}
+          <div className="w-full h-80 md:h-96 lg:h-[500px] relative overflow-hidden rounded-t-[2.5rem]">
             <img 
               src={tour.image || 'https://via.placeholder.com/800x600?text=No+Image'} 
               alt={tour.title} 
               className="w-full h-full object-cover" 
             />
-                {tour.isBestSeller && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-xs shadow-xl flex items-center gap-2">
-                    🏆 {t('tourSpecialties.bestSeller')}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            {tour.isBestSeller && (
+              <div className="absolute top-6 right-6 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-2xl flex items-center gap-2 z-10">
+                🏆 {t('tourSpecialties.bestSeller')}
+              </div>
+            )}
+            {/* Titre sur l'image */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="p-3 bg-gradient-to-br from-[#D4A574] to-[#C4965F] rounded-2xl shadow-xl">
+                  <span className="text-4xl">{tour.icon}</span>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2 leading-tight drop-shadow-2xl">
+                    {tour.title}
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-xl text-white px-4 py-1.5 rounded-full text-sm font-bold border border-white/30">
+                      <span className="w-2 h-2 rounded-full bg-[#D4A574]"></span>
+                      {tour.difficulty || 'Modéré'}
+                    </span>
+                    {tour.rating && (
+                      <div className="flex items-center gap-2 bg-white/20 backdrop-blur-xl px-4 py-1.5 rounded-full">
+                        <span className="text-yellow-300">⭐</span>
+                        <span className="text-white font-bold">{tour.rating}/5</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Content Column */}
-          <div className="p-6 md:p-10 lg:order-2 h-full overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">{tour.icon}</span>
-                <h2 className="text-3xl md:text-3xl lg:text-4xl font-bold text-[#332C26]">{tour.title}</h2>
-              </div>
-              <span className="hidden sm:inline-block bg-[#F7EBD5] text-[#443C34] px-4 py-1.5 rounded-full text-sm font-bold ml-4 whitespace-nowrap">
-                {tour.difficulty || 'Modéré'}
-              </span>
+          {/* Content Column - Centré */}
+          <div className="max-w-5xl mx-auto w-full p-6 md:p-10 lg:p-12">
+            {/* Description */}
+            <div className="mb-10">
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed pl-6 border-l-4 border-[#D4A574] bg-[#F0E7D5]/30 p-6 rounded-r-xl">
+                {tour.description}
+              </p>
             </div>
-            <p className="text-gray-500 mb-8">{tour.description}</p>
 
-            {/* Info Bar */}
-            <div className="grid grid-cols-2 gap-4 bg-[#F0E7D5]/30 p-5 rounded-2xl mb-10">
+            {/* Info Bar amélioré */}
+            <div className="grid grid-cols-2 gap-4 bg-gradient-to-br from-[#F0E7D5]/40 to-[#E5D8C0]/30 p-6 rounded-2xl mb-10 border border-[#D4A574]/20">
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <Clock size={16} /> 
+                <div className="flex items-center gap-2 text-[#8B7355] mb-2">
+                  <Clock size={18} className="text-[#D4A574]" /> 
                   <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.duration')}</span>
                 </div>
-                <span className="font-bold text-[#332C26] text-sm">{tour.duration}</span>
+                <span className="font-bold text-[#332C26] text-base">{tour.duration}</span>
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <MapPin size={16} /> 
+                <div className="flex items-center gap-2 text-[#8B7355] mb-2">
+                  <MapPin size={18} className="text-[#D4A574]" /> 
                   <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.location')}</span>
                 </div>
-                <span className="font-bold text-[#332C26] text-sm">{tour.location}</span>
+                <span className="font-bold text-[#332C26] text-base">{tour.location}</span>
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <Users size={16} /> 
+                <div className="flex items-center gap-2 text-[#8B7355] mb-2">
+                  <Users size={18} className="text-[#D4A574]" /> 
                   <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.group')}</span>
                 </div>
-                <span className="font-bold text-[#332C26] text-sm">{tour.groupSize || '4-8 pers.'}</span>
+                <span className="font-bold text-[#332C26] text-base">{tour.groupSize || '4-8 pers.'}</span>
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <Car size={16} /> 
+                <div className="flex items-center gap-2 text-[#8B7355] mb-2">
+                  <Car size={18} className="text-[#D4A574]" /> 
                   <span className="text-[10px] uppercase font-bold tracking-wider">{t('tourSpecialties.modal.transport')}</span>
                 </div>
-                <span className="font-bold text-[#332C26] text-sm">{tour.transport || '4x4'}</span>
+                <span className="font-bold text-[#332C26] text-base">{tour.transport || '4x4'}</span>
               </div>
             </div>
 
-            {/* Why Us */}
-            {tour.whyUs && (
+            {/* Dates et Saison */}
+            {(tour.season || (tour as any).startDate || (tour as any).endDate) && (
               <div className="mb-10 bg-gradient-to-br from-[#D4A574]/10 to-[#F0E7D5]/30 p-6 rounded-2xl border border-[#D4A574]/20">
-                <h3 className="text-xl font-bold text-[#332C26] mb-3 flex items-center gap-2">
-                  <TrendingUp size={20} className="text-[#D4A574]" />
-                  {t('tourSpecialties.modal.whyUs')}
+                <h3 className="text-lg font-bold text-[#332C26] mb-4 flex items-center gap-2">
+                  <Calendar className="text-[#D4A574]" size={20} />
+                  Dates & Saison
                 </h3>
-                <p className="text-gray-600 leading-relaxed">{tour.whyUs}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(tour as any).startDate && (tour as any).endDate && (
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">Période</span>
+                      <span className="font-semibold text-[#332C26]">
+                        {(tour as any).startDate} - {(tour as any).endDate}
+                      </span>
+                    </div>
+                  )}
+                  {tour.season && (
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">Meilleure saison</span>
+                      <span className="font-semibold text-[#332C26]">{tour.season}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Highlights */}
+            {/* Why Us amélioré */}
+            {tour.whyUs && (
+              <div className="mb-10 bg-gradient-to-br from-[#D4A574]/15 via-[#F0E7D5]/40 to-[#E5D8C0]/30 p-8 rounded-3xl border-2 border-[#D4A574]/30 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A574]/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <h3 className="text-2xl font-black text-[#332C26] mb-4 flex items-center gap-3 relative z-10">
+                  <div className="p-2 bg-gradient-to-br from-[#D4A574] to-[#C4965F] rounded-xl shadow-lg">
+                    <TrendingUp size={24} className="text-white" />
+                  </div>
+                  {t('tourSpecialties.modal.whyUs')}
+                </h3>
+                <p className="text-gray-700 leading-relaxed text-lg relative z-10">{tour.whyUs}</p>
+              </div>
+            )}
+
+            {/* Highlights amélioré */}
             {tour.highlights && tour.highlights.length > 0 && (
               <div className="mb-10">
-                <h3 className="text-xl font-bold text-[#332C26] mb-6">{t('tourSpecialties.modal.highlights')}</h3>
-                <div className="grid grid-cols-1 gap-3">
+                <h3 className="text-2xl font-black text-[#332C26] mb-6 flex items-center gap-2">
+                  <span className="text-3xl">✨</span>
+                  {t('tourSpecialties.modal.highlights')}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {tour.highlights.map((point, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="mt-1 bg-green-100 p-1 rounded-full">
-                        <Check size={10} className="text-green-600" />
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="flex items-start gap-4 bg-white p-4 rounded-xl border-2 border-[#F0E7D5] hover:border-[#D4A574] hover:shadow-lg transition-all"
+                    >
+                      <div className="mt-0.5 p-2 bg-gradient-to-br from-green-400 to-green-600 rounded-lg shadow-md flex-shrink-0">
+                        <Check size={16} className="text-white" />
                       </div>
-                      <span className="text-gray-600 text-sm md:text-base">{point}</span>
-                    </div>
+                      <span className="text-gray-700 text-base font-medium leading-relaxed">{point}</span>
+                    </motion.div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Itinerary */}
+            {/* Itinerary avec Timeline */}
             {tour.itinerary && tour.itinerary.length > 0 && (
               <div className="mb-10">
                 <div
                   className="flex items-center justify-between mb-6 cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => setIsItineraryOpen(!isItineraryOpen)}
                 >
-                  <h3 className="text-xl font-bold text-[#332C26]">{t('tourSpecialties.modal.itinerary')}</h3>
+                  <h3 className="text-xl font-bold text-[#332C26] flex items-center gap-2">
+                    <Calendar className="text-[#D4A574]" size={22} />
+                    {t('tourSpecialties.modal.itinerary')}
+                  </h3>
                   <motion.div
                     animate={{ rotate: isItineraryOpen ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -218,36 +280,84 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="space-y-4">
-                        {tour.itinerary.map((day, i) => (
-                          <div 
-                            key={i} 
-                            className="border-b border-gray-100 pb-4 last:border-0 hover:bg-[#F0E7D5]/20 p-3 rounded-lg transition-colors cursor-pointer" 
-                            onClick={() => setOpenDay(openDay === i ? null : i)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-bold text-[#332C26]">{day.day}: {day.title}</h4>
-                              {openDay === i ? 
-                                <ChevronUp size={16} className="text-gray-400" /> : 
-                                <ChevronDown size={16} className="text-gray-400" />
-                              }
-                            </div>
-                            <AnimatePresence>
-                              {openDay === i && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden"
-                                >
-                                  <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-                                    {day.description}
-                                  </p>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        ))}
+                      <div className="relative">
+                        {/* Timeline verticale améliorée */}
+                        <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-[#D4A574] via-[#C4965F] to-[#D4A574] rounded-full shadow-lg" />
+                        
+                        <div className="space-y-8 pl-16">
+                          {tour.itinerary.map((day, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, x: -30 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}
+                              className="relative"
+                            >
+                              {/* Point sur la timeline amélioré */}
+                              <div className="absolute -left-[3.25rem] top-2 w-6 h-6 rounded-full bg-gradient-to-br from-[#D4A574] to-[#C4965F] border-4 border-white shadow-xl flex items-center justify-center ring-4 ring-[#F0E7D5]">
+                                {openDay === i && (
+                                  <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="w-3 h-3 rounded-full bg-white"
+                                  />
+                                )}
+                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-black text-[#D4A574] whitespace-nowrap">
+                                  Jour {i + 1}
+                                </span>
+                              </div>
+
+                              {/* Carte du jour améliorée */}
+                              <motion.div 
+                                whileHover={{ scale: 1.02, x: 5 }}
+                                className={`bg-white border-2 rounded-3xl p-6 transition-all cursor-pointer shadow-lg ${
+                                  openDay === i 
+                                    ? 'border-[#D4A574] shadow-2xl bg-gradient-to-br from-[#F0E7D5]/40 via-white to-[#F0E7D5]/20' 
+                                    : 'border-gray-200 hover:border-[#D4A574]/60 hover:shadow-xl'
+                                }`}
+                                onClick={() => setOpenDay(openDay === i ? null : i)}
+                              >
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-4 mb-3">
+                                      <span className="text-base font-black text-white bg-gradient-to-r from-[#D4A574] to-[#C4965F] px-4 py-2 rounded-xl shadow-md">
+                                        {day.day}
+                                      </span>
+                                      <h4 className="font-black text-[#332C26] text-xl">{day.title}</h4>
+                                    </div>
+                                    <AnimatePresence>
+                                      {openDay === i && (
+                                        <motion.div
+                                          initial={{ height: 0, opacity: 0, y: -10 }}
+                                          animate={{ height: "auto", opacity: 1, y: 0 }}
+                                          exit={{ height: 0, opacity: 0, y: -10 }}
+                                          transition={{ duration: 0.3 }}
+                                          className="overflow-hidden"
+                                        >
+                                          <div className="mt-4 p-4 bg-gradient-to-r from-[#F0E7D5]/50 to-transparent rounded-xl border-l-4 border-[#D4A574]">
+                                            <p className="text-gray-700 text-base leading-relaxed">
+                                              {day.description}
+                                            </p>
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
+                                  <motion.div
+                                    animate={{ rotate: openDay === i ? 180 : 0, scale: openDay === i ? 1.1 : 1 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex-shrink-0 p-2 rounded-full bg-[#F0E7D5]"
+                                  >
+                                    {openDay === i ? 
+                                      <ChevronUp size={22} className="text-[#D4A574]" /> : 
+                                      <ChevronDown size={22} className="text-gray-500" />
+                                    }
+                                  </motion.div>
+                                </div>
+                              </motion.div>
+                            </motion.div>
+                          ))}
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -287,60 +397,33 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
               </div>
             )}
           </div>
-
-          {/* Desktop Gallery */}
-          <div className="hidden lg:block lg:order-1 p-6 h-full sticky top-0 overflow-y-auto md:pr-2" style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#D4A574 #F0E7D5'
-          }}>
-            <div className="flex flex-col gap-4">
-              <div className="rounded-2xl overflow-hidden shadow-sm h-[300px] flex-shrink-0 relative">
-                <img
-                  src={tour.image || 'https://via.placeholder.com/800x600?text=No+Image'}
-                  alt={tour.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-                {tour.isBestSeller && (
-                  <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-xl flex items-center gap-2">
-                    🏆 {t('tourSpecialties.bestSeller')}
-                  </div>
-                )}
-              </div>
-              
-              {/* Rating & Reviews */}
-              {tour.rating && (
-                <div className="bg-[#F0E7D5]/30 p-4 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl font-bold text-[#332C26]">{tour.rating}</span>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-yellow-400">★</span>
-                      ))}
-                    </div>
-                  </div>
-                  {tour.reviews > 0 && (
-                    <p className="text-sm text-gray-600">{tour.reviews} {t('tourSpecialties.modal.reviews')}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Footer sticky avec prix */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 md:px-10 flex items-center justify-between rounded-b-[2rem] z-20">
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{t('tourSpecialties.modal.from')}</p>
-            <p className="text-3xl font-black text-[#332C26]">
-              {tour.price} 
-              <span className="text-sm font-normal text-gray-500"> {t('tourSpecialties.modal.perPerson')}</span>
-            </p>
+        {/* Footer sticky avec prix amélioré */}
+        <div className="sticky bottom-0 bg-gradient-to-r from-white via-[#FAF7F2] to-white border-t-4 border-[#D4A574] p-6 md:px-10 flex items-center justify-between rounded-b-[2.5rem] z-20 shadow-2xl backdrop-blur-xl">
+          <div className="flex items-center gap-6">
+            <div>
+              <p className="text-xs text-[#8B7355] uppercase tracking-wider mb-1 font-bold">{t('tourSpecialties.modal.from')}</p>
+              <p className="text-4xl font-black text-[#332C26] bg-gradient-to-r from-[#4B3935] to-[#332C26] bg-clip-text text-transparent">
+                {tour.price} 
+                <span className="text-lg font-normal text-gray-600"> {t('tourSpecialties.modal.perPerson')}</span>
+              </p>
+            </div>
+            {tour.rating && (
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#F0E7D5]/50 rounded-xl border border-[#D4A574]/30">
+                <span className="text-2xl">⭐</span>
+                <div>
+                  <p className="text-sm font-bold text-[#332C26]">{tour.rating}/5</p>
+                  <p className="text-xs text-gray-500">{tour.reviews} avis</p>
+                </div>
+              </div>
+            )}
           </div>
           <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleAskQuote}
-            className="cursor-pointer bg-gradient-to-r from-[#8B7355] to-[#6B5744] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-sm md:text-base hover:shadow-xl transition-all shadow-lg"
+            className="cursor-pointer bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white px-8 py-4 md:px-10 md:py-5 rounded-2xl font-black text-base md:text-lg hover:shadow-2xl transition-all shadow-xl border-2 border-white/20"
           >
             {t('tourSpecialties.modal.askQuote')}
           </motion.button>
