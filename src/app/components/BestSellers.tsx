@@ -152,7 +152,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             className={`
               cursor-pointer mt-auto py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300
               ${isHovered
-                ? "bg-[#2fb5a3] text-white shadow-lg"
+                ? "bg-[#5d4c49] text-white shadow-lg"
                 : "bg-[#4B3935] text-[#F0E7D5]"
               }
             `}

@@ -595,7 +595,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                         <img
                                             src={selectedPost.image}
                                             alt={selectedPost.title}
-                                            className="absolute inset-0 w-full h-full object-cover"
+                                            className="absolute inset-0 w-full h-full object-cover blur-sm"
                                             loading="eager"
                                             fetchPriority="high"
                                         />
@@ -655,7 +655,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                         <Clock size={14} className="sm:w-[18px] sm:h-[18px]" />
                                         <span className="whitespace-nowrap">{selectedPost.readTime || '5 min'} de lecture</span>
                                     </span>
-                                    {selectedPost.views && (
+                                    {selectedPost?.views != null && selectedPost.views > 0 && (
                                         <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
                                             <Eye size={14} className="sm:w-[18px] sm:h-[18px]" />
                                             <span className="whitespace-nowrap">{selectedPost.views} vues</span>
