@@ -133,19 +133,19 @@ export function VisitorCounter() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-4 left-4 z-40 bg-white/90 dark:bg-[#1a1410]/90 backdrop-blur-xl border-2 border-[#4B3935]/20 dark:border-[#F0E7D5]/20 rounded-2xl p-4 shadow-2xl"
+      className="inline-flex bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-lg"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {/* Total visiteurs */}
         <div className="flex items-center gap-2">
           <div className="p-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] rounded-xl">
-            <Users className="w-4 h-4 text-[#4B3935]" />
+            <Users className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-xs text-[#4B3935]/60 dark:text-[#F0E7D5]/60 font-medium">
+            <p className="text-xs text-white/70 font-medium">
               Total
             </p>
-            <p className="text-lg font-black text-[#4B3935] dark:text-[#F0E7D5]">
+            <p className="text-base sm:text-lg font-black text-white">
               {totalVisitors.toLocaleString()}
             </p>
           </div>
@@ -153,14 +153,14 @@ export function VisitorCounter() {
 
         {/* Visiteurs aujourd'hui */}
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-r from-[#4B3935] to-[#3D2F2B] rounded-xl">
-            <Eye className="w-4 h-4 text-[#F0E7D5]" />
+          <div className="p-2 bg-white/20 rounded-xl">
+            <Eye className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-xs text-[#4B3935]/60 dark:text-[#F0E7D5]/60 font-medium">
+            <p className="text-xs text-white/70 font-medium">
               Aujourd'hui
             </p>
-            <p className="text-lg font-black text-[#4B3935] dark:text-[#F0E7D5]">
+            <p className="text-base sm:text-lg font-black text-white">
               {todayVisitors.toLocaleString()}
             </p>
           </div>

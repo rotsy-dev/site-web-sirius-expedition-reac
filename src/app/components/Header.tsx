@@ -69,11 +69,38 @@ export function Header({ siteConfig }: HeaderProps) {
               className="relative h-16 w-auto lg:h-20 transition-all duration-300"
             >
               {siteConfig.logo ? (
-                <img 
-                  src={siteConfig.logo} 
-                  alt={siteConfig.siteName || "Logo"} 
-                  className="h-full w-auto object-contain transition-all duration-500 group-hover:brightness-110 drop-shadow-lg" 
-                />
+                <div className="relative h-full w-auto flex items-center">
+                  <div 
+                    className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center"
+                    style={{
+                      backgroundColor: 'transparent',
+                      backgroundImage: 'none'
+                    }}
+                  >
+                    <img 
+                      src={siteConfig.logo} 
+                      alt={siteConfig.siteName || "Logo"} 
+                      className="h-full w-auto object-contain transition-all duration-500 group-hover:brightness-110"
+                      style={{
+                        imageRendering: 'auto',
+                        objectFit: 'contain',
+                        mixBlendMode: scrolled ? 'normal' : 'multiply',
+                        filter: scrolled 
+                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1)' 
+                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3)) brightness(1.1)',
+                        backgroundColor: 'transparent',
+                        WebkitFilter: scrolled 
+                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1)' 
+                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3)) brightness(1.1)',
+                        WebkitMixBlendMode: scrolled ? 'normal' : 'multiply'
+                      }}
+                      onError={(e) => {
+                        // Si l'image ne charge pas, on cache l'image et on affiche le fallback
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="flex items-center gap-3 h-full">
                   <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-xl bg-gradient-to-br from-[#D4A574] to-[#C4965F] flex items-center justify-center text-white font-bold text-lg lg:text-xl shadow-xl">
