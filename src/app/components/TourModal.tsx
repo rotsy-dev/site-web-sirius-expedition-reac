@@ -108,45 +108,45 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         </button>
 
         <div className="flex flex-col">
-          {/* Image en haut - Toutes les tailles */}
-          <div className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] relative overflow-hidden rounded-t-2xl sm:rounded-t-[2.5rem]">
-            <img
-              src={tour.image || 'https://via.placeholder.com/800x600?text=No+Image'}
-              alt={tour.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            {tour.isBestSeller && (
-              <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm shadow-2xl flex items-center gap-1.5 sm:gap-2 z-10">
-                🏆 <span className="hidden sm:inline">{t('tourSpecialties.bestSeller')}</span>
+         {/* Image en haut - Toutes les tailles */}
+        <div className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] relative overflow-hidden rounded-t-2xl sm:rounded-t-[2.5rem]">
+          <img
+            src={tour.image || 'https://via.placeholder.com/800x600?text=No+Image'}
+            alt={tour.title}
+            className="w-full h-full object-cover blur-sm scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+          {tour.isBestSeller && (
+            <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm shadow-2xl flex items-center gap-1.5 sm:gap-2 z-10">
+              🏆 <span className="hidden sm:inline">{t('tourSpecialties.bestSeller')}</span>
+            </div>
+          )}
+          {/* Titre sur l'image */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-10">
+            <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
+              <div className="p-2 sm:p-3 bg-gradient-to-br from-[#D4A574] to-[#C4965F] rounded-xl sm:rounded-2xl shadow-xl flex-shrink-0">
+                <span className="text-2xl sm:text-3xl md:text-4xl">{tour.icon}</span>
               </div>
-            )}
-            {/* Titre sur l'image */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-10">
-              <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
-                <div className="p-2 sm:p-3 bg-gradient-to-br from-[#D4A574] to-[#C4965F] rounded-xl sm:rounded-2xl shadow-xl flex-shrink-0">
-                  <span className="text-2xl sm:text-3xl md:text-4xl">{tour.icon}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white mb-1 sm:mb-2 leading-tight drop-shadow-2xl">
-                    {tour.title}
-                  </h2>
-                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold border border-white/30">
-                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D4A574]"></span>
-                      <span className="whitespace-nowrap">{tour.difficulty || 'Modéré'}</span>
-                    </span>
-                    {tour.rating && (
-                      <div className="flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl px-3 sm:px-4 py-1 sm:py-1.5 rounded-full">
-                        <span className="text-yellow-300 text-sm sm:text-base">⭐</span>
-                        <span className="text-white font-bold text-xs sm:text-sm">{tour.rating}/5</span>
-                      </div>
-                    )}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-black text-white mb-1 sm:mb-2 leading-tight drop-shadow-2xl">
+                  {tour.title}
+                </h2>
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold border border-white/30">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D4A574]"></span>
+                    <span className="whitespace-nowrap">{tour.difficulty || 'Modéré'}</span>
+                  </span>
+                  {tour.rating && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl px-3 sm:px-4 py-1 sm:py-1.5 rounded-full">
+                      <span className="text-yellow-300 text-sm sm:text-base">⭐</span>
+                      <span className="text-white font-bold text-xs sm:text-sm">{tour.rating}/5</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
           {/* Content Column - Centré */}
           <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 md:p-10 lg:p-12">
