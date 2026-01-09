@@ -606,7 +606,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                             </motion.div>
 
                             {/* Contenu du hero */}
-                            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+                            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-20 md:pt-28">
                                 <motion.button
                                     initial={{ opacity: 0, y: -20 }}
                                     animate={{ opacity: 1, y: 0 }}
