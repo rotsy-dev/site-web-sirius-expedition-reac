@@ -58,11 +58,11 @@ const SocialShare = ({ post }: any) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap items-center gap-3 p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-2xl shadow-lg border-2 border-[#D4A574]/20"
+            className="flex flex-wrap items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-xl sm:rounded-2xl shadow-lg border-2 border-[#D4A574]/20"
         >
             <div className="flex items-center gap-2 text-[#443C34] dark:text-white font-bold">
-                <Share2 size={20} />
-                <span className="text-sm">Partager :</span>
+                <Share2 size={18} className="sm:w-5 sm:h-5" />
+                <span className="text-xs sm:text-sm">Partager :</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -70,41 +70,41 @@ const SocialShare = ({ post }: any) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleShare('facebook')}
-                    className="cursor-pointer w-10 h-10 rounded-full bg-[#1877F2] hover:bg-[#0d5dbf] text-white flex items-center justify-center shadow-md transition-all"
+                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1877F2] hover:bg-[#0d5dbf] text-white flex items-center justify-center shadow-md transition-all"
                     aria-label="Partager sur Facebook"
                 >
-                    <Facebook size={18} fill="white" />
+                    <Facebook size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
                 </motion.button>
 
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleShare('twitter')}
-                    className="cursor-pointer w-10 h-10 rounded-full bg-[#1DA1F2] hover:bg-[#0d8bd9] text-white flex items-center justify-center shadow-md transition-all"
+                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1DA1F2] hover:bg-[#0d8bd9] text-white flex items-center justify-center shadow-md transition-all"
                     aria-label="Partager sur Twitter"
                 >
-                    <Twitter size={18} fill="white" />
+                    <Twitter size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
                 </motion.button>
 
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleShare('linkedin')}
-                    className="cursor-pointer w-10 h-10 rounded-full bg-[#0A66C2] hover:bg-[#084d94] text-white flex items-center justify-center shadow-md transition-all"
+                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0A66C2] hover:bg-[#084d94] text-white flex items-center justify-center shadow-md transition-all"
                     aria-label="Partager sur LinkedIn"
                 >
-                    <Linkedin size={18} fill="white" />
+                    <Linkedin size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
                 </motion.button>
 
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={copyToClipboard}
-                    className={` cursor-pointer w-10 h-10 rounded-full ${copied ? 'bg-green-500' : 'bg-[#8B7355] hover:bg-[#6B5535]'
+                    className={` cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full ${copied ? 'bg-green-500' : 'bg-[#8B7355] hover:bg-[#6B5535]'
                         } text-white flex items-center justify-center shadow-md transition-all`}
                     aria-label="Copier le lien"
                 >
-                    {copied ? <Check size={18} /> : <Link2 size={18} />}
+                    {copied ? <Check size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Link2 size={16} className="sm:w-[18px] sm:h-[18px]" />}
                 </motion.button>
             </div>
 
@@ -134,23 +134,23 @@ const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onClick(post)}
-            className={`cursor-pointer group flex-1 p-4 md:p-6 rounded-2xl bg-white dark:bg-[#443C34] border-2 border-[#D4A574]/20 hover:border-[#D4A574] shadow-lg hover:shadow-xl transition-all ${direction === 'prev' ? 'text-left' : 'text-right'
+            className={`cursor-pointer group flex-1 p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl bg-white dark:bg-[#443C34] border-2 border-[#D4A574]/20 hover:border-[#D4A574] shadow-lg hover:shadow-xl transition-all ${direction === 'prev' ? 'text-left' : 'text-right'
                 }`}
         >
-            <div className={`cursor-pointer flex items-center gap-3 mb-3 text-xs font-bold text-[#8B7355] dark:text-[#D4A574] ${direction === 'next' ? 'flex-row-reverse' : ''
+            <div className={`cursor-pointer flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 text-xs font-bold text-[#8B7355] dark:text-[#D4A574] ${direction === 'next' ? 'flex-row-reverse' : ''
                 }`}>
-                {direction === 'prev' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {direction === 'prev' ? <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> : <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
                 <span className="uppercase tracking-wider">
                     {direction === 'prev' ? 'Prev' : 'Next'}
                 </span>
             </div>
 
-            <h3 className="text-base md:text-lg font-bold text-[#443C34] dark:text-white line-clamp-2 group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
+            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#443C34] dark:text-white line-clamp-2 group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
                 {post.title}
             </h3>
 
             {post.excerpt && (
-                <p className="cursor-pointer mt-2 text-xs md:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                <p className="cursor-pointer mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                     {post.excerpt}
                 </p>
             )}
@@ -163,7 +163,7 @@ const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row gap-4 mt-12"
+            className="flex flex-col md:flex-row gap-4 mt-8 sm:mt-12"
         >
             {prevPost ? (
                 <NavCard post={prevPost} direction="prev" onClick={onNavigate} />
@@ -583,7 +583,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                         className="min-h-screen"
                     >
                         {/* Hero Section avec image en background */}
-                        <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
+                        <section className="relative h-[50vh] sm:h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24 md:pt-0">
                             <motion.div
                                 initial={{ scale: 1.1 }}
                                 animate={{ scale: 1 }}
@@ -605,17 +605,19 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                 )}
                             </motion.div>
 
+                            {/* Bouton Back - Positionné en haut à gauche pour éviter le menu */}
+                            <motion.button
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                onClick={handleBack}
+                                className="absolute top-16 sm:top-20 left-4 sm:left-6 z-[60] cursor-pointer group inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all shadow-lg text-xs sm:text-sm"
+                            >
+                                <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                <span className="font-bold uppercase hidden sm:inline">{t('common.back')}</span>
+                            </motion.button>
+
                             {/* Contenu du hero */}
-                            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-20 md:pt-28">
-                                <motion.button
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    onClick={handleBack}
-                                    className="cursor-pointer group mb-8 inline-flex items-center gap-3 px-6 py-3 rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all shadow-lg"
-                                >
-                                    <ArrowLeft size={18} />
-                                    <span className="font-bold text-sm uppercase">{t('common.back')}</span>
-                                </motion.button>
+                            <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center pt-8 sm:pt-12 md:pt-28">
 
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -634,7 +636,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 }}
-                                    className="text-4xl md:text-5xl lg:text-6xl xl:text-5xl font-black text-white mb-6 leading-tight drop-shadow-2xl px-4"
+                                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight drop-shadow-2xl px-2 sm:px-4"
                                 >
                                     {(translatedPosts?.find((p: any) => p.id === selectedPost.id)?.title) || selectedPost.title}
                                 </motion.h1>
@@ -643,20 +645,20 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
-                                    className="flex flex-wrap items-center justify-center gap-4 text-white/90 text-sm md:text-base"
+                                    className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 text-white/90 text-xs sm:text-sm md:text-base"
                                 >
-                                    <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
-                                        <Calendar size={18} />
-                                        {selectedPost.date || new Date().toLocaleDateString()}
+                                    <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
+                                        <Calendar size={14} className="sm:w-[18px] sm:h-[18px]" />
+                                        <span className="whitespace-nowrap">{selectedPost.date || new Date().toLocaleDateString()}</span>
                                     </span>
-                                    <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
-                                        <Clock size={18} />
-                                        {selectedPost.readTime || '5 min'} de lecture
+                                    <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
+                                        <Clock size={14} className="sm:w-[18px] sm:h-[18px]" />
+                                        <span className="whitespace-nowrap">{selectedPost.readTime || '5 min'} de lecture</span>
                                     </span>
                                     {selectedPost.views && (
-                                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full">
-                                            <Eye size={18} />
-                                            {selectedPost.views} vues
+                                        <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
+                                            <Eye size={14} className="sm:w-[18px] sm:h-[18px]" />
+                                            <span className="whitespace-nowrap">{selectedPost.views} vues</span>
                                         </span>
                                     )}
                                 </motion.div>
@@ -664,26 +666,26 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                         </section>
 
                         {/* Contenu de l'article */}
-                        <div className="max-w-[1400px] mx-auto px-6 -mt-20 relative z-10 pb-20">
-                            <div className="max-w-4xl mx-auto px-4 md:px-6">
+                        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 -mt-12 sm:-mt-16 md:-mt-20 relative z-10 pb-12 sm:pb-16 md:pb-20">
+                            <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6">
                                 {/* Auteur */}
-                                <div className="flex items-center gap-4 mb-8 pb-6 border-b-2 border-[#F0E7D5] dark:border-[#332C26] bg-white dark:bg-[#443C34] p-6 rounded-2xl shadow-xl">
+                                <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-[#F0E7D5] dark:border-[#332C26] bg-white dark:bg-[#443C34] p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-xl">
                                     {selectedPost.authorAvatar ? (
                                         <img
                                             src={selectedPost.authorAvatar}
                                             alt={selectedPost.author}
-                                            className="w-16 h-16 rounded-full object-cover border-3 border-[#D4A574] shadow-lg"
+                                            className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full object-cover border-2 sm:border-3 border-[#D4A574] shadow-lg flex-shrink-0"
                                         />
                                     ) : (
-                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#8B7355] to-[#D4A574] flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-[#8B7355] to-[#D4A574] flex items-center justify-center text-white text-base sm:text-lg md:text-xl font-bold shadow-lg flex-shrink-0">
                                             {selectedPost.author?.charAt(0) || 'A'}
                                         </div>
                                     )}
-                                    <div className="flex-1">
-                                        <p className="font-black text-[#443C34] dark:text-white text-xl">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-black text-[#443C34] dark:text-white text-base sm:text-lg md:text-xl truncate">
                                             {selectedPost.author || 'Auteur'}
                                         </p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                             {t('blog.author') || 'Auteur de l\'article'}
                                         </p>
                                     </div>
@@ -691,19 +693,19 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
 
                             {/* Excerpt si disponible */}
                             {selectedPost.excerpt && (
-                                <div className="mb-8 p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-2xl border-l-4 border-[#D4A574]">
-                                    <p className="text-lg md:text-xl text-[#443C34] dark:text-white font-semibold italic leading-relaxed">
+                                <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-xl sm:rounded-2xl border-l-4 border-[#D4A574]">
+                                    <p className="text-base sm:text-lg md:text-xl text-[#443C34] dark:text-white font-semibold italic leading-relaxed">
                                         {selectedPost.excerpt}
                                     </p>
                                 </div>
                             )}
 
                             {/* Contenu */}
-                            <div className="bg-white dark:bg-[#443C34] p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[32px] shadow-xl mb-8">
+                            <div className="bg-white dark:bg-[#443C34] p-4 sm:p-6 md:p-10 lg:p-12 rounded-xl sm:rounded-2xl md:rounded-[32px] shadow-xl mb-6 sm:mb-8">
                                 {((translatedPosts?.find((p: any) => p.id === selectedPost.id)?.content) || selectedPost.content || '').split('\n\n').map((paragraph: string, index: number) => (
                                     <p
                                         key={index}
-                                        className={`text-base md:text-lg text-gray-700 dark:text-gray-200 mb-6 leading-relaxed text-justify ${index === 0 ? 'first-letter:text-6xl md:first-letter:text-7xl first-letter:font-bold first-letter:text-[#D4A574] first-letter:mr-3 first-letter:float-left first-letter:leading-none' : ''}`}
+                                        className={`text-sm sm:text-base md:text-lg text-gray-700 dark:text-gray-200 mb-4 sm:mb-6 leading-relaxed text-justify ${index === 0 ? 'first-letter:text-4xl sm:first-letter:text-5xl md:first-letter:text-6xl lg:first-letter:text-7xl first-letter:font-bold first-letter:text-[#D4A574] first-letter:mr-2 sm:first-letter:mr-3 first-letter:float-left first-letter:leading-none' : ''}`}
                                     >
                                         {paragraph}
                                     </p>
@@ -712,12 +714,12 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
 
                             {/* Tags si disponibles */}
                             {selectedPost.tags && selectedPost.tags.length > 0 && (
-                                <div className="mb-8 flex flex-wrap gap-2">
-                                    <span className="text-sm font-bold text-[#443C34] dark:text-white mr-2">Tags :</span>
+                                <div className="mb-6 sm:mb-8 flex flex-wrap gap-2">
+                                    <span className="text-xs sm:text-sm font-bold text-[#443C34] dark:text-white mr-2">Tags :</span>
                                     {selectedPost.tags.map((tag: string, idx: number) => (
                                         <span
                                             key={idx}
-                                            className="px-4 py-1.5 bg-[#F0E7D5] dark:bg-[#332C26] text-[#8B7355] dark:text-[#D4A574] rounded-full text-xs font-semibold border border-[#D4A574]/30"
+                                            className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F0E7D5] dark:bg-[#332C26] text-[#8B7355] dark:text-[#D4A574] rounded-full text-xs font-semibold border border-[#D4A574]/30"
                                         >
                                             #{tag}
                                         </span>
@@ -726,7 +728,9 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                             )}
 
                             {/* NOUVEAU : Partage sur les réseaux sociaux */}
-                            <SocialShare post={selectedPost} />
+                            <div className="mb-6 sm:mb-8">
+                                <SocialShare post={selectedPost} />
+                            </div>
 
                             {/* NOUVEAU : Navigation entre articles */}
                             <BlogNavigation

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, MessageCircle } from 'lucide-react';
@@ -21,7 +21,6 @@ import { Footer } from './components/Footer';
 import { QuoteRequest } from './components/QuoteRequest';
 import { MadagascarGallery } from './components/MadagascarGallery';
 import { CookieConsent } from '../components/common/CookieConsent';
-import { VisitorCounter } from '../components/common/VisitorCounter';
 
 // Composants Admin
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -202,9 +201,40 @@ const LanguageRoutes = () => {
 
   const activeSection = getActiveSection();
 
-  // UseEffect pour scroller en haut à chaque changement de route
+  // UseEffect pour scroller en haut à chaque changement de route (sauf changement de langue)
+  const prevPathRef = useRef<string>('');
+  const scrollPositionRef = useRef<number>(0);
+  
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const currentPath = location.pathname;
+    const prevPath = prevPathRef.current;
+    
+    // Extraire les chemins sans la langue (ex: /fr/blog -> /blog, /en/blog -> /blog)
+    const getPathWithoutLang = (path: string) => {
+      const segments = path.split('/').filter(Boolean);
+      if (segments.length > 0 && ['en', 'fr', 'de', 'it'].includes(segments[0])) {
+        return '/' + segments.slice(1).join('/');
+      }
+      return path;
+    };
+    
+    const currentPathWithoutLang = getPathWithoutLang(currentPath);
+    const prevPathWithoutLang = getPathWithoutLang(prevPath);
+    
+    // Si c'est juste un changement de langue (même chemin sans langue), restaurer la position
+    if (currentPathWithoutLang === prevPathWithoutLang && prevPath !== '') {
+      // C'est un changement de langue, restaurer la position de scroll
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    } else {
+      // C'est un vrai changement de route, scroller en haut
+      window.scrollTo(0, 0);
+    }
+    
+    // Sauvegarder la position actuelle avant le changement
+    scrollPositionRef.current = window.scrollY;
+    prevPathRef.current = currentPath;
   }, [location.pathname]);
 
   // UseEffect pour détecter le scroll (throttled)
@@ -595,7 +625,6 @@ function App() {
         </AnimatePresence>
       </div>
       <CookieConsent />
-      <VisitorCounter />
     </ToastProvider>
   );
 }
