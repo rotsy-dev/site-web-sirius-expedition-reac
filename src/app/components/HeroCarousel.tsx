@@ -22,23 +22,40 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
+  const [isMounted, setIsMounted] = useState(true);
 
   const { translatedContent: translatedSlides } = useTranslatedContent(slides, ['title', 'subtitle', 'cta']);
   const displaySlides = (translatedSlides || slides) as Slide[];
 
   useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || displaySlides.length === 0) return;
+    
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % displaySlides.length);
+      if (isMounted) {
+        setCurrentIndex((prev) => (prev + 1) % displaySlides.length);
+      }
     }, 6000);
     return () => clearInterval(timer);
-  }, [displaySlides.length]);
+  }, [displaySlides.length, isMounted]);
 
   return (
     <section className="relative w-full h-screen bg-gradient-to-br from-[#1a1410] via-[#2a201d] to-[#1a1410] overflow-hidden">
-      {/* Effet de particules en arrière-plan */}
+      {/* Effet de particules en arrière-plan - Optimisé pour éviter les plantages */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" style={{ 
+          animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          willChange: 'opacity'
+        }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" style={{ 
+          animation: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          animationDelay: '2s',
+          willChange: 'opacity'
+        }} />
       </div>
 
       <AnimatePresence mode="wait">
@@ -130,13 +147,21 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                       >
                         <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
                           <span className="whitespace-nowrap">{slide.cta}</span>
-                          <motion.span
-                            animate={{ x: [0, 5, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="text-lg sm:text-xl"
-                          >
-                            →
-                          </motion.span>
+                          {isMounted && (
+                            <motion.span
+                              animate={{ x: [0, 5, 0] }}
+                              transition={{ 
+                                duration: 1.5, 
+                                repeat: Infinity,
+                                repeatType: "loop",
+                                ease: "easeInOut"
+                              }}
+                              className="text-lg sm:text-xl"
+                              style={{ willChange: 'transform' }}
+                            >
+                              →
+                            </motion.span>
+                          )}
                         </span>
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                       </motion.button>
@@ -186,21 +211,29 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
       </div>
 
       {/* Scroll indicator - À droite pour mobile, centré pour desktop */}
-     <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 mb-10"
-      >
-        <span className="text-white/60 text-xs font-medium uppercase tracking-wider">Scroll</span>
+     {isMounted && (
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 mb-10"
         >
-          <div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+          <span className="text-white/60 text-xs font-medium uppercase tracking-wider">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              repeatType: "loop",
+              ease: "easeInOut"
+            }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
+            style={{ willChange: 'transform' }}
+          >
+            <div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </section>
   );
 }

@@ -80,17 +80,37 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
   const displayTours = (translatedTours || tours) as typeof tours
 
   useEffect(() => {
-    if (typeof ScrollReveal !== 'undefined') {
-      const sr = ScrollReveal({
+    if (typeof ScrollReveal === 'undefined') return;
+    
+    let sr: any = null;
+    let isMounted = true;
+
+    try {
+      sr = ScrollReveal({
         reset: false,
         distance: '60px',
         duration: 800,
         easing: 'cubic-bezier(0.5, 0, 0, 1)',
-      })
+      });
 
-      sr.reveal('.section-header', { origin: 'top' })
-      sr.reveal('.animate-card', { origin: 'bottom', interval: 200 })
+      if (isMounted && sr) {
+        sr.reveal('.section-header', { origin: 'top' })
+        sr.reveal('.animate-card', { origin: 'bottom', interval: 200 })
+      }
+    } catch (error) {
+      console.warn('ScrollReveal initialization error:', error);
     }
+
+    return () => {
+      isMounted = false;
+      if (sr && typeof sr.destroy === 'function') {
+        try {
+          sr.destroy();
+        } catch (error) {
+          console.warn('ScrollReveal cleanup error:', error);
+        }
+      }
+    };
   }, [])
 
   const handleOpenModal = (tour: any) => {

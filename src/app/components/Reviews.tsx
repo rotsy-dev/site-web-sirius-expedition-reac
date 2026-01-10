@@ -71,7 +71,7 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12deg", "12deg"]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !isHovered) return;
     const rect = cardRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -79,9 +79,10 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
     const mouseY = e.clientY - rect.top;
     const xPct = mouseX / width - 0.5;
     const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
-  }, [x, y]);
+    // Limiter l'amplitude pour éviter les animations trop extrêmes
+    x.set(Math.max(-0.3, Math.min(0.3, xPct)));
+    y.set(Math.max(-0.3, Math.min(0.3, yPct)));
+  }, [x, y, isHovered]);
 
   const handleMouseLeave = useCallback(() => {
     x.set(0);
@@ -107,7 +108,8 @@ function ReviewCard({ review, index }: { review: Review, index: number }) {
         rotateX,
         rotateY,
         transformStyle: "preserve-3d",
-        transformPerspective: 1000
+        transformPerspective: 1000,
+        willChange: isHovered ? 'transform' : 'auto'
       }}
       className="relative px-4 py-10 h-full"
     >

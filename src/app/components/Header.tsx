@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Menu, X, LogIn, Calendar, Sparkles } from "lucide-react"
+import { Menu, X, LogIn, Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom"
 import { LanguageSwitcher } from "./shared/LanguageSwitcher"
@@ -25,9 +25,21 @@ export function Header({ siteConfig }: HeaderProps) {
   const currentLang = lang || 'en'
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      ticking = false;
+    };
   }, [])
 
   const menuItems = [
@@ -69,9 +81,9 @@ export function Header({ siteConfig }: HeaderProps) {
               className="relative h-16 w-auto lg:h-20 transition-all duration-300"
             >
               {siteConfig.logo ? (
-                <div className="relative h-full w-auto flex items-center">
+                <div className="relative h-full w-auto flex items-center site-logo-container">
                   <div 
-                    className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center"
+                    className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center bg-transparent site-logo-container"
                     style={{
                       backgroundColor: 'transparent',
                       backgroundImage: 'none'
@@ -79,20 +91,29 @@ export function Header({ siteConfig }: HeaderProps) {
                   >
                     <img 
                       src={siteConfig.logo} 
-                      alt={siteConfig.siteName || "Logo"} 
-                      className="h-full w-auto object-contain transition-all duration-500 group-hover:brightness-110"
+                      alt={`${siteConfig.siteName || "Site"} Logo`}
+                      className="site-logo h-full w-auto object-contain transition-all duration-500 group-hover:brightness-110"
                       style={{
-                        imageRendering: 'auto',
+                        imageRendering: 'crisp-edges',
                         objectFit: 'contain',
-                        mixBlendMode: scrolled ? 'normal' : 'multiply',
-                        filter: scrolled 
-                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1)' 
-                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3)) brightness(1.1)',
                         backgroundColor: 'transparent',
-                        WebkitFilter: scrolled 
-                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1)' 
-                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3)) brightness(1.1)',
-                        WebkitMixBlendMode: scrolled ? 'normal' : 'multiply'
+                        background: 'transparent',
+                        filter: scrolled 
+                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' 
+                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+                        mixBlendMode: 'normal',
+                      } as React.CSSProperties}
+                      onLoad={(e) => {
+                        // Forcer la transparence après chargement
+                        const img = e.target as HTMLImageElement;
+                        img.style.backgroundColor = 'transparent';
+                        img.style.background = 'transparent';
+                        img.style.backgroundImage = 'none';
+                        
+                        // Si c'est une image base64 PNG, s'assurer qu'elle garde sa transparence
+                        if (siteConfig.logo.startsWith('data:image/png')) {
+                          img.style.mixBlendMode = 'normal';
+                        }
                       }}
                       onError={(e) => {
                         // Si l'image ne charge pas, on cache l'image et on affiche le fallback
@@ -143,6 +164,7 @@ export function Header({ siteConfig }: HeaderProps) {
                         layoutId="activeNav"
                         className="absolute inset-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] rounded-xl shadow-lg"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        style={{ willChange: 'transform' }}
                       />
                     )}
                     <span className={`relative z-10 transition-colors duration-300 ${

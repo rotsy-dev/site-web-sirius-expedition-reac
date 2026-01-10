@@ -237,21 +237,28 @@ const LanguageRoutes = () => {
     prevPathRef.current = currentPath;
   }, [location.pathname]);
 
-  // UseEffect pour détecter le scroll (throttled)
+  // UseEffect pour détecter le scroll (optimisé avec requestAnimationFrame)
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let rafId: number | null = null;
+    let ticking = false;
 
     const handleScroll = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setShowScrollTop(window.scrollY > 500);
-      }, 100);
+      if (!ticking) {
+        rafId = window.requestAnimationFrame(() => {
+          setShowScrollTop(window.scrollY > 500);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeoutId);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      ticking = false;
     };
   }, []);
 
@@ -266,6 +273,7 @@ const LanguageRoutes = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
+      style={{ willChange: 'opacity' }}
     >
       <Header
         activeSection={activeSection}

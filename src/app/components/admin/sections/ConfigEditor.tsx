@@ -237,11 +237,29 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
 
                     canvas.width = width;
                     canvas.height = height;
-                    const ctx = canvas.getContext('2d');
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     if (!ctx) return reject('Erreur canvas');
 
+                    // Pour les logos, préserver la transparence en utilisant PNG
+                    // Détecter si c'est un PNG ou si l'image a de la transparence
+                    const isPNG = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+                    
+                    if (isPNG) {
+                        // Remplir le canvas avec un fond transparent avant de dessiner
+                        ctx.clearRect(0, 0, width, height);
+                    } else {
+                        // Pour JPEG, remplir avec blanc pour éviter les fonds noirs
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, width, height);
+                    }
+
+                    // Dessiner l'image
                     ctx.drawImage(img, 0, 0, width, height);
-                    const compressed = canvas.toDataURL('image/jpeg', 0.85);
+                    
+                    // Utiliser PNG pour préserver la transparence, sinon JPEG avec qualité réduite
+                    const compressed = isPNG 
+                        ? canvas.toDataURL('image/png', 1.0) // PNG avec qualité maximale pour préserver la transparence
+                        : canvas.toDataURL('image/jpeg', 0.85);
 
                     const sizeKB = Math.round((compressed.length * 3) / 4 / 1024);
                     if (sizeKB > 500) {

@@ -23,6 +23,33 @@ img {
   image-rendering: crisp-edges;
 }
 
+/* Logo avec fond transparent - Force la transparence */
+img[alt*="Logo"],
+.site-logo,
+.site-logo img,
+img.site-logo {
+  background-color: transparent !important;
+  background-image: none !important;
+  mix-blend-mode: normal !important;
+  background: transparent !important;
+}
+
+/* Correction pour éviter les arrière-plans noirs sur les logos PNG transparents */
+.site-logo-container,
+.site-logo-container * {
+  background-color: transparent !important;
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Forcer la transparence pour les images base64 PNG */
+img[src^="data:image/png"],
+img[src*="data:image/png"] {
+  background-color: transparent !important;
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+}
+
 /* Optimisation des animations */
 @media (prefers-reduced-motion: reduce) {
   *,

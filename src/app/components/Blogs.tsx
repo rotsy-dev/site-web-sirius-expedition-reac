@@ -455,7 +455,13 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                     </div>
                                                     <div className="relative h-full min-h-[400px]">
                                                         {!imagesLoaded[featuredPost.id] && (
-                                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+                                                            <div 
+                                                                className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" 
+                                                                style={{ 
+                                                                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                                                                    willChange: 'opacity'
+                                                                }}
+                                                            />
                                                         )}
                                                         <img
                                                             src={featuredPost.image}
@@ -487,7 +493,13 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                 >
                                                     <div className="relative aspect-[16/10] overflow-hidden">
                                                         {!imagesLoaded[post.id] && (
-                                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
+                                                            <div 
+                                                                className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" 
+                                                                style={{ 
+                                                                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                                                                    willChange: 'opacity'
+                                                                }}
+                                                            />
                                                         )}
                                                         <img
                                                             src={post.image}

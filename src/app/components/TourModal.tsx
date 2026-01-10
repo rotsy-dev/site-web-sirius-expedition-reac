@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, ChevronUp, X, Clock, MapPin,ArrowLeft, Users, Calendar, Check, CheckCircle, XCircle, Car, TrendingUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Clock, MapPin, ArrowLeft, Users, Calendar, Check, CheckCircle, XCircle, Car, TrendingUp } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { SITE_SECTIONS } from "../../constants"
 
 // Types compatibles avec Firebase
 export interface TourSpecialty {
@@ -85,6 +84,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto"
+      style={{ willChange: 'opacity' }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
@@ -95,7 +95,8 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         className="relative bg-gradient-to-br from-white via-[#FAF7F2] to-white w-full max-w-7xl max-h-[95vh] sm:max-h-[98vh] overflow-y-auto rounded-xl sm:rounded-2xl md:rounded-[2.5rem] shadow-2xl border-2 sm:border-4 border-[#D4A574]/20 my-4 sm:my-0"
         style={{
           scrollbarWidth: 'thin',
-          scrollbarColor: '#D4A574 #F0E7D5'
+          scrollbarColor: '#D4A574 #F0E7D5',
+          willChange: 'transform, opacity'
         }}
       >
         {/* Close Button */}
@@ -263,7 +264,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                   onClick={() => setIsItineraryOpen(!isItineraryOpen)}
                 >
                   <h3 className="text-lg sm:text-xl font-bold text-[#332C26] flex items-center gap-2">
-                    <Calendar className="text-[#D4A574]" size={18} className="sm:w-[22px] sm:h-[22px]" />
+                    <Calendar className="text-[#D4A574] w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" />
                     <span>{t('tourSpecialties.modal.itinerary')}</span>
                   </h3>
                   <motion.div

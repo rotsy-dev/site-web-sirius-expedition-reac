@@ -140,6 +140,7 @@ export function Footer({ config }: FooterProps) {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16"
+          style={{ willChange: 'transform, opacity' }}
         >
           {/* Section gauche */}
           <motion.div variants={itemVariants} className="space-y-8">

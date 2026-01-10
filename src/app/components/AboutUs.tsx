@@ -69,23 +69,43 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
   }, []);
 
   React.useEffect(() => {
-    if (typeof ScrollReveal !== 'undefined') {
-      const sr = ScrollReveal({
+    if (typeof ScrollReveal === 'undefined') return;
+    
+    let sr: any = null;
+    let isMounted = true;
+
+    try {
+      sr = ScrollReveal({
         reset: false,
         distance: '40px',
         duration: 800,
         delay: 0,
         easing: 'cubic-bezier(0.5, 0, 0, 1)',
         mobile: true
-      })
+      });
 
-      sr.reveal('.reveal-stats', { origin: 'bottom', interval: 100 })
-      sr.reveal('.reveal-left', { origin: 'left', distance: '60px' })
-      sr.reveal('.reveal-right', { origin: 'right', distance: '60px' })
-      sr.reveal('.reveal-bottom', { origin: 'bottom', distance: '60px' })
-      sr.reveal('.reveal-values', { origin: 'bottom', interval: 100 })
-      sr.reveal('.reveal-why', { origin: 'bottom', interval: 100 })
+      if (isMounted && sr) {
+        sr.reveal('.reveal-stats', { origin: 'bottom', interval: 100 })
+        sr.reveal('.reveal-left', { origin: 'left', distance: '60px' })
+        sr.reveal('.reveal-right', { origin: 'right', distance: '60px' })
+        sr.reveal('.reveal-bottom', { origin: 'bottom', distance: '60px' })
+        sr.reveal('.reveal-values', { origin: 'bottom', interval: 100 })
+        sr.reveal('.reveal-why', { origin: 'bottom', interval: 100 })
+      }
+    } catch (error) {
+      console.warn('ScrollReveal initialization error:', error);
     }
+
+    return () => {
+      isMounted = false;
+      if (sr && typeof sr.destroy === 'function') {
+        try {
+          sr.destroy();
+        } catch (error) {
+          console.warn('ScrollReveal cleanup error:', error);
+        }
+      }
+    };
   }, [])
 
   // Récupération des données dynamiques de l'histoire (déjà traduite ci-dessus)

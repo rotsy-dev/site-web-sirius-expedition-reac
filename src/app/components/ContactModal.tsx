@@ -133,13 +133,23 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
                     {/* Header/Profile */}
                     <div className="flex flex-col items-center text-center">
                         <div className="relative mb-5">
-                            <div className="w-24 h-24 rounded-full p-1 border border-gray-100 shadow-sm bg-white overflow-hidden flex items-center justify-center">
+                            <div className="w-24 h-24 rounded-full p-1 border border-gray-100 shadow-sm bg-white overflow-hidden flex items-center justify-center site-logo-container">
                                 {/* Logo placeholder or image if available */}
                                 {config.logo ? (
                                     <img
                                         src={config.logo}
                                         alt={config.siteName}
-                                        className="w-full h-full rounded-full object-cover"
+                                        className="site-logo w-full h-full rounded-full object-cover"
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            background: 'transparent',
+                                            mixBlendMode: 'normal'
+                                        } as React.CSSProperties}
+                                        onLoad={(e) => {
+                                            const img = e.target as HTMLImageElement;
+                                            img.style.backgroundColor = 'transparent';
+                                            img.style.background = 'transparent';
+                                        }}
                                     />
                                 ) : (
                                     <div className="w-full h-full rounded-full bg-[#443C34] text-white flex items-center justify-center text-3xl font-bold">
