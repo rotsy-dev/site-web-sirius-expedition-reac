@@ -128,7 +128,7 @@ export function Header({ siteConfig }: HeaderProps) {
           </Link>
 
           {/* Navigation Desktop - Design Moderne */}
-          <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+          <nav className="hidden lg:flex items-center gap-6 lg:gap-8 ml-auto absolute left-1/2 transform -translate-x-1/2">
             <div className="flex items-center gap-2 bg-white/80 dark:bg-[#1a1410]/80 backdrop-blur-2xl px-4 py-2.5 rounded-2xl border border-[#4B3935]/10 shadow-xl">
               {menuItems.map((item) => {
                 const isActive = getIsActive(item.path)
@@ -164,7 +164,7 @@ export function Header({ siteConfig }: HeaderProps) {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(`/${currentLang}/quote`)}
-              className="relative flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-[#4B3935] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+              className="relative flex items-center gap-1 px-5 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-[#4B3935] shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group whitespace-nowrap"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               <Calendar size={16} strokeWidth={2.5} className="relative z-10" />
