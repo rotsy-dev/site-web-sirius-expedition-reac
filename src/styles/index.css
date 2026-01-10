@@ -23,7 +23,7 @@ img {
   image-rendering: crisp-edges;
 }
 
-/* Logo avec fond transparent - Force la transparence */
+/* Logo avec fond transparent - Force la transparence et améliore la visibilité */
 img[alt*="Logo"],
 .site-logo,
 .site-logo img,
@@ -32,6 +32,13 @@ img.site-logo {
   background-image: none !important;
   mix-blend-mode: normal !important;
   background: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  /* Améliorer la netteté et la visibilité */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Correction pour éviter les arrière-plans noirs sur les logos PNG transparents */
@@ -48,6 +55,17 @@ img[src*="data:image/png"] {
   background-color: transparent !important;
   background: transparent !important;
   mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
+
+/* Améliorer la visibilité du logo sur fond clair et sombre */
+.site-logo-container img.site-logo {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.site-logo-container:hover img.site-logo {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 /* Optimisation des animations */

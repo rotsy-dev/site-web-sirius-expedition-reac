@@ -83,7 +83,7 @@ export function Header({ siteConfig }: HeaderProps) {
               {siteConfig.logo ? (
                 <div className="relative h-full w-auto flex items-center site-logo-container">
                   <div 
-                    className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center bg-transparent site-logo-container"
+                    className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center justify-center bg-transparent site-logo-container"
                     style={{
                       backgroundColor: 'transparent',
                       backgroundImage: 'none'
@@ -92,19 +92,22 @@ export function Header({ siteConfig }: HeaderProps) {
                     <img 
                       src={siteConfig.logo} 
                       alt={`${siteConfig.siteName || "Site"} Logo`}
-                      className="site-logo h-full w-auto object-contain transition-all duration-500 group-hover:brightness-110"
+                      className="site-logo h-full w-auto max-h-full object-contain transition-all duration-500 group-hover:brightness-110 group-hover:scale-105"
                       style={{
-                        imageRendering: 'crisp-edges',
+                        imageRendering: 'auto',
                         objectFit: 'contain',
                         backgroundColor: 'transparent',
                         background: 'transparent',
                         filter: scrolled 
-                          ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' 
-                          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+                          ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.15)) brightness(1)' 
+                          : 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) brightness(1.05)',
                         mixBlendMode: 'normal',
+                        maxWidth: '100%',
+                        height: 'auto',
+                        display: 'block',
                       } as React.CSSProperties}
                       onLoad={(e) => {
-                        // Forcer la transparence après chargement
+                        // Forcer la transparence après chargement et améliorer la visibilité
                         const img = e.target as HTMLImageElement;
                         img.style.backgroundColor = 'transparent';
                         img.style.background = 'transparent';
@@ -114,6 +117,10 @@ export function Header({ siteConfig }: HeaderProps) {
                         if (siteConfig.logo.startsWith('data:image/png')) {
                           img.style.mixBlendMode = 'normal';
                         }
+                        
+                        // Améliorer la visibilité du logo
+                        img.style.opacity = '1';
+                        img.style.visibility = 'visible';
                       }}
                       onError={(e) => {
                         // Si l'image ne charge pas, on cache l'image et on affiche le fallback

@@ -194,7 +194,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
             {(tour.season || (tour as any).startDate || (tour as any).endDate) && (
               <div className="mb-6 sm:mb-8 md:mb-10 bg-gradient-to-br from-[#D4A574]/10 to-[#F0E7D5]/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-[#D4A574]/20">
                 <h3 className="text-base sm:text-lg font-bold text-[#332C26] mb-3 sm:mb-4 flex items-center gap-2">
-                  <Calendar className="text-[#D4A574]" size={18} className="sm:w-5 sm:h-5" />
+                  <Calendar className="text-[#D4A574] w-[18px] h-[18px] sm:w-5 sm:h-5" />
                   <span>Dates & Saison</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
