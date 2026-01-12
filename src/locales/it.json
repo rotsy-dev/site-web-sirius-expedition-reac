@@ -5,8 +5,10 @@
     "blog": "Blog",
     "about": "Chi siamo",
     "contact": "Contatto",
+    "faqs": "FAQ",
     "quote": "Richiedi un preventivo",
-    "login": "Accedi"
+    "login": "Accedi",
+    "discovermore": "Scopri di più"
   },
   "hero": {
     "featured": "Destinazioni in primo piano",
@@ -29,7 +31,8 @@
     "blogs": "Il nostro blog",
     "blogsSubtitle": "Consigli e racconti di viaggio",
     "aboutUs": "Chi siamo",
-    "aboutUsSubtitle": "La nostra storia e la nostra passione"
+    "aboutUsSubtitle": "La nostra storia e la nostra passione",
+    "faq":" Domande frequenti"
   },
   "tours": {
     "from": "Da",
@@ -262,5 +265,21 @@
     "badge": "Scopri il Madagascar",
     "title": "Madagascar in immagini",
     "subtitle": "Esplora la bellezza e la diversità dell'Isola Rossa"
+  },
+  "faq": {
+      "title": "Domande frequenti",
+      "subtitle": "Trova le risposte alle domande più comuni sui nostri tour",
+      "searchPlaceholder": "Cerca domande...",
+      "allCategories": "Tutte le categorie",
+      "totalQuestions": "Numero totale di domande",
+      "categories": "Categorie",
+      "resultsFound": "Risultati trovati",
+      "openAnswers": "Apri le risposte",
+      "noResults": "Nessuna domanda trovata",
+      "tryDifferentSearch": "Prova un termine di ricerca o una categoria diversa",
+      "stillHaveQuestions": "Hai ancora domande?",
+      "contactUsMessage": "Non riesci a trovare la risposta che cerchi? Il nostro team è qui per aiutarti.",
+      "contactUs": "Contattaci"
   }
+
 }

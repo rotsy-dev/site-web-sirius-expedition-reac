@@ -1,6 +1,6 @@
 "use client"
-import { useState, useEffect } from "react"
-import { Menu, X, LogIn, Calendar } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Menu, X, LogIn, Calendar, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom"
 import { LanguageSwitcher } from "./shared/LanguageSwitcher"
@@ -17,6 +17,8 @@ interface HeaderProps {
 export function Header({ siteConfig }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [discoverMoreOpen, setDiscoverMoreOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -42,12 +44,28 @@ export function Header({ siteConfig }: HeaderProps) {
     };
   }, [])
 
+  // Fermer le dropdown quand on clique à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDiscoverMoreOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const menuItems = [
     { path: `/${currentLang}`, label: t("nav.home"), id: "home" },
     { path: `/${currentLang}/tours`, label: t("nav.tours"), id: "tours" },
     { path: `/${currentLang}/blog`, label: t("nav.blog"), id: "blog" },
-    { path: `/${currentLang}/about`, label: t("nav.about"), id: "about" },
     { path: `/${currentLang}/contact`, label: t("nav.contact"), id: "contact" },
+  ]
+
+  const discoverMoreItems = [
+    { path: `/${currentLang}/about`, label: t("nav.about"), id: "about", description: "Learn about our story" },
+    { path: `/${currentLang}/faqs`, label: t("nav.faqs"), id: "faqs", description: "Get answers to common questions" },
   ]
 
   const getIsActive = (path: string) => {
@@ -57,21 +75,22 @@ export function Header({ siteConfig }: HeaderProps) {
     return location.pathname.startsWith(path)
   }
 
+  const isDiscoverMoreActive = discoverMoreItems.some(item => getIsActive(item.path))
+
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${scrolled
           ? "bg-white/95 dark:bg-[#1a1410]/95 backdrop-blur-xl shadow-2xl border-b border-[#4B3935]/10 py-3"
           : "bg-transparent py-6"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
-          
-          {/* Logo - Image unique avec logo et nom */}
+
+          {/* Logo */}
           <Link
             to={`/${currentLang}`}
             className="flex items-center cursor-pointer group relative z-10 -ml-2 lg:-ml-4"
@@ -82,15 +101,12 @@ export function Header({ siteConfig }: HeaderProps) {
             >
               {siteConfig.logo ? (
                 <div className="relative h-full w-auto flex items-center site-logo-container">
-                  <div 
+                  <div
                     className="h-full w-auto max-w-[200px] lg:max-w-[250px] flex items-center justify-center bg-transparent site-logo-container"
-                    style={{
-                      backgroundColor: 'transparent',
-                      backgroundImage: 'none'
-                    }}
+                    style={{ backgroundColor: 'transparent', backgroundImage: 'none' }}
                   >
-                    <img 
-                      src={siteConfig.logo} 
+                    <img
+                      src={siteConfig.logo}
                       alt={`${siteConfig.siteName || "Site"} Logo`}
                       className="site-logo h-full w-auto max-h-full object-contain transition-all duration-500 group-hover:brightness-110 group-hover:scale-105"
                       style={{
@@ -98,8 +114,8 @@ export function Header({ siteConfig }: HeaderProps) {
                         objectFit: 'contain',
                         backgroundColor: 'transparent',
                         background: 'transparent',
-                        filter: scrolled 
-                          ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.15)) brightness(1)' 
+                        filter: scrolled
+                          ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.15)) brightness(1)'
                           : 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) brightness(1.05)',
                         mixBlendMode: 'normal',
                         maxWidth: '100%',
@@ -107,23 +123,17 @@ export function Header({ siteConfig }: HeaderProps) {
                         display: 'block',
                       } as React.CSSProperties}
                       onLoad={(e) => {
-                        // Forcer la transparence après chargement et améliorer la visibilité
                         const img = e.target as HTMLImageElement;
                         img.style.backgroundColor = 'transparent';
                         img.style.background = 'transparent';
                         img.style.backgroundImage = 'none';
-                        
-                        // Si c'est une image base64 PNG, s'assurer qu'elle garde sa transparence
                         if (siteConfig.logo.startsWith('data:image/png')) {
                           img.style.mixBlendMode = 'normal';
                         }
-                        
-                        // Améliorer la visibilité du logo
                         img.style.opacity = '1';
                         img.style.visibility = 'visible';
                       }}
                       onError={(e) => {
-                        // Si l'image ne charge pas, on cache l'image et on affiche le fallback
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
@@ -135,18 +145,16 @@ export function Header({ siteConfig }: HeaderProps) {
                     SE
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-xl lg:text-2xl font-bold leading-none ${
-                      scrolled 
-                        ? "text-[#4B3935] dark:text-[#F0E7D5]" 
+                    <span className={`text-xl lg:text-2xl font-bold leading-none ${scrolled
+                        ? "text-[#4B3935] dark:text-[#F0E7D5]"
                         : "text-white drop-shadow-2xl"
-                    }`}>
+                      }`}>
                       {siteConfig.siteName}
                     </span>
-                    <span className={`text-[9px] lg:text-[10px] font-medium uppercase tracking-[0.25em] ${
-                      scrolled 
-                        ? "text-[#4B3935]/70 dark:text-[#F0E7D5]/70" 
+                    <span className={`text-[9px] lg:text-[10px] font-medium uppercase tracking-[0.25em] ${scrolled
+                        ? "text-[#4B3935]/70 dark:text-[#F0E7D5]/70"
                         : "text-white/80 drop-shadow-lg"
-                    }`}>
+                      }`}>
                       {siteConfig.tagline}
                     </span>
                   </div>
@@ -155,8 +163,8 @@ export function Header({ siteConfig }: HeaderProps) {
             </motion.div>
           </Link>
 
-          {/* Navigation Desktop - Design Moderne */}
-          <nav className="hidden lg:flex items-center gap-6 lg:gap-8 ml-auto absolute left-1/2 transform -translate-x-1/2">
+          {/* Navigation Desktop */}
+          <nav className="hidden lg:flex items-center gap-6 lg:gap-8 ml-auto">
             <div className="flex items-center gap-2 bg-white/80 dark:bg-[#1a1410]/80 backdrop-blur-2xl px-4 py-2.5 rounded-2xl border border-[#4B3935]/10 shadow-xl">
               {menuItems.map((item) => {
                 const isActive = getIsActive(item.path)
@@ -174,16 +182,83 @@ export function Header({ siteConfig }: HeaderProps) {
                         style={{ willChange: 'transform' }}
                       />
                     )}
-                    <span className={`relative z-10 transition-colors duration-300 ${
-                      isActive 
-                        ? "text-white" 
+                    <span className={`relative z-10 transition-colors duration-300 ${isActive
+                        ? "text-white"
                         : "text-[#4B3935] dark:text-[#F0E7D5] hover:text-[#D4A574]"
-                    }`}>
+                      }`}>
                       {item.label}
                     </span>
                   </Link>
                 )
               })}
+
+              {/* Discover More Dropdown */}
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => setDiscoverMoreOpen(!discoverMoreOpen)}
+                  className="relative px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-1"
+                >
+                  {isDiscoverMoreActive && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className="absolute inset-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] rounded-xl shadow-lg"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      style={{ willChange: 'transform' }}
+                    />
+                  )}
+                  <span className={`relative z-10 transition-colors duration-300 ${isDiscoverMoreActive || discoverMoreOpen
+                      ? "text-white"
+                      : "text-[#4B3935] dark:text-[#F0E7D5] hover:text-[#D4A574]"
+                    }`}>
+                    {t("nav.discovermore")}
+                  </span>
+                  <motion.div
+                    animate={{ rotate: discoverMoreOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative z-10"
+                  >
+                    <ChevronDown size={16} className={
+                      isDiscoverMoreActive || discoverMoreOpen
+                        ? "text-white"
+                        : "text-[#4B3935] dark:text-[#F0E7D5]"
+                    } />
+                  </motion.div>
+                </button>
+
+                <AnimatePresence>
+                  {discoverMoreOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full mt-2 right-0 w-64 bg-white dark:bg-[#1a1410] rounded-2xl shadow-2xl border border-[#4B3935]/10 overflow-hidden"
+                    >
+                      {discoverMoreItems.map((item, index) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setDiscoverMoreOpen(false)}
+                          className={`block px-5 py-4 transition-all duration-300 ${getIsActive(item.path)
+                              ? "bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white"
+                              : "hover:bg-[#F0E7D5]/30 dark:hover:bg-[#4B3935]/20"
+                            } ${index !== discoverMoreItems.length - 1 ? 'border-b border-[#4B3935]/10' : ''}`}
+                        >
+                          <div className="font-semibold text-sm mb-1">
+                            {item.label}
+                          </div>
+                          <div className={`text-xs ${getIsActive(item.path)
+                              ? "text-white/80"
+                              : "text-[#8B7355] dark:text-[#F0E7D5]/60"
+                            }`}>
+                            {item.description}
+                          </div>
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </nav>
 
@@ -254,16 +329,41 @@ export function Header({ siteConfig }: HeaderProps) {
                     <Link
                       to={item.path}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                        getIsActive(item.path)
+                      className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${getIsActive(item.path)
                           ? "bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white shadow-lg"
                           : "text-[#4B3935] dark:text-[#F0E7D5] hover:bg-[#F0E7D5]/50 dark:hover:bg-[#4B3935]/20"
-                      }`}
+                        }`}
                     >
                       {item.label}
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Discover More Section Mobile */}
+                <div className="pt-2">
+                  <div className="px-3 py-2 text-xs font-bold text-[#8B7355] uppercase tracking-wider">
+                    {t("nav.discovermore")}
+                  </div>
+                  {discoverMoreItems.map((item, index) => (
+                    <motion.div
+                      key={item.path}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (menuItems.length + index) * 0.05 }}
+                    >
+                      <Link
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`block w-full text-left px-5 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${getIsActive(item.path)
+                            ? "bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white shadow-lg"
+                            : "text-[#4B3935] dark:text-[#F0E7D5] hover:bg-[#F0E7D5]/50 dark:hover:bg-[#4B3935]/20"
+                          }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
 
                 <div className="h-px bg-[#4B3935]/10 dark:bg-[#F0E7D5]/10 my-4" />
 

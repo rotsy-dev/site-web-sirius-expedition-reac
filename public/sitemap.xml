@@ -240,4 +240,35 @@
     <priority>0.3</priority>
   </url>
 
+  <!-- FAQ Pages -->
+  <url>
+    <loc>https://www.siriusexpedition.com/en/faqs</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.siriusexpedition.com/en/faqs"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.siriusexpedition.com/fr/faqs"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.siriusexpedition.com/de/faqs"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.siriusexpedition.com/it/faqs"/>
+  </url>
+  <url>
+    <loc>https://www.siriusexpedition.com/fr/faqs</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.siriusexpedition.com/de/faqs</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.siriusexpedition.com/it/faqs</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+
 </urlset>

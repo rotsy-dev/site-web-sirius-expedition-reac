@@ -5,8 +5,10 @@
     "blog": "Blog",
     "about": "À propos",
     "contact": "Contact",
+    "faqs": "FAQ",
     "quote": "Demande de devis",
-    "login": "Connexion"
+    "login": "Connexion",
+    "discovermore": "Découvrir plus"
   },
   "hero": {
     "featured": "Destinations en vedette",
@@ -29,7 +31,8 @@
     "blogs": "Notre blog",
     "blogsSubtitle": "Conseils et récits de voyage",
     "aboutUs": "À propos de nous",
-    "aboutUsSubtitle": "Notre histoire et notre passion"
+    "aboutUsSubtitle": "Notre histoire et notre passion",
+    "faq": "Foire aux questions"
   },
   "tours": {
     "from": "À partir de",
@@ -276,5 +279,20 @@
     "analyticsDesc": "Ces cookies nous aident à comprendre comment les visiteurs utilisent le site.",
     "marketing": "Cookies marketing",
     "marketingDesc": "Ces cookies sont utilisés pour vous proposer des publicités personnalisées."
+  },
+  "faqs": {
+    "title": "Foire aux questions",
+    "subtitle": "Trouvez des réponses aux questions fréquentes concernant nos circuits",
+    "searchPlaceholder": "Rechercher des questions...",
+    "allCategories": "Toutes les catégories",
+    "totalQuestions": "Nombre total de questions",
+    "categories": "Catégories",
+    "resultsFound": "Résultats trouvés",
+    "openAnswers": "Ouvrir les réponses",
+    "noResults": "Aucune question trouvée",
+    "tryDifferentSearch": "Essayez un autre terme de recherche ou une autre catégorie",
+    "stillHaveQuestions": "Vous avez encore des questions ?",
+    "contactUsMessage": "Vous ne trouvez pas la réponse que vous cherchez ? Notre équipe est là pour vous aider.",
+    "contactUs": "Contactez-nous"
   }
 }

@@ -22,6 +22,7 @@ import { Blogs } from './components/Blogs';
 import { Contact } from './components/Contact';
 import { AboutUs } from './components/AboutUs';
 import { Footer } from './components/Footer';
+import { FAQPage } from './components/FAQPage';
 import { QuoteRequest } from './components/QuoteRequest';
 import { MadagascarGallery } from './components/MadagascarGallery';
 import { CookieConsent } from '../components/common/CookieConsent';
@@ -394,6 +395,13 @@ const LanguageRoutes = () => {
                   config={content.siteConfig}
                   content={content}
                 />
+              </>
+            } />
+
+            <Route path="faqs" element={
+              <>
+                <PageSEO page="faqs" />
+                <FAQPage content={content} />
               </>
             } />
 

@@ -5,8 +5,10 @@
     "blog": "Blog",
     "about": "Über uns",
     "contact": "Kontakt",
+    "faqs": "FAQs",
     "quote": "Angebotsanfrage",
-    "login": "Anmelden"
+    "login": "Anmelden",
+    "discovermore": "Mehr entdecken"
   },
   "hero": {
     "featured": "Empfohlene Reiseziele",
@@ -29,7 +31,8 @@
     "blogs": "Unser Blog",
     "blogsSubtitle": "Reisetipps und Geschichten",
     "aboutUs": "Über uns",
-    "aboutUsSubtitle": "Unsere Geschichte und unsere Leidenschaft"
+    "aboutUsSubtitle": "Unsere Geschichte und unsere Leidenschaft",
+    "faq": "Häufig gestellte Fragen"
   },
   "tours": {
     "from": "Ab",
@@ -263,5 +266,20 @@
     "badge": "Madagaskar entdecken",
     "title": "Madagaskar in Bildern",
     "subtitle": "Erkunden Sie die Schönheit und Vielfalt der Roten Insel"
+  },
+  "faqs": {
+    "title": "Häufig gestellte Fragen",
+    "subtitle": "Finden Sie Antworten auf häufige Fragen zu unseren Touren",
+    "searchPlaceholder": "Fragen suchen...",
+    "allCategories": "Alle Kategorien",
+    "totalQuestions": "Gesamtanzahl der Fragen",
+    "categories": "Kategorien",
+    "resultsFound": "Gefundene Ergebnisse",
+    "openAnswers": "Antworten öffnen",
+    "noResults": "Keine Fragen gefunden",
+    "tryDifferentSearch": "Versuchen Sie einen anderen Suchbegriff oder eine andere Kategorie",
+    "stillHaveQuestions": "Haben Sie noch Fragen?",
+    "contactUsMessage": "Können Sie die gesuchte Antwort nicht finden? Unser Team hilft Ihnen gerne weiter.",
+    "contactUs": "Kontaktieren Sie uns"
   }
 }

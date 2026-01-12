@@ -4,9 +4,11 @@
     "tours": "Tours",
     "blog": "Blog",
     "about": "About",
+    "faqs": "FAQs",
     "contact": "Contact",
     "quote": "Ask a quote",
-    "login": "Login"
+    "login": "Login",
+    "discovermore": "Discover More"
   },
   "hero": {
     "featured": "Featured Destinations",
@@ -26,7 +28,8 @@
     "blogs": "Our Blog",
     "blogsSubtitle": "Travel tips and stories",
     "aboutUs": "About Us",
-    "aboutUsSubtitle": "Our story and passion"
+    "aboutUsSubtitle": "Our story and passion",
+    "faq":" Frequently Asked Questions"
   },
   "footer": {
     "description": "Discover the wonders of Madagascar with Sirius Expedition",
@@ -280,5 +283,20 @@
     "analyticsDesc": "These cookies help us understand how visitors use the site.",
     "marketing": "Marketing cookies",
     "marketingDesc": "These cookies are used to provide you with personalized advertisements."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to common questions about our tours",
+    "searchPlaceholder": "Search questions...",
+    "allCategories": "All Categories",
+    "totalQuestions": "Total Questions",
+    "categories": "Categories",
+    "resultsFound": "Results Found",
+    "openAnswers": "Open Answers",
+    "noResults": "No questions found",
+    "tryDifferentSearch": "Try a different search term or category",
+    "stillHaveQuestions": "Still have questions?",
+    "contactUsMessage": "Can't find the answer you're looking for? Our team is here to help you.",
+    "contactUs": "Contact Us"
   }
 }
