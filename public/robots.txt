@@ -1,0 +1,69 @@
+# robots.txt pour Sirius Expedition
+# https://www.siriusexpedition.com/robots.txt
+
+# Autoriser tous les robots d'indexation
+User-agent: *
+Allow: /
+
+# Bloquer l'indexation des pages admin
+Disallow: /admin
+Disallow: /admin/
+
+# Bloquer l'indexation des pages légales (déjà gérées par noindex mais double sécurité)
+Disallow: /*/terms
+Disallow: /*/privacy
+Disallow: /*/cookies
+
+# Bloquer les fichiers système et techniques
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*.xml$ 
+Disallow: /config/
+Disallow: /node_modules/
+
+# Bloquer les paramètres de tracking
+Disallow: /*?utm_source=*
+Disallow: /*?utm_medium=*
+Disallow: /*?utm_campaign=*
+Disallow: /*?ref=*
+
+# Robots spécifiques - Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Robots spécifiques - Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+# Robots spécifiques - Yandex
+User-agent: Yandex
+Allow: /
+Crawl-delay: 1
+
+# Bloquer les mauvais robots (scraping, spam)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Sitemap - IMPORTANT pour l'indexation
+Sitemap: https://www.siriusexpedition.com/sitemap.xml
+
+# Informations additionnelles
+# Contact: contact@siriusexpedition.com
+# Dernière mise à jour: 2026-01-12

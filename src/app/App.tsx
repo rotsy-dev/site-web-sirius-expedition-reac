@@ -4,6 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, MessageCircle } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 
+// SEO
+import SEO from '../components/SEO';
+import { getSEOForPage } from '../config/seoConfig';
+
 // Provider de notifications
 import { ToastProvider } from '../components/shared/Toast';
 
@@ -53,6 +57,27 @@ const CACHE_KEYS = {
   reviews: `reviews_v${CACHE_VERSION}`,
   tourSpecialties: `tour_specialties_v${CACHE_VERSION}`,
 };
+
+// ============================================
+// COMPOSANT POUR GÉRER LE SEO PAR PAGE
+// ============================================
+const PageSEO = ({ page }: { page: string }) => {
+  const { lang } = useParams<{ lang: string }>();
+  const seoData = getSEOForPage(page, (lang || 'en') as any);
+
+  return (
+    <SEO
+      title={seoData.title}
+      description={seoData.description}
+      keywords={seoData.keywords}
+      image={seoData.image}
+      type={seoData.type}
+      schema={seoData.schema}
+      lang={lang || 'en'}
+      noindex={seoData.noindex}
+    />
+  );
+}
 
 // Wrapper pour les routes avec langue
 const LanguageRoutes = () => {
@@ -287,6 +312,7 @@ const LanguageRoutes = () => {
             {/* Page d'accueil */}
             <Route index element={
               <>
+                <PageSEO page="home" />
                 <HeroCarousel
                   slides={cachedHeroSlides}
                   onNavigateToContact={() => setActiveSection('contact')}
@@ -317,6 +343,7 @@ const LanguageRoutes = () => {
             {/* Page Tours */}
             <Route path="tours" element={
               <div className="min-h-screen bg-[#FAF7F2]">
+                <PageSEO page="tours" />
                 <TourSpecialties
                   specialties={cachedTourSpecialties}
                   initialSelectedTour={pendingTour}
@@ -327,39 +354,68 @@ const LanguageRoutes = () => {
             } />
 
             {/* Page Liste des Blogs */}
-            <Route path="blog" element={<Blogs content={content} />} />
+            <Route path="blog" element={
+              <>
+                <PageSEO page="blog" />
+                <Blogs content={content} />
+              </>
+            } />
 
             {/* Page Détail du Blog (Slug) */}
             <Route path="blog/:slug" element={<Blogs content={content} isDetail={true} />} />
 
             {/* Page Contact */}
             <Route path="contact" element={
-              <Contact
-                config={content.siteConfig}
-                content={content}
-              />
+              <>
+                <PageSEO page="contact" />
+                <Contact
+                  config={content.siteConfig}
+                  content={content}
+                />
+              </>
             } />
 
             {/* Page Devis */}
             <Route path="quote" element={
-              <QuoteRequest
-                config={content.siteConfig}
-                content={content}
-              />
+              <>
+                <PageSEO page="quote" />
+                <QuoteRequest
+                  config={content.siteConfig}
+                  content={content}
+                />
+              </>
             } />
 
             {/* Page À propos */}
             <Route path="about" element={
-              <AboutUs
-                config={content.siteConfig}
-                content={content}
-              />
+              <>
+                <PageSEO page="about" />
+                <AboutUs
+                  config={content.siteConfig}
+                  content={content}
+                />
+              </>
             } />
 
             {/* ========== PAGES LÉGALES (LAZY) ========== */}
-            <Route path="terms" element={<TermsPage currentLang={lang || 'en'} />} />
-            <Route path="privacy" element={<PrivacyPage currentLang={lang || 'en'} />} />
-            <Route path="cookies" element={<CookiesPage currentLang={lang || 'en'} />} />
+            <Route path="terms" element={
+              <>
+                <PageSEO page="terms" />
+                <TermsPage currentLang={lang || 'en'} />
+              </>
+            } />
+            <Route path="privacy" element={
+              <>
+                <PageSEO page="privacy" />
+                <PrivacyPage currentLang={lang || 'en'} />
+              </>
+            } />
+            <Route path="cookies" element={
+              <>
+                <PageSEO page="cookies" />
+                <CookiesPage currentLang={lang || 'en'} />
+              </>
+            } />
           </Routes>
         </Suspense>
       </main>
