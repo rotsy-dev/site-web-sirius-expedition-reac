@@ -11,6 +11,7 @@ import {
     orderBy
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { faqs } from '@/app/data/content';
 
 // Cache configuration
 const CACHE_VERSION = '1.0';
@@ -63,7 +64,12 @@ const defaultContent = {
             badge: 'Get In Touch',
             title: 'Contact Us',
             subtitle: 'Get in touch with us to plan your Madagascar adventure'
-        }
+        },
+        faqs: {
+            badge: 'FAQs',
+            title: 'Frequently Asked Questions',
+            subtitle: 'Find answers to common questions about our tours and services'
+        },
     },
     ourStory: {
         title: 'Our Story',

@@ -401,7 +401,9 @@ const LanguageRoutes = () => {
             <Route path="faqs" element={
               <>
                 <PageSEO page="faqs" />
-                <FAQPage content={content} />
+                <FAQPage
+                 onNavigateToContact={() => setActiveSection('contact')}
+                 content={content} />
               </>
             } />
 
