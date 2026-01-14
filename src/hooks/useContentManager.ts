@@ -63,7 +63,12 @@ const defaultContent = {
             badge: 'Get In Touch',
             title: 'Contact Us',
             subtitle: 'Get in touch with us to plan your Madagascar adventure'
-        }
+        },
+        faqs: {
+            badge: 'FAQs',
+            title: 'Frequently Asked Questions',
+            subtitle: 'Find answers to common questions about our tours and services'
+        },
     },
     ourStory: {
         title: 'Our Story',

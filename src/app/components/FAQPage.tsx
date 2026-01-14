@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, ChevronDown, Search, X, Loader2, Sparkles, CheckCircle } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { HelpCircle, ChevronDown, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import ScrollReveal from 'scrollreveal';
+import { useTranslatedContent } from '@/hooks/useTranslatedContent';
 
 interface FAQ {
     id: number;
@@ -15,9 +14,10 @@ interface FAQ {
 }
 
 interface FAQPageProps {
+    onNavigateToContact?: () => void;
     content?: {
         pageHeaders?: {
-            faq?: {
+            faqs?: {
                 badge?: string;
                 title?: string;
                 subtitle?: string;
@@ -26,10 +26,9 @@ interface FAQPageProps {
     };
 }
 
+const HERO_IMAGE = "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1200&h=600&fit=crop";
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&h=600&fit=crop";
-
-export function FAQPage({ content = {} }: FAQPageProps) {
+export function FAQPage({ onNavigateToContact, content = {} }: FAQPageProps) {
     const { t } = useTranslation();
     const [faqs, setFaqs] = useState<FAQ[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +37,21 @@ export function FAQPage({ content = {} }: FAQPageProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-    const header = content?.pageHeaders?.faq || {};
+    const { translatedContent: translatedFaqs } = useTranslatedContent(
+        faqs,
+        ['question', 'answer']
+    );
+    
+    const { translatedContent: translatedFaqsHeader } = useTranslatedContent(
+        content.pageHeaders?.faqs ?? null,
+        ['badge', 'title', 'subtitle']
+    );
+
+    const header = (translatedFaqsHeader as { badge?: string; title?: string; subtitle?: string } | null)
+        || content.pageHeaders?.faqs
+        || {};
+
+    const translatedFaqList = (translatedFaqs as FAQ[] | null) || faqs;
 
     useEffect(() => {
         if (HERO_IMAGE) {
@@ -73,77 +86,51 @@ export function FAQPage({ content = {} }: FAQPageProps) {
         fetchFaqs();
     }, []);
 
-    useEffect(() => {
-        if (typeof ScrollReveal === 'undefined' || isLoading) return;
+    const categories = useMemo(() => 
+        ['all', ...Array.from(new Set(translatedFaqList.map(faq => faq.category)))],
+        [translatedFaqList]
+    );
 
-        let sr: any = null;
-        let isMounted = true;
+    const filteredFaqs = useMemo(() => 
+        translatedFaqList.filter(faq => {
+            const matchesSearch = searchQuery === '' ||
+                faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
 
-        try {
-            sr = ScrollReveal({
-                reset: false,
-                distance: '40px',
-                duration: 800,
-                delay: 0,
-                easing: 'cubic-bezier(0.5, 0, 0, 1)',
-                mobile: true
-            });
+            const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
 
-            if (isMounted && sr) {
-                sr.reveal('.reveal-faq', { origin: 'bottom', interval: 100 });
-                sr.reveal('.reveal-category', { origin: 'bottom', interval: 50 });
-            }
-        } catch (error) {
-            console.warn('ScrollReveal initialization error:', error);
-        }
+            return matchesSearch && matchesCategory;
+        }),
+        [translatedFaqList, searchQuery, selectedCategory]
+    );
 
-        return () => {
-            isMounted = false;
-            if (sr && typeof sr.destroy === 'function') {
-                try {
-                    sr.destroy();
-                } catch (error) {
-                    console.warn('ScrollReveal cleanup error:', error);
-                }
-            }
-        };
-    }, [isLoading]);
+    const groupedFaqs = useMemo(() => 
+        filteredFaqs.reduce((acc, faq) => {
+            if (!acc[faq.category]) acc[faq.category] = [];
+            acc[faq.category].push(faq);
+            return acc;
+        }, {} as Record<string, FAQ[]>),
+        [filteredFaqs]
+    );
 
-    const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category)))];
-
-    const filteredFaqs = faqs.filter(faq => {
-        const matchesSearch = searchQuery === '' ||
-            faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
-
-        return matchesSearch && matchesCategory;
-    });
-
-    const groupedFaqs = filteredFaqs.reduce((acc, faq) => {
-        if (!acc[faq.category]) acc[faq.category] = [];
-        acc[faq.category].push(faq);
-        return acc;
-    }, {} as Record<string, FAQ[]>);
+    const handleClearSearch = useCallback(() => setSearchQuery(''), []);
+    const handleToggleFaq = useCallback((id: number) => {
+        setOpenFaqId(prev => prev === id ? null : id);
+    }, []);
 
     return (
-        <div className="bg-[#F0E7D5] min-h-screen overflow-hidden">
+        <div className="bg-gradient-to-b from-[#F0E7D5] to-[#F0E7D5] min-h-screen">
             {/* Hero Section */}
             <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-                <motion.div
-                    initial={{ scale: 1.1 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="absolute inset-0 overflow-hidden"
-                >
-                    {HERO_IMAGE ? (
+                <div className="absolute inset-0">
+                    {HERO_IMAGE && (
                         <>
                             <img
                                 src={HERO_IMAGE}
                                 alt="FAQ Hero"
-                                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
-                                    }`}
+                                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                                    heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                                }`}
                                 loading="eager"
                                 fetchPriority="high"
                             />
@@ -151,94 +138,79 @@ export function FAQPage({ content = {} }: FAQPageProps) {
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
                             )}
                         </>
-                    ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-                </motion.div>
+                    <div className="absolute inset-0 bg-black/50" />
+                </div>
 
-                <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
-                    <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                        <path
-                            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
-                            className="fill-[#F3E5D1]"
-                        />
-                    </svg>
+               <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
+                <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path
+                    d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
+                    className="fill-[#F0E7D5] dark:fill-[#1a1410]"
+                    ></path>
+                </svg>
                 </div>
 
                 <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="mb-4"
-                    >
-                        <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-                            {header.badge || t('sections.faq')}
-                        </span>
-                    </motion.div>
+                    <span className="inline-block px-4 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-semibold mb-4">
+                        {header.badge || t('sections.faq')}
+                    </span>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="text-4xl md:text-6xl lg:text-6xl font-black text-white mb-4 tracking-tight"
-                    >
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
                         {header.title || t('faq.title')}
-                    </motion.h1>
+                    </h1>
 
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
-                    >
+                    <p className="text-base md:text-lg text-white/90 max-w-2xl mx-auto">
                         {header.subtitle || t('faq.subtitle')}
-                    </motion.p>
+                    </p>
                 </div>
             </section>
 
             {/* Main Content */}
-            <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
                 {isLoading ? (
-                    <div className="text-center py-16">
-                        <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-[#443C34]" />
+                    <div className="text-center py-20">
+                        <div className="w-12 h-12 border-4 border-[#D4A574] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                         <p className="text-lg text-gray-600">{t('common.loading')}</p>
                     </div>
                 ) : (
                     <>
-                        {/* Search & Filter */}
-                        <div className="mb-12 space-y-6">
+                        {/* Search Bar */}
+                        <div className="mb-10">
                             <div className="relative max-w-2xl mx-auto">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder={t('faq.searchPlaceholder') || 'Search questions...'}
-                                    className="w-full pl-12 pr-12 py-4 bg-white border-2 border-[#D4A574]/20 rounded-2xl text-[#443C34] focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent shadow-sm"
+                                    placeholder={t('faq.searchPlaceholder') || 'Rechercher une question...'}
+                                    className="w-full pl-12 pr-12 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent shadow-sm"
                                 />
                                 {searchQuery && (
                                     <button
-                                        onClick={() => setSearchQuery('')}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#443C34] transition-colors"
+                                        onClick={handleClearSearch}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
                                     >
-                                        <X size={20} />
+                                        <X size={18} className="text-gray-500" />
                                     </button>
                                 )}
                             </div>
+                        </div>
 
-                            <div className="flex flex-wrap gap-3 justify-center">
+                        {/* Categories */}
+                        <div className="mb-10">
+                            <div className="flex flex-wrap gap-2 justify-center">
                                 {categories.map((category) => (
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
-                                        className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${selectedCategory === category
-                                            ? 'bg-gradient-to-r from-[#443C34] to-[#8B7355] text-white shadow-lg'
-                                            : 'bg-white text-[#443C34] border-2 border-[#D4A574]/20 hover:border-[#D4A574] hover:shadow-md'
-                                            }`}
+                                        className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                            selectedCategory === category
+                                                ? 'bg-[#D4A574] text-white shadow-md'
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                        }`}
                                     >
-                                        {category === 'all' ? t('faq.allCategories') || 'All' : category}
+                                        {category === 'all' ? t('faq.allCategories') || 'Toutes' : category}
                                     </button>
                                 ))}
                             </div>
@@ -246,117 +218,82 @@ export function FAQPage({ content = {} }: FAQPageProps) {
 
                         {/* Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                            <div className="bg-white rounded-2xl p-6 text-center border border-gray-200 shadow-sm">
-                                <p className="text-sm text-[#8B7355] mb-1 font-medium">{t('faq.totalQuestions') || 'Total Questions'}</p>
-                                <p className="text-3xl font-bold text-[#443C34]">{faqs.length}</p>
-                            </div>
-                            <div className="bg-white rounded-2xl p-6 text-center border border-gray-200 shadow-sm">
-                                <p className="text-sm text-[#8B7355] mb-1 font-medium">{t('faq.categories') || 'Categories'}</p>
-                                <p className="text-3xl font-bold text-[#443C34]">{categories.length - 1}</p>
-                            </div>
-                            <div className="bg-white rounded-2xl p-6 text-center border border-gray-200 shadow-sm">
-                                <p className="text-sm text-[#8B7355] mb-1 font-medium">{t('faq.resultsFound') || 'Results'}</p>
-                                <p className="text-3xl font-bold text-[#443C34]">{filteredFaqs.length}</p>
-                            </div>
-                            <div className="bg-white rounded-2xl p-6 text-center border border-gray-200 shadow-sm">
-                                <p className="text-sm text-[#8B7355] mb-1 font-medium">{t('faq.openAnswers') || 'Open'}</p>
-                                <p className="text-3xl font-bold text-[#443C34]">{openFaqId ? 1 : 0}</p>
-                            </div>
+                            {[
+                                { label: t('faq.totalQuestions') || 'Total', value: faqs.length },
+                                { label: t('faq.categories') || 'Catégories', value: categories.length - 1 },
+                                { label: t('faq.resultsFound') || 'Résultats', value: filteredFaqs.length },
+                                { label: t('faq.openAnswers') || 'Ouverte', value: openFaqId ? 1 : 0 },
+                            ].map((stat) => (
+                                <div
+                                    key={stat.label}
+                                    className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100"
+                                >
+                                    <p className="text-3xl font-bold text-[#443C34] mb-1">{stat.value}</p>
+                                    <p className="text-xs text-gray-600 uppercase tracking-wide">{stat.label}</p>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* FAQs by Category */}
+                        {/* FAQs List */}
                         {filteredFaqs.length === 0 ? (
-                            <div className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-[#D4A574]/30">
-                                <HelpCircle size={64} className="text-gray-300 mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-[#443C34] mb-2">
-                                    {t('faq.noResults') || 'No questions found'}
+                            <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                <HelpCircle size={48} className="text-gray-300 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {t('faq.noResults') || 'Aucune question trouvée'}
                                 </h3>
                                 <p className="text-gray-600">
-                                    {t('faq.tryDifferentSearch') || 'Try a different search term or category'}
+                                    {t('faq.tryDifferentSearch') || 'Essayez une autre recherche'}
                                 </p>
                             </div>
                         ) : (
                             <div className="space-y-12">
                                 {Object.entries(groupedFaqs).map(([category, categoryFaqs]) => (
-                                    <div key={category} className="reveal-category">
-                                        <div className="mb-8 pb-4 border-b-2 border-[#D4A574]/30">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-[#D4A574] to-[#C4965F] rounded-xl flex items-center justify-center shadow-md">
-                                                    <HelpCircle size={24} className="text-white" />
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-2xl font-bold text-[#443C34] mb-1">
-                                                        {category}
-                                                    </h2>
-                                                    <p className="text-sm text-[#8B7355] font-medium">
-                                                        {categoryFaqs.length} {categoryFaqs.length === 1 ? 'question' : 'questions'}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                    <div key={category}>
+                                        {/* Category Header */}
+                                        <div className="mb-6 pb-3 border-b-2 border-gray-200">
+                                            <h2 className="text-2xl font-bold text-[#443C34]">{category}</h2>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                {categoryFaqs.length} {categoryFaqs.length === 1 ? 'question' : 'questions'}
+                                            </p>
                                         </div>
 
+                                        {/* FAQ Items */}
                                         <div className="space-y-3">
-                                            {categoryFaqs.map((faq, index) => {
+                                            {categoryFaqs.map((faq) => {
                                                 const isOpen = openFaqId === faq.id;
                                                 return (
                                                     <div
                                                         key={faq.id}
-                                                        className="reveal-faq bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-[#D4A574]/40 transition-all duration-300 group"
+                                                        className={`bg-white rounded-xl border transition-all ${
+                                                            isOpen 
+                                                                ? 'border-[#D4A574] shadow-md' 
+                                                                : 'border-gray-200 shadow-sm hover:border-gray-300'
+                                                        }`}
                                                     >
                                                         <button
-                                                            onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                                                            className="w-full px-6 py-5 flex items-start justify-between gap-4 text-left group-hover:bg-gray-50 transition-colors"
+                                                            onClick={() => handleToggleFaq(faq.id)}
+                                                            className="w-full px-5 py-4 flex items-start justify-between gap-4 text-left"
                                                         >
-                                                            <div className="flex items-start gap-4 flex-1">
-                                                                <div className={`mt-1 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen
-                                                                        ? 'bg-[#D4A574]'
-                                                                        : 'bg-gray-200 group-hover:bg-[#D4A574]/20'
-                                                                    }`}>
-                                                                    <span className={`text-xs font-bold ${isOpen ? 'text-white' : 'text-gray-500 group-hover:text-[#D4A574]'
-                                                                        }`}>
-                                                                        {index + 1}
-                                                                    </span>
-                                                                </div>
-                                                                <h3 className="text-lg font-semibold text-[#443C34] leading-tight">
-                                                                    {faq.question}
-                                                                </h3>
-                                                            </div>
-                                                            <motion.div
-                                                                animate={{ rotate: isOpen ? 180 : 0 }}
-                                                                transition={{ duration: 0.3 }}
-                                                                className="flex-shrink-0"
-                                                            >
-                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isOpen
-                                                                        ? 'bg-[#D4A574]'
-                                                                        : 'bg-gray-100 group-hover:bg-gray-200'
-                                                                    }`}>
-                                                                    <ChevronDown size={20} className={isOpen ? 'text-white' : 'text-[#443C34]'} />
-                                                                </div>
-                                                            </motion.div>
+                                                            <h3 className="text-base md:text-lg font-semibold text-gray-800 flex-1">
+                                                                {faq.question}
+                                                            </h3>
+                                                            <ChevronDown 
+                                                                size={20} 
+                                                                className={`text-gray-500 flex-shrink-0 mt-1 transition-transform ${
+                                                                    isOpen ? 'rotate-180' : ''
+                                                                }`}
+                                                            />
                                                         </button>
 
-                                                        <AnimatePresence>
-                                                            {isOpen && (
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    transition={{ duration: 0.3 }}
-                                                                    className="overflow-hidden"
-                                                                >
-                                                                    <div className="px-6 pb-6 pt-2 pl-16">
-                                                                        <div className="bg-gradient-to-br from-[#F8F5F0] to-white rounded-lg p-5 border-l-4 border-[#D4A574]">
-                                                                            <div className="flex items-start gap-3">
-                                                                                <CheckCircle size={20} className="text-[#D4A574] mt-0.5 flex-shrink-0" />
-                                                                                <p className="text-[#443C34]/90 leading-relaxed text-base">
-                                                                                    {faq.answer}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
+                                                        {isOpen && (
+                                                            <div className="px-5 pb-5">
+                                                                <div className="pt-3 border-t border-gray-100">
+                                                                    <p className="text-gray-700 leading-relaxed">
+                                                                        {faq.answer}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
@@ -367,23 +304,22 @@ export function FAQPage({ content = {} }: FAQPageProps) {
                         )}
 
                         {/* CTA Section */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="mt-16 bg-white rounded-3xl p-8 md:p-12 text-center border border-gray-200 shadow-sm"
-                        >
-                            <HelpCircle size={48} className="text-[#443C34] mx-auto mb-4" />
+                        <div className="mt-16 bg-white rounded-2xl p-8 md:p-12 text-center shadow-sm border border-gray-100">
                             <h3 className="text-2xl md:text-3xl font-bold text-[#443C34] mb-3">
-                                {t('faq.stillHaveQuestions') || 'Still have questions?'}
+                                {t('faq.stillHaveQuestions') || 'Vous avez encore des questions ?'}
                             </h3>
-                            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                                {t('faq.contactUsMessage') || "Can't find the answer you're looking for? Our team is here to help you."}
+                            <p className="text-gray-600 mb-6 max-w-xl mx-auto">
+                                {t('faq.contactUsMessage') || "Notre équipe est là pour vous aider."}
                             </p>
-                            <button className="px-8 py-4 bg-gradient-to-r from-[#443C34] to-[#8B7355] text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                {t('faq.contactUs') || 'Contact Us'}
-                            </button>
-                        </motion.div>
+                            {onNavigateToContact && (
+                                <button 
+                                    onClick={onNavigateToContact}
+                                    className="inline-flex items-center gap-2 px-8 py-3 bg-[#D4A574] text-white rounded-lg font-semibold hover:bg-[#C39563] transition-colors shadow-md"
+                                >
+                                    {t('contact.title') || 'Nous contacter'}
+                                </button>
+                            )}
+                        </div>
                     </>
                 )}
             </section>
