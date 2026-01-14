@@ -20,6 +20,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 )
 
 interface FooterProps {
+  setActiveSection?: (section: string) => void
   config: {
     siteName: string;
     logo: string;

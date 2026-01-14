@@ -354,6 +354,19 @@ const LanguageRoutes = () => {
               </div>
             } />
 
+            {/* Page Tours (avec slug dans l'URL) - ouvre la modal automatiquement */}
+            <Route path="tours/:slug" element={
+              <div className="min-h-screen bg-[#FAF7F2]">
+                <PageSEO page="tours" />
+                <TourSpecialties
+                  specialties={cachedTourSpecialties}
+                  initialSelectedTour={pendingTour}
+                  content={content}
+                  onNavigateToQuote={() => setActiveSection(SITE_SECTIONS.QUOTE)}
+                />
+              </div>
+            } />
+
             {/* Page Liste des Blogs */}
             <Route path="blog" element={
               <>
@@ -400,7 +413,7 @@ const LanguageRoutes = () => {
 
             <Route path="faqs" element={
               <>
-                <PageSEO page="faqs" />
+                <PageSEO page="faq" />
                 <FAQPage content={content} />
               </>
             } />

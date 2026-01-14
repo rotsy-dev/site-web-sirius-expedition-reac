@@ -7,6 +7,8 @@ import { LanguageSwitcher } from "./shared/LanguageSwitcher"
 import { useTranslation } from "react-i18next"
 
 interface HeaderProps {
+  activeSection?: string
+  setActiveSection?: (section: string) => void
   siteConfig: {
     siteName: string
     tagline: string

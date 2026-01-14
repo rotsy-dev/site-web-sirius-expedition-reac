@@ -17,6 +17,7 @@ interface Video {
 interface VideoGalleryProps {
   videos: Video[]
   config: any
+  onNavigateToContact?: () => void
   content?: {
     pageHeaders?: {
       videos?: {

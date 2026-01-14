@@ -125,7 +125,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
     const isHovered = hoveredButton === tour.id
 
     return (
-      <div className="bg-[#F0E7D5] rounded-[32px] overflow-hidden border border-[#4B3935]/10 flex flex-col h-full animate-card shadow-sm">
+      <div className="safari-frame bg-[#F0E7D5] animate-card flex flex-col h-full">
         {/* Image avec Overlay léger */}
         <div className="relative h-64 overflow-hidden rounded-t-[32px]">
           <ImageWithFallback
@@ -133,7 +133,8 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             alt={tour.title}
             className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#4B3935]/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1410]/35 to-transparent" />
+          <div className="absolute inset-0 safari-topo opacity-25 pointer-events-none mix-blend-overlay" />
         </div>
 
         <div className="p-8 flex flex-col flex-1">
@@ -187,7 +188,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
   return (
     <>
       {/* Background de la section en Vanilla clair pour faire ressortir les cartes */}
-      <section className="py-24 px-4 bg-[#F0E7D5]/30">
+      <section className="py-24 px-4 safari-section relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
 
           <div className="section-header mb-12">

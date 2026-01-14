@@ -49,6 +49,14 @@
   --accent-travel-hover: #26A393;
   --gold: #D4A574;
   --gold-hover: #C4965F;
+  --safari-olive: #5E6B3B;
+  --safari-olive-hover: #4E5931;
+  --safari-clay: #B66A3C;
+  --safari-clay-hover: #9E5C34;
+  --safari-sky: #8FB7A6;
+  --safari-ink: #1a1410;
+  --safari-overlay: rgba(26, 20, 16, 0.72);
+  --safari-overlay-soft: rgba(26, 20, 16, 0.52);
 }
 
 .dark {
@@ -137,6 +145,12 @@
   --color-accent-travel-hover: var(--accent-travel-hover);
   --color-gold: var(--gold);
   --color-gold-hover: var(--gold-hover);
+  --color-safari-olive: var(--safari-olive);
+  --color-safari-olive-hover: var(--safari-olive-hover);
+  --color-safari-clay: var(--safari-clay);
+  --color-safari-clay-hover: var(--safari-clay-hover);
+  --color-safari-sky: var(--safari-sky);
+  --color-safari-ink: var(--safari-ink);
 }
 
 @layer base {

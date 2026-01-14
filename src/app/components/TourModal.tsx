@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, ChevronUp, Clock, MapPin, ArrowLeft, Users, Calendar, Check, CheckCircle, XCircle, Car, TrendingUp } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -32,13 +32,34 @@ export interface ItineraryStep {
   description: string
 }
 
+export type AvailabilityStatus = 'available' | 'limited' | 'unavailable'
+
+export interface AvailabilityEntry {
+  date: string // YYYY-MM-DD
+  status: AvailabilityStatus
+  note?: string
+}
+
+export interface TourTestimonial {
+  name: string
+  text: string
+  rating?: number
+  date?: string
+}
+
 // Extension pour la modal (optionnel)
 export interface ExtendedTourSpecialty extends TourSpecialty {
   gallery?: string[]
+  availability?: AvailabilityEntry[]
   groupSize?: string
   season?: string
   included?: string[]
   excluded?: string[]
+  itineraryMapEmbedUrl?: string
+  packingList?: string[]
+  testimonials?: TourTestimonial[]
+  similarTourSlugs?: string[]
+  enableShare?: boolean
 }
 
 // Helper pour convertir les données Firebase en format modal
@@ -46,7 +67,8 @@ export const getDetailedTour = (base: TourSpecialty): ExtendedTourSpecialty => {
   return {
     ...base,
     // Ajouter des valeurs par défaut si elles n'existent pas
-    gallery: base.image ? [base.image] : [],
+    gallery: (base as any).gallery?.length ? (base as any).gallery : (base.image ? [base.image] : []),
+    availability: (base as any).availability || [],
     groupSize: "4-8 personnes", // Valeur par défaut
     season: "Toute l'année",     // Valeur par défaut
     included: [
@@ -61,7 +83,12 @@ export const getDetailedTour = (base: TourSpecialty): ExtendedTourSpecialty => {
       "Assurance voyage",
       "Boissons alcoolisées",
       "Dépenses personnelles"
-    ]
+    ],
+    itineraryMapEmbedUrl: (base as any).itineraryMapEmbedUrl || '',
+    packingList: (base as any).packingList || [],
+    testimonials: (base as any).testimonials || [],
+    similarTourSlugs: (base as any).similarTourSlugs || [],
+    enableShare: (base as any).enableShare ?? true,
   };
 };
 
@@ -70,12 +97,103 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
   const { t } = useTranslation();
   const [openDay, setOpenDay] = useState<number | null>(0);
   const [isItineraryOpen, setIsItineraryOpen] = useState(true);
+  const gallery = tour.gallery && tour.gallery.length > 0 ? tour.gallery : (tour.image ? [tour.image] : []);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   const handleAskQuote = () => {
     onClose();
     if (onNavigateToQuote) {
       onNavigateToQuote();
     }
+  };
+
+  const tr = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
+  const displaySlug = useMemo(() => {
+    const slugify = (input: string) =>
+      input
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    if ((tour as any)?.slug) return String((tour as any).slug);
+    const link = (tour as any)?.link;
+    if (typeof link === 'string' && link.length > 0) {
+      const parts = link.split('/').filter(Boolean);
+      return parts[parts.length - 1] || '';
+    }
+    if (typeof (tour as any)?.id !== 'undefined') return String((tour as any).id);
+    if (typeof (tour as any)?.title === 'string' && (tour as any).title.trim()) return slugify((tour as any).title);
+    return '';
+  }, [tour]);
+
+  const normalizedAvailability = useMemo<AvailabilityEntry[]>(() => {
+    const raw: any = (tour as any).availability;
+
+    if (Array.isArray(raw)) {
+      return raw
+        .filter(Boolean)
+        .filter((e: any) => typeof e?.date === 'string' && typeof e?.status === 'string')
+        .map((e: any) => ({ date: e.date, status: e.status, note: e.note }));
+    }
+
+    if (raw && typeof raw === 'object') {
+      // Support ancien format éventuel: { "YYYY-MM-DD": { status, note } }
+      return Object.entries(raw)
+        .map(([date, v]: any) => ({ date, status: v?.status, note: v?.note }))
+        .filter((e: any) => typeof e?.date === 'string' && typeof e?.status === 'string');
+    }
+
+    return [];
+  }, [tour]);
+
+  const availabilityByDate = useMemo(() => {
+    const map = new Map<string, AvailabilityEntry>();
+    normalizedAvailability.forEach((e) => {
+      if (e?.date) map.set(e.date, e);
+    });
+    return map;
+  }, [normalizedAvailability]);
+
+  const calendarDays = useMemo(() => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const startWeekday = (first.getDay() + 6) % 7; // Monday=0
+    const daysInMonth = last.getDate();
+    const cells: Array<{ date: Date; inMonth: boolean }> = [];
+
+    for (let i = 0; i < startWeekday; i++) {
+      const d = new Date(year, month, 1 - (startWeekday - i));
+      cells.push({ date: d, inMonth: false });
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      cells.push({ date: new Date(year, month, day), inMonth: true });
+    }
+    while (cells.length % 7 !== 0) {
+      const lastCell = cells[cells.length - 1].date;
+      const d = new Date(lastCell);
+      d.setDate(d.getDate() + 1);
+      cells.push({ date: d, inMonth: false });
+    }
+    return cells;
+  }, [calendarMonth]);
+
+  const formatYmd = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   };
 
   return (
@@ -105,21 +223,21 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
           className="cursor-pointer absolute top-3 left-3 sm:top-6 sm:left-6 z-10 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 bg-white/90 backdrop-blur-xl rounded-full hover:bg-white transition-all border-2 border-[#D4A574]/30 shadow-xl hover:shadow-2xl hover:scale-105"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[#4B3935]" />
-          <span className="font-bold text-xs sm:text-sm text-[#4B3935] hidden sm:inline">{t('common.back')}</span>
+          <span className="font-bold text-xs sm:text-sm text-[#4B3935] hidden sm:inline">{tr('common.back', 'Retour')}</span>
         </button>
 
         <div className="flex flex-col">
          {/* Image en haut - Toutes les tailles */}
         <div className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] relative overflow-hidden rounded-t-2xl sm:rounded-t-[2.5rem]">
           <img
-            src={tour.image || 'https://via.placeholder.com/800x600?text=No+Image'}
+            src={gallery[activeImageIndex] || tour.image || 'https://via.placeholder.com/800x600?text=No+Image'}
             alt={tour.title}
             className="w-full h-full object-cover blur-sm scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           {tour.isBestSeller && (
             <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-gradient-to-r from-amber-400 to-yellow-600 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm shadow-2xl flex items-center gap-1.5 sm:gap-2 z-10">
-              🏆 <span className="hidden sm:inline">{t('tourSpecialties.bestSeller')}</span>
+              🏆 <span className="hidden sm:inline">{tr('tourSpecialties.bestSeller', 'Best Seller')}</span>
             </div>
           )}
           {/* Titre sur l'image */}
@@ -132,6 +250,14 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-black text-white mb-1 sm:mb-2 leading-tight drop-shadow-2xl">
                   {tour.title}
                 </h2>
+                {displaySlug && (
+                  <div className="mb-1 sm:mb-2">
+                    <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-xl text-white px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-white/25">
+                      <span className="opacity-80">slug</span>
+                      <span className="font-black">{displaySlug}</span>
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold border border-white/30">
                     <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D4A574]"></span>
@@ -151,11 +277,123 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
 
           {/* Content Column - Centré */}
           <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 md:p-10 lg:p-12">
+            {/* Galerie d'images */}
+            {gallery.length > 1 && (
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#332C26]">{tr('tourSpecialties.modal.gallery', 'Galerie')}</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex((v) => (v - 1 + gallery.length) % gallery.length)}
+                      className="cursor-pointer px-3 py-2 rounded-xl bg-white border border-[#D4A574]/20 hover:border-[#D4A574]/50 transition-all text-sm font-bold text-[#4B3935]"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex((v) => (v + 1) % gallery.length)}
+                      className="cursor-pointer px-3 py-2 rounded-xl bg-white border border-[#D4A574]/20 hover:border-[#D4A574]/50 transition-all text-sm font-bold text-[#4B3935]"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {gallery.map((src, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`cursor-pointer relative h-20 w-28 sm:h-24 sm:w-36 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${idx === activeImageIndex ? 'border-[#D4A574] shadow-lg' : 'border-transparent hover:border-[#D4A574]/40'}`}
+                      aria-label={`gallery-${idx + 1}`}
+                    >
+                      <img src={src} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/10" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div className="mb-6 sm:mb-8 md:mb-10">
               <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed pl-3 sm:pl-4 md:pl-6 border-l-2 sm:border-l-4 border-[#D4A574] bg-[#F0E7D5]/30 p-4 sm:p-6 rounded-r-xl">
                 {tour.description}
               </p>
+            </div>
+
+            {/* Calendrier de disponibilités */}
+            <div className="mb-6 sm:mb-8 md:mb-10 bg-white rounded-2xl border-2 border-[#F0E7D5] p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26]">{tr('tourSpecialties.modal.availability', 'Disponibilités')}</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                    className="cursor-pointer px-3 py-2 rounded-xl bg-[#F0E7D5]/40 hover:bg-[#F0E7D5]/60 transition-all text-sm font-bold text-[#4B3935]"
+                  >
+                    ←
+                  </button>
+                  <div className="text-sm sm:text-base font-black text-[#332C26]">
+                    {calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                    className="cursor-pointer px-3 py-2 rounded-xl bg-[#F0E7D5]/40 hover:bg-[#F0E7D5]/60 transition-all text-sm font-bold text-[#4B3935]"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-2 text-xs font-bold text-[#8B7355] mb-2">
+                {[
+                  tr('common.weekdays.mon', 'Lun'),
+                  tr('common.weekdays.tue', 'Mar'),
+                  tr('common.weekdays.wed', 'Mer'),
+                  tr('common.weekdays.thu', 'Jeu'),
+                  tr('common.weekdays.fri', 'Ven'),
+                  tr('common.weekdays.sat', 'Sam'),
+                  tr('common.weekdays.sun', 'Dim'),
+                ].map((d) => (
+                  <div key={d} className="text-center">{d}</div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-2">
+                {calendarDays.map(({ date, inMonth }, idx) => {
+                  const key = formatYmd(date);
+                  const entry = availabilityByDate.get(key);
+                  const status = entry?.status;
+                  const dot =
+                    status === 'available'
+                      ? 'bg-green-500'
+                      : status === 'limited'
+                      ? 'bg-amber-500'
+                      : status === 'unavailable'
+                      ? 'bg-red-500'
+                      : 'bg-transparent';
+
+                  return (
+                    <div
+                      key={idx}
+                      title={entry?.note || ''}
+                      className={`relative rounded-xl border p-2 sm:p-2.5 text-center ${inMonth ? 'bg-[#FAF7F2]' : 'bg-white/50'} ${inMonth ? 'border-[#F0E7D5]' : 'border-transparent'} ${inMonth ? 'text-[#332C26]' : 'text-[#332C26]/35'}`}
+                    >
+                      <div className="text-xs sm:text-sm font-black">{date.getDate()}</div>
+                      <div className={`mx-auto mt-1 h-2 w-2 rounded-full ${dot}`} />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-wrap gap-3 mt-4 text-xs font-semibold text-[#4B3935]">
+                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-green-500" /> {tr('tourSpecialties.modal.available', 'Disponible')}</div>
+                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500" /> {tr('tourSpecialties.modal.limited', 'Limité')}</div>
+                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /> {tr('tourSpecialties.modal.unavailable', 'Complet')}</div>
+              </div>
             </div>
 
             {/* Info Bar amélioré */}
@@ -305,7 +543,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                                   />
                                 )}
                                 <span className="absolute -top-6 sm:-top-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-black text-[#D4A574] whitespace-nowrap">
-                                  Jour {i + 1}
+                                  {tr('tourSpecialties.modal.day', 'Jour')} {i + 1}
                                 </span>
                               </div>
 
@@ -397,6 +635,88 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 )}
               </div>
             )}
+
+            {/* Carte interactive de l'itinéraire */}
+            {tour.itineraryMapEmbedUrl && (
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26] mb-4">{tr('tourSpecialties.modal.map', "Carte de l'itinéraire")}</h3>
+                <div className="overflow-hidden rounded-2xl border-2 border-[#F0E7D5] bg-white">
+                  <iframe
+                    src={tour.itineraryMapEmbedUrl}
+                    className="w-full h-[320px] md:h-[420px]"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="map"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Témoignages clients détaillés */}
+            {tour.testimonials && tour.testimonials.length > 0 && (
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26] mb-4">{tr('tourSpecialties.modal.testimonials', 'Témoignages')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {tour.testimonials.map((r, i) => (
+                    <div key={i} className="bg-white border-2 border-[#F0E7D5] rounded-2xl p-4 sm:p-5">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-black text-[#332C26]">{r.name}</p>
+                        {r.rating ? <p className="text-sm font-bold text-[#8B7355]">⭐ {r.rating}/5</p> : null}
+                      </div>
+                      {r.date ? <p className="text-xs text-[#8B7355] mt-1">{r.date}</p> : null}
+                      <p className="text-gray-700 text-sm sm:text-base leading-relaxed mt-3">{r.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Ce qu'il faut apporter */}
+            {tour.packingList && tour.packingList.length > 0 && (
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26] mb-4">{tr('tourSpecialties.modal.packingList', "Ce qu'il faut apporter")}</h3>
+                <div className="bg-white border-2 border-[#F0E7D5] rounded-2xl p-4 sm:p-6">
+                  <ul className="space-y-2">
+                    {tour.packingList.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <span className="mt-1 h-2 w-2 rounded-full bg-[#D4A574]" />
+                        <span className="break-words">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Tours similaires */}
+            {tour.similarTourSlugs && tour.similarTourSlugs.length > 0 && (
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26] mb-4">{tr('tourSpecialties.modal.similarTours', 'Tours similaires')}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tour.similarTourSlugs.map((s, i) => (
+                    <span key={i} className="px-3 py-2 rounded-full bg-[#F0E7D5]/60 border border-[#D4A574]/25 text-sm font-bold text-[#4B3935]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Partage social */}
+            {tour.enableShare !== false && (
+              <div className="mb-2">
+                <h3 className="text-lg sm:text-xl font-bold text-[#332C26] mb-4">{tr('tourSpecialties.modal.share', 'Partager')}</h3>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard?.writeText(window.location.href)}
+                    className="cursor-pointer px-4 py-3 rounded-xl bg-white border-2 border-[#F0E7D5] hover:border-[#D4A574]/60 transition-all text-sm font-bold text-[#4B3935]"
+                  >
+                    {tr('common.copyLink', 'Copier le lien')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -404,10 +724,10 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
         <div className="sticky bottom-0 bg-gradient-to-r from-white via-[#FAF7F2] to-white border-t-2 sm:border-t-4 border-[#D4A574] p-4 sm:p-6 md:px-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 rounded-b-2xl sm:rounded-b-[2.5rem] z-20 shadow-2xl backdrop-blur-xl">
           <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
             <div className="flex-1 sm:flex-none">
-              <p className="text-[10px] sm:text-xs text-[#8B7355] uppercase tracking-wider mb-0.5 sm:mb-1 font-bold">{t('tourSpecialties.modal.from')}</p>
+              <p className="text-[10px] sm:text-xs text-[#8B7355] uppercase tracking-wider mb-0.5 sm:mb-1 font-bold">{tr('tourSpecialties.modal.from', 'À partir de')}</p>
               <p className="text-2xl sm:text-3xl md:text-4xl font-black text-[#332C26] bg-gradient-to-r from-[#4B3935] to-[#332C26] bg-clip-text text-transparent">
                 {tour.price}
-                <span className="text-sm sm:text-base md:text-lg font-normal text-gray-600"> {t('tourSpecialties.modal.perPerson')}</span>
+                <span className="text-sm sm:text-base md:text-lg font-normal text-gray-600"> {tr('tourSpecialties.modal.perPerson', 'par personne')}</span>
               </p>
             </div>
             {tour.rating && (
@@ -415,7 +735,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <span className="text-lg sm:text-2xl">⭐</span>
                 <div>
                   <p className="text-xs sm:text-sm font-bold text-[#332C26]">{tour.rating}/5</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500">{tour.reviews} avis</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500">{tour.reviews} {tr('tourSpecialties.modal.reviewsLabel', 'avis')}</p>
                 </div>
               </div>
             )}
@@ -426,7 +746,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
             onClick={handleAskQuote}
             className="cursor-pointer w-full sm:w-auto bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base md:text-lg hover:shadow-2xl transition-all shadow-xl border-2 border-white/20"
           >
-            {t('tourSpecialties.modal.askQuote')}
+            {tr('tourSpecialties.modal.askQuote', 'Demander un devis')}
           </motion.button>
         </div>
       </motion.div>

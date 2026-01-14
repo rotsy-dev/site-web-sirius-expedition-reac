@@ -426,11 +426,16 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                 initial={{ y: 40, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
                                                 onClick={() => openPost(featuredPost)}
-                                                className="group cursor-pointer bg-white dark:bg-[#443C34] rounded-[40px] mb-20 border-4 border-[#443C34] hover:shadow-2xl transition-all duration-500 overflow-hidden hover:border-[#D4A574]"
+                                                className="group cursor-pointer journal-card mb-20 border-2 border-[#4B3935]/10 hover:shadow-2xl transition-all duration-500 overflow-hidden"
                                             >
                                                 <div className="grid md:grid-cols-2 items-stretch">
-                                                    <div className="p-8 md:p-12 space-y-8 flex flex-col justify-center bg-gradient-to-br from-white to-[#F8F5F0] dark:from-[#443C34] dark:to-[#332C26]">
+                                                    <div className="p-8 md:p-12 space-y-8 flex flex-col justify-center">
                                                         <div className="space-y-4">
+                                                            {featuredPost.category && (
+                                                                <span className="journal-stamp w-fit">
+                                                                    {featuredPost.category}
+                                                                </span>
+                                                            )}
                                                             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#443C34] dark:text-white leading-[1.15] group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
                                                                 {featuredPost.title}
                                                             </h2>
@@ -446,11 +451,9 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                                 {featuredPost.author} <span className="text-[#8B7355] dark:text-[#D4A574] mx-2">•</span> {featuredPost.date}
                                                             </div>
                                                         </div>
-                                                            <button className="cursor-pointer flex items-center gap-3 pl-6 pr-2 py-2 rounded-full border-2 border-[#D4A574] text-[#443C34] dark:text-white font-bold text-sm bg-white dark:bg-[#332C26] hover:bg-[#F0E7D5] dark:hover:bg-[#8B7355] transition-all group-hover:border-[#8B7355] w-fit shadow-md">
-                                                            {t('blog.readArticle')}
-                                                            <div className="w-10 h-10 rounded-full bg-[#F0E7D5] dark:bg-[#8B7355] flex items-center justify-center group-hover:bg-[#443C34] dark:group-hover:bg-[#D4A574] group-hover:text-white transition-colors">
-                                                                <ArrowRight size={16} />
-                                                            </div>
+                                                        <button className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#D4A574] to-[#B66A3C] text-[#1a1410] font-black text-sm shadow-xl hover:shadow-2xl transition-all">
+                                                            <span>{t('blog.readArticle')}</span>
+                                                            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                                                         </button>
                                                     </div>
                                                     <div className="relative h-full min-h-[400px]">
@@ -470,9 +473,12 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             alt={featuredPost.title}
                                                             loading="lazy"
                                                         />
-                                                        <div className="absolute top-0 right-10 bg-[#D4A574] dark:bg-[#8B7355] rounded-b-[24px] w-24 h-24 flex items-center justify-center z-10 shadow-lg">
-                                                            <span className="text-5xl font-bold text-white translate-y-2">
+                                                        <div className="absolute top-6 right-6 bg-white/85 backdrop-blur-xl rounded-3xl w-24 h-24 flex flex-col items-center justify-center z-10 shadow-xl border border-[#4B3935]/10">
+                                                            <span className="text-5xl font-black text-[#443C34] leading-none">
                                                                 {featuredPost.date ? featuredPost.date.split(' ')[0] : '10'}
+                                                            </span>
+                                                            <span className="text-[11px] font-black tracking-[0.22em] uppercase text-[#8B7355]">
+                                                                {featuredPost.date ? featuredPost.date.split(' ')[1] : 'Day'}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -489,9 +495,9 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                     animate={{ y: 0, opacity: 1 }}
                                                     transition={{ delay: 0.1 * idx }}
                                                     onClick={() => openPost(post)}
-                                                    className="group cursor-pointer bg-white dark:bg-[#443C34] rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-[#D4A574] shadow-lg hover:-translate-y-2"
+                                                    className="group cursor-pointer journal-card overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                                                 >
-                                                    <div className="relative aspect-[16/10] overflow-hidden">
+                                                    <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-[#4B3935]/10">
                                                         {!imagesLoaded[post.id] && (
                                                             <div 
                                                                 className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" 
@@ -511,8 +517,10 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                                         {post.category && (
-                                                            <div className="absolute top-4 left-4 bg-[#D4A574] backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                                                            <div className="absolute top-4 left-4">
+                                                                <span className="journal-stamp">
                                                                 {post.category}
+                                                                </span>
                                                             </div>
                                                         )}
 
@@ -530,7 +538,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             {post.excerpt}
                                                         </p>
 
-                                                        <div className="h-px bg-gradient-to-r from-transparent via-[#D4A574]/30 to-transparent" />
+                                                        <div className="h-px bg-gradient-to-r from-transparent via-[#4B3935]/12 to-transparent" />
 
                                                         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                                             <div className="flex items-center gap-3">
@@ -546,7 +554,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             </div>
                                                         </div>
 
-                                                        <div className="flex items-center justify-between pt-4 border-t-2 border-[#F0E7D5] dark:border-[#332C26]">
+                                                        <div className="flex items-center justify-between pt-4 border-t border-[#4B3935]/10">
                                                             <div className="flex items-center gap-3">
                                                                 {post.authorAvatar ? (
                                                                     <img
@@ -572,7 +580,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             <motion.div
                                                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                                                 whileTap={{ scale: 0.9 }}
-                                                                className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F0E7D5] to-[#E5D8C0] dark:from-[#8B7355] dark:to-[#6B5535] flex items-center justify-center group-hover:from-[#D4A574] group-hover:to-[#C49564] transition-all shadow-md"
+                                                                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#F0E7D5] to-[#E5D8C0] flex items-center justify-center group-hover:from-[#D4A574] group-hover:to-[#C49564] transition-all shadow-md"
                                                             >
                                                                 <ArrowRight size={18} className="text-[#443C34] dark:text-white group-hover:text-white transition-colors" />
                                                             </motion.div>

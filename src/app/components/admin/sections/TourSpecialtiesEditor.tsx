@@ -182,6 +182,21 @@ interface ItineraryStep {
   description: string;
 }
 
+type AvailabilityStatus = 'available' | 'limited' | 'unavailable';
+
+interface AvailabilityEntry {
+  date: string;
+  status: AvailabilityStatus;
+  note?: string;
+}
+
+interface TourTestimonial {
+  name: string;
+  text: string;
+  rating?: number;
+  date?: string;
+}
+
 interface TourSpecialty {
   id: number;
   icon: string;
@@ -189,6 +204,13 @@ interface TourSpecialty {
   slug: string;
   description: string;
   image: string;
+  gallery?: string[];
+  availability?: AvailabilityEntry[];
+  itineraryMapEmbedUrl?: string;
+  testimonials?: TourTestimonial[];
+  packingList?: string[];
+  similarTourSlugs?: string[];
+  enableShare?: boolean;
   link: string;
   duration: string;
   location: string;
@@ -225,6 +247,17 @@ export function TourSpecialtiesEditor({
         const fetched = snapshot.docs
           .map((docSnap) => {
             const data = docSnap.data();
+
+            const normalizeAvailability = (raw: any): AvailabilityEntry[] => {
+              if (Array.isArray(raw)) return raw as AvailabilityEntry[];
+              if (raw && typeof raw === 'object') {
+                return Object.entries(raw)
+                  .map(([date, v]: any) => ({ date, status: v?.status, note: v?.note }))
+                  .filter((e: any) => typeof e?.date === 'string' && typeof e?.status === 'string');
+              }
+              return [];
+            };
+
             return {
               id: parseInt(docSnap.id),
               icon: data.icon || '🌟',
@@ -232,6 +265,13 @@ export function TourSpecialtiesEditor({
               slug: data.slug || '',
               description: data.description || '',
               image: data.image || '',
+              gallery: data.gallery || [],
+              availability: normalizeAvailability(data.availability),
+              itineraryMapEmbedUrl: data.itineraryMapEmbedUrl || '',
+              testimonials: data.testimonials || [],
+              packingList: data.packingList || [],
+              similarTourSlugs: data.similarTourSlugs || [],
+              enableShare: data.enableShare ?? true,
               link: data.link || '',
               duration: data.duration || '',
               location: data.location || '',
@@ -269,6 +309,13 @@ export function TourSpecialtiesEditor({
       slug: 'nouvelle-specialite',
       description: 'Description détaillée de cette expérience unique...',
       image: '',
+      gallery: [],
+      availability: [],
+      itineraryMapEmbedUrl: '',
+      testimonials: [],
+      packingList: [],
+      similarTourSlugs: [],
+      enableShare: true,
       link: '/tours/nouvelle-specialite',
       duration: '7-10 jours',
       location: 'Destination à définir',
@@ -788,6 +835,386 @@ export function TourSpecialtiesEditor({
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Galerie d'images */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-lg font-medium">Galerie d'images (upload)</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentSpecialty((prev) =>
+                          prev ? { ...prev, gallery: [...(prev.gallery || []), ''] } : null
+                        )
+                      }
+                      className="flex items-center gap-2 text-primary hover:underline text-sm"
+                    >
+                      <Plus size={18} /> Ajouter une image
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {(currentSpecialty.gallery || []).map((g, i) => (
+                      <div key={i} className="border border-border rounded-2xl p-4 bg-muted/20">
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <div className="text-sm font-semibold text-muted-foreground">Image #{i + 1}</div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCurrentSpecialty((prev) =>
+                                prev ? { ...prev, gallery: (prev.gallery || []).filter((_, idx) => idx !== i) } : null
+                              )
+                            }
+                            className="p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+
+                        <ImageUploader
+                          value={g}
+                          onChange={(base64) =>
+                            setCurrentSpecialty((prev) => {
+                              if (!prev) return null;
+                              const next = [...(prev.gallery || [])];
+                              next[i] = base64;
+                              return { ...prev, gallery: next };
+                            })
+                          }
+                          aspectRatio="3/2"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Calendrier de disponibilités */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-lg font-medium">Calendrier de disponibilités</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentSpecialty((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                availability: [
+                                  ...(Array.isArray(prev.availability) ? prev.availability : []),
+                                  { date: '', status: 'available', note: '' },
+                                ],
+                              }
+                            : null
+                        )
+                      }
+                      className="flex items-center gap-2 text-primary hover:underline text-sm"
+                    >
+                      <Plus size={18} /> Ajouter
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(Array.isArray(currentSpecialty.availability)
+                      ? currentSpecialty.availability
+                      : currentSpecialty.availability && typeof currentSpecialty.availability === 'object'
+                      ? (Object.entries(currentSpecialty.availability as any)
+                          .map(([date, v]: any) => ({ date, status: v?.status, note: v?.note }))
+                          .filter((e: any) => typeof e?.date === 'string' && typeof e?.status === 'string') as AvailabilityEntry[])
+                      : []
+                    ).map((a, i) => (
+                      <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-3 border border-border rounded-2xl p-4 bg-muted/20">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Date (YYYY-MM-DD)</label>
+                          <input
+                            type="text"
+                            value={a.date}
+                            onChange={(e) => {
+                              const next = [...(Array.isArray(currentSpecialty.availability) ? currentSpecialty.availability : [])];
+                              next[i] = { ...next[i], date: e.target.value };
+                              setCurrentSpecialty((prev) => (prev ? { ...prev, availability: next } : null));
+                            }}
+                            className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="2026-05-14"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Statut</label>
+                          <select
+                            value={a.status}
+                            onChange={(e) => {
+                              const next = [...(Array.isArray(currentSpecialty.availability) ? currentSpecialty.availability : [])];
+                              next[i] = { ...next[i], status: e.target.value as AvailabilityStatus };
+                              setCurrentSpecialty((prev) => (prev ? { ...prev, availability: next } : null));
+                            }}
+                            className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <option value="available">Disponible</option>
+                            <option value="limited">Limité</option>
+                            <option value="unavailable">Complet</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium mb-2">Note</label>
+                          <input
+                            type="text"
+                            value={a.note || ''}
+                            onChange={(e) => {
+                              const next = [...(Array.isArray(currentSpecialty.availability) ? currentSpecialty.availability : [])];
+                              next[i] = { ...next[i], note: e.target.value };
+                              setCurrentSpecialty((prev) => (prev ? { ...prev, availability: next } : null));
+                            }}
+                            className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="ex: départ garanti"
+                          />
+                        </div>
+
+                        <div className="md:col-span-4 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCurrentSpecialty((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      availability: (Array.isArray(prev.availability) ? prev.availability : []).filter(
+                                        (_, idx) => idx !== i
+                                      ),
+                                    }
+                                  : null
+                              )
+                            }
+                            className="p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Carte interactive */}
+                <div>
+                  <label className="block font-medium mb-2">Carte itinéraire (Embed URL)</label>
+                  <input
+                    type="text"
+                    value={currentSpecialty.itineraryMapEmbedUrl || ''}
+                    onChange={(e) =>
+                      setCurrentSpecialty((prev) => (prev ? { ...prev, itineraryMapEmbedUrl: e.target.value } : null))
+                    }
+                    placeholder="https://www.google.com/maps/embed?..."
+                    className="w-full px-5 py-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+
+                {/* Témoignages */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-lg font-medium">Témoignages clients</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentSpecialty((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                testimonials: [
+                                  ...(prev.testimonials || []),
+                                  { name: '', text: '', rating: 5, date: '' },
+                                ],
+                              }
+                            : null
+                        )
+                      }
+                      className="flex items-center gap-2 text-primary hover:underline text-sm"
+                    >
+                      <Plus size={18} /> Ajouter
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(currentSpecialty.testimonials || []).map((r, i) => (
+                      <div key={i} className="border border-border rounded-2xl p-6 bg-muted/20 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Nom</label>
+                            <input
+                              type="text"
+                              value={r.name}
+                              onChange={(e) => {
+                                const next = [...(currentSpecialty.testimonials || [])];
+                                next[i] = { ...next[i], name: e.target.value };
+                                setCurrentSpecialty((prev) => (prev ? { ...prev, testimonials: next } : null));
+                              }}
+                              className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Note (1-5)</label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={5}
+                              value={r.rating ?? 5}
+                              onChange={(e) => {
+                                const next = [...(currentSpecialty.testimonials || [])];
+                                next[i] = { ...next[i], rating: Number(e.target.value) };
+                                setCurrentSpecialty((prev) => (prev ? { ...prev, testimonials: next } : null));
+                              }}
+                              className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Date (optionnel)</label>
+                            <input
+                              type="text"
+                              value={r.date || ''}
+                              onChange={(e) => {
+                                const next = [...(currentSpecialty.testimonials || [])];
+                                next[i] = { ...next[i], date: e.target.value };
+                                setCurrentSpecialty((prev) => (prev ? { ...prev, testimonials: next } : null));
+                              }}
+                              className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Texte</label>
+                          <textarea
+                            rows={4}
+                            value={r.text}
+                            onChange={(e) => {
+                              const next = [...(currentSpecialty.testimonials || [])];
+                              next[i] = { ...next[i], text: e.target.value };
+                              setCurrentSpecialty((prev) => (prev ? { ...prev, testimonials: next } : null));
+                            }}
+                            className="w-full px-5 py-4 border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCurrentSpecialty((prev) =>
+                                prev ? { ...prev, testimonials: (prev.testimonials || []).filter((_, idx) => idx !== i) } : null
+                              )
+                            }
+                            className="p-3 text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ce qu'il faut apporter */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-lg font-medium">Ce qu'il faut apporter</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentSpecialty((prev) =>
+                          prev ? { ...prev, packingList: [...(prev.packingList || []), ''] } : null
+                        )
+                      }
+                      className="flex items-center gap-2 text-primary hover:underline text-sm"
+                    >
+                      <Plus size={18} /> Ajouter
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(currentSpecialty.packingList || []).map((p, i) => (
+                      <div key={i} className="flex gap-3">
+                        <input
+                          type="text"
+                          value={p}
+                          onChange={(e) => {
+                            const next = [...(currentSpecialty.packingList || [])];
+                            next[i] = e.target.value;
+                            setCurrentSpecialty((prev) => (prev ? { ...prev, packingList: next } : null));
+                          }}
+                          className="flex-1 px-5 py-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentSpecialty((prev) =>
+                              prev ? { ...prev, packingList: (prev.packingList || []).filter((_, idx) => idx !== i) } : null
+                            )
+                          }
+                          className="p-4 text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tours similaires */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="text-lg font-medium">Tours similaires (slugs)</label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentSpecialty((prev) =>
+                          prev ? { ...prev, similarTourSlugs: [...(prev.similarTourSlugs || []), ''] } : null
+                        )
+                      }
+                      className="flex items-center gap-2 text-primary hover:underline text-sm"
+                    >
+                      <Plus size={18} /> Ajouter
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(currentSpecialty.similarTourSlugs || []).map((s, i) => (
+                      <div key={i} className="flex gap-3">
+                        <input
+                          type="text"
+                          value={s}
+                          onChange={(e) => {
+                            const next = [...(currentSpecialty.similarTourSlugs || [])];
+                            next[i] = e.target.value;
+                            setCurrentSpecialty((prev) => (prev ? { ...prev, similarTourSlugs: next } : null));
+                          }}
+                          placeholder="ex: grand-tour-sud"
+                          className="flex-1 px-5 py-4 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentSpecialty((prev) =>
+                              prev ? { ...prev, similarTourSlugs: (prev.similarTourSlugs || []).filter((_, idx) => idx !== i) } : null
+                            )
+                          }
+                          className="p-4 text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Partage social */}
+                <div className="flex items-center gap-4 py-4">
+                  <input
+                    type="checkbox"
+                    id="enableShare"
+                    checked={currentSpecialty.enableShare ?? true}
+                    onChange={(e) =>
+                      setCurrentSpecialty((prev) => (prev ? { ...prev, enableShare: e.target.checked } : null))
+                    }
+                    className="w-6 h-6 rounded text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="enableShare" className="text-lg font-medium cursor-pointer">
+                    Activer le partage social
+                  </label>
                 </div>
 
                 {/* Boutons finaux - empilés sur mobile */}

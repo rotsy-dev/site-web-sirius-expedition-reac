@@ -119,17 +119,20 @@ export function AdminDashboard({
 
       {/* SIDEBAR */}
       <aside
-        className={`
+        className={
+          `
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
-          fixed md:static
+          fixed md:sticky
           inset-y-0 left-0
           w-64
           bg-card border-r border-border
           z-50
           transition-transform duration-300 ease-in-out
           flex flex-col
-        `}
+          md:top-0 md:h-screen
+        `
+        }
       >
         <div className="flex flex-col min-h-0 px-4 py-6">
 
@@ -154,8 +157,8 @@ export function AdminDashboard({
             </div>
           </div>
 
-          {/* Liste des items – pas de flex-grow, pas d'overflow */}
-          <div className="shrink-0 mt-4">
+          {/* Liste des items (scrollable) */}
+          <div className="flex-1 min-h-0 mt-4 overflow-y-auto pr-1">
             <div className="space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -181,8 +184,8 @@ export function AdminDashboard({
             </div>
           </div>
 
-          {/* Déconnexion – poussé en bas */}
-          <div className="mt-auto pt-8 border-t border-border">
+          {/* Déconnexion – visible en bas */}
+          <div className="shrink-0 mt-4 pt-6 border-t border-border">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

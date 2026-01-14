@@ -107,7 +107,9 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
 
   return (
     <>
-      <section className="min-h-screen w-full bg-gradient-to-br from-[#F0E7D5] via-white to-[#F0E7D5] py-20 md:py-32">
+      <section className="min-h-screen w-full safari-section py-20 md:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 safari-topo pointer-events-none opacity-25" />
+        <div className="absolute inset-0 safari-leaves pointer-events-none opacity-30" />
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <motion.div
@@ -134,6 +136,15 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
             </p>
           </motion.div>
 
+          <div className="safari-divider safari-divider--top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
+                className="fill-[#F0E7D5]"
+              />
+            </svg>
+          </div>
+
           {/* Photo Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
             {images.map((photo, index) => (
@@ -146,7 +157,7 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
                 whileHover={mobile ? {} : { scale: 1.05, zIndex: 10 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleImageClick(photo, index)}
-                className={`relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group ${index === 0 || index === 5 || index === 9 ? 'md:col-span-2 md:row-span-2' : ''
+                className={`relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group safari-frame ${index === 0 || index === 5 || index === 9 ? 'md:col-span-2 md:row-span-2' : ''
                   }`}
               >
                 <div className="relative w-full h-full aspect-square md:aspect-auto min-h-[200px]">

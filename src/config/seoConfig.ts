@@ -345,6 +345,34 @@ export const seoConfig: SEOConfig = {
             noindex: true,
         },
     },
+
+    faq: {
+        en: {
+            title: 'Frequently Asked Questions',
+            description: 'Find answers to common questions about traveling to Madagascar with Sirius Expedition. Get information on tours, bookings, and more.',
+            keywords: 'Madagascar FAQ, travel questions, tour questions, booking questions',
+            noindex: true,
+
+        },
+        fr: {
+            title: 'Foire Aux Questions',
+            description: 'Trouvez des réponses aux questions courantes sur les voyages à Madagascar avec Sirius Expedition. Obtenez des informations sur les circuits, les réservations, et plus encore.',
+            keywords: 'FAQ Madagascar, questions de voyage, questions sur les circuits, questions de réservation',
+            noindex: true,
+        },
+        de: {
+            title: 'Häufig Gestellte Fragen',
+            description: 'Finden Sie Antworten auf häufig gestellte Fragen zum Reisen nach Madagaskar mit Sirius Expedition. Erhalten Sie Informationen zu Touren, Buchungen und mehr.',
+            keywords: 'Madagaskar FAQ, Reise Fragen, Tour Fragen, Buchungs Fragen',
+            noindex: true,
+        },
+        it: {
+            title: 'Domande Frequenti',
+            description: 'Trova risposte alle domande comuni sui viaggi in Madagascar con Sirius Expedition. Ottieni informazioni su tour, prenotazioni e altro.',
+            keywords: 'Madagascar FAQ, domande di viaggio, domande sui tour, domande di prenotazione',
+            noindex: true,
+        },
+    },
 };
 
 // ============================================
