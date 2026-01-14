@@ -305,51 +305,59 @@ export function Footer({ config }: FooterProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </motion.div>
 
-        {/* Copyright */}
+        {/* Copyright et Visitor Counter */}
         <motion.div
           variants={bottomVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="flex flex-col md:flex-row items-center justify-between gap-6"
+          className="flex flex-col xl:flex-row items-center justify-between gap-6"
         >
-          <p className="text-white/60 text-sm text-center md:text-left">
-            © {currentYear} {config.siteName}. {t('footer.rights')}
-          </p>
+          {/* Colonne gauche : Copyright + Contact */}
+          <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
+            <p className="text-white/60 text-sm text-center lg:text-left">
+              © {currentYear} {config.siteName}. {t('footer.rights')}
+            </p>
 
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-white/70 text-sm"
+            >
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                href={`mailto:${config.contact.email}`}
+                className="flex items-center gap-2 hover:text-white transition-colors"
+              >
+                <Mail className="w-4 h-4 flex-shrink-0" />
+                <span className="break-all">{config.contact.email}</span>
+              </motion.a>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex items-center gap-2"
+              >
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="text-center sm:text-left">{config.contact.address}</span>
+              </motion.div>
+            </motion.div>
+          </div>
+
+          {/* Colonne droite : Visitor Counter */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/70 text-sm"
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href={`mailto:${config.contact.email}`}
-              className="flex items-center gap-2 hover:text-white transition-colors"
-            >
-              <Mail className="w-4 h-4 flex-shrink-0" />
-              <span className="break-all">{config.contact.email}</span>
-            </motion.a>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex items-center gap-2"
-            >
-              <MapPin className="w-4 h-4 flex-shrink-0" />
-              <span className="text-center sm:text-left">{config.contact.address}</span>
-            </motion.div>
+            <VisitorCounter />
           </motion.div>
         </motion.div>
-      </div>
-      
-      {/* Visitor Counter intégré dans le footer */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <VisitorCounter />
       </div>
     </footer>
   )

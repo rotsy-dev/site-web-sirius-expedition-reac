@@ -222,7 +222,9 @@
     "legalNotice": "Mentions légales",
     "termsOfUse": "Conditions d'utilisation",
     "privacyPolicy": "Politique de confidentialité",
-    "cookieManagement": "Gestion des cookies"
+    "cookieManagement": "Gestion des cookies",
+    "visitorTotal": "total",
+    "visitorToday": "aujourd'hui"
   }
 ,
   "quote": {

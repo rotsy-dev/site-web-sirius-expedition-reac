@@ -156,7 +156,9 @@
     "legalNotice": "Rechtliche Hinweise",
     "termsOfUse": "Nutzungsbedingungen",
     "privacyPolicy": "Datenschutzrichtlinie",
-    "cookieManagement": "Cookie-Verwaltung"
+    "cookieManagement": "Cookie-Verwaltung",
+    "visitorTotal": "insgesamt",
+    "visitorToday": "heute"
   },
   "tourSpecialties": {
     "searchPlaceholder": "Nach einem Erlebnis suchen...",

@@ -31,13 +31,6 @@
     "aboutUsSubtitle": "Our story and passion",
     "faq":" Frequently Asked Questions"
   },
-  "footer": {
-    "description": "Discover the wonders of Madagascar with Sirius Expedition",
-    "quickLinks": "Quick Links",
-    "followUs": "Follow Us",
-    "contact": "Contact",
-    "rights": "All rights reserved"
-  },
   "common": {
     "learnMore": "Learn More",
     "bookNow": "Book Now",
@@ -227,7 +220,9 @@
     "legalNotice": "Legal Notice",
     "termsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",
-    "cookieManagement": "Cookie Management"
+    "cookieManagement": "Cookie Management",
+    "visitorTotal": "total",
+    "visitorToday": "today"
   },
   "gallery": {
     "badge": "Discover Madagascar",

@@ -3,11 +3,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import {  getFirestore } from "firebase/firestore";
 import {getStorage} from "firebase/storage";
+import { getDatabase } from "firebase/database"; // Realtime Database
 
 
 const firebaseConfig = {
   apiKey:  "AIzaSyA2i7wEhzTQO9CKA45meqnn70JunpdV2RY",
   authDomain: "site-web-sirius-expedition.firebaseapp.com",
+  databaseURL: "https://sirius-expedition-default-rtdb.firebaseio.com", 
   projectId: "site-web-sirius-expedition",
   storageBucket: "site-web-sirius-expedition.firebasestorage.app",
   messagingSenderId: "805029750026",
@@ -22,4 +24,5 @@ export const app =
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const dbR = getDatabase(app); 
 export const storage = getStorage(app);
