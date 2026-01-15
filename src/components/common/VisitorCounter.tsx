@@ -2,8 +2,55 @@ import { useEffect, useState } from "react";
 import { Eye, Users, TrendingUp } from "lucide-react";
 import { useTranslation } from 'react-i18next'
 import { dbR } from "../../firebase/config";
-import { ref, runTransaction, get } from "firebase/database";
+import { ref, increment, set, get } from "firebase/database";
 
+// ========== GÉNÉRATION DU FINGERPRINT ==========
+const generateFingerprint = async (): Promise<string> => {
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    navigator.hardwareConcurrency,
+    screen.width,
+    screen.height,
+    screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.platform,
+    navigator.maxTouchPoints
+  ];
+
+  // Canvas fingerprinting
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('fingerprint', 2, 2);
+    components.push(canvas.toDataURL());
+  }
+
+  const data = components.join('|||');
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// ========== GESTION DES COOKIES ==========
+const setCookie = (name: string, value: string, days: number = 365 * 10) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+};
+
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+// ========== COMPOSANT ==========
 export function VisitorCounter() {
   const { t } = useTranslation();
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -12,47 +59,53 @@ export function VisitorCounter() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const hasVisitedToday = localStorage.getItem("hasVisitedToday") === today;
-    const hasVisitedEver = localStorage.getItem("hasVisitedEver") === "true";
-
     const updateVisitorCount = async () => {
       try {
+        const today = new Date().toISOString().slice(0, 10);
+
+        // 🔹 Générer le fingerprint unique de l'appareil
+        const fingerprint = await generateFingerprint();
+
+        // 🔹 Vérifier dans Firebase si ce fingerprint a déjà visité
+        const fingerprintRef = ref(dbR, `siteStats/fingerprints/${fingerprint}`);
+        const lastVisitRef = ref(dbR, `siteStats/lastVisits/${fingerprint}`);
+
+        const [fingerprintSnapshot, lastVisitSnapshot] = await Promise.all([
+          get(fingerprintRef),
+          get(lastVisitRef)
+        ]);
+
+        const hasVisitedEver = fingerprintSnapshot.exists();
+        const lastVisitDate = lastVisitSnapshot.val();
+        const hasVisitedToday = lastVisitDate === today;
+
         const totalRef = ref(dbR, "siteStats/visitors");
         const todayRef = ref(dbR, `siteStats/visitorsToday/${today}`);
 
         // 🔹 Compteur total - incrémenter seulement si première visite absolue
         if (!hasVisitedEver) {
-          const totalResult = await runTransaction(totalRef, (current) => (current || 0) + 1);
-          
-          if (totalResult.committed) {
-            setTotalCount(totalResult.snapshot.val() || 0);
-            localStorage.setItem("hasVisitedEver", "true");
-          } else {
-            throw new Error("Transaction totale annulée");
-          }
-        } else {
-          // Juste récupérer la valeur actuelle
-          const totalSnapshot = await get(totalRef);
-          setTotalCount(totalSnapshot.val() || 0);
+          await Promise.all([
+            set(totalRef, increment(1)),
+            set(fingerprintRef, true), // Marquer ce fingerprint comme ayant visité
+          ]);
         }
 
         // 🔹 Compteur quotidien - incrémenter seulement si pas encore visité aujourd'hui
         if (!hasVisitedToday) {
-          const todayResult = await runTransaction(todayRef, (current) => (current || 0) + 1);
-          
-          if (todayResult.committed) {
-            setTodayCount(todayResult.snapshot.val() || 0);
-            localStorage.setItem("hasVisitedToday", today);
-          } else {
-            throw new Error("Transaction quotidienne annulée");
-          }
-        } else {
-          // Juste récupérer la valeur actuelle
-          const todaySnapshot = await get(todayRef);
-          setTodayCount(todaySnapshot.val() || 0);
+          await Promise.all([
+            set(todayRef, increment(1)),
+            set(lastVisitRef, today), // Enregistrer la dernière date de visite
+          ]);
         }
 
+        // 🔹 Récupérer les valeurs actuelles
+        const [totalSnapshot, todaySnapshot] = await Promise.all([
+          get(totalRef),
+          get(todayRef)
+        ]);
+
+        setTotalCount(totalSnapshot.val() || 0);
+        setTodayCount(todaySnapshot.val() || 0);
         setIsLoading(false);
       } catch (err) {
         console.error("Erreur compteur visiteurs :", err);

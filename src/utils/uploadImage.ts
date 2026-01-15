@@ -12,7 +12,6 @@ export const uploadImageToImgBB = async (file: File): Promise<string> => {
   formData.append('image', file);
 
   try {
-    console.log('Upload de l\'image en cours...');
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
       method: 'POST',
       body: formData,
@@ -26,7 +25,6 @@ export const uploadImageToImgBB = async (file: File): Promise<string> => {
     const data = await response.json();
 
     if (data.success) {
-      console.log('Upload réussi ! URL :', data.data.url);
       return data.data.url; // C'est l'URL directe de l'image (publique)
     } else {
       throw new Error('Upload échoué');

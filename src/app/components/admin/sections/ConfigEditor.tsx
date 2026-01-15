@@ -85,7 +85,6 @@ export function ConfigEditor({ config: initialConfig, onSave }: ConfigEditorProp
                         tours: data.tours || [],
                     });
                 } else {
-                    console.log('Document siteConfig/main inexistant → utilisation des valeurs par défaut');
                     setConfig(defaultConfig);
                 }
             } catch (err) {

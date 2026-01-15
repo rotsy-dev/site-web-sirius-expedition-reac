@@ -141,7 +141,7 @@ export function TourSpecialties({ specialties, initialSelectedTour, content, onN
                   heroImageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 loading="eager"
-                fetchPriority="high"
+                // fetchPriority="high"
               />
               {!heroImageLoaded && (
                 <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />

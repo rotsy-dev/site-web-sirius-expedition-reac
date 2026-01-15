@@ -1,7 +1,5 @@
 import { Mail, Phone, X, CheckCircle, Clock, ShieldCheck, Facebook, Youtube, Linkedin, Instagram } from "lucide-react";
-// Since we don't have a specific photo, we'll use the logo from config or a placeholder if needed,
-// but the user asked to change profile to "le logo de cette site".
-// We will receive config as prop.
+import { useTranslation } from "react-i18next";
 
 const TikTokIcon = ({ className }: { className?: string }) => (
     <svg
@@ -25,6 +23,7 @@ interface ContactModalProps {
 }
 
 export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     const socialLinks = [
@@ -36,7 +35,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-green-600',
             borderColor: 'border-green-200',
             shadowColor: 'shadow-green-200',
-            subText: 'En ligne • Réponse immédiate'
+            subText: t('reseausocial.WhatsApp')
         },
         {
             name: 'Email',
@@ -46,7 +45,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-indigo-600',
             borderColor: 'border-indigo-200',
             shadowColor: 'shadow-indigo-200',
-            subText: 'Réponse sous 24h maximum'
+            subText: t('reseausocial.Email')
         },
         {
             name: 'Facebook',
@@ -56,7 +55,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-blue-600',
             borderColor: 'border-blue-200',
             shadowColor: 'shadow-blue-200',
-            subText: 'Suivez notre actualité'
+            subText: t('reseausocial.Facebook')
         },
         {
             name: 'Instagram',
@@ -66,7 +65,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-pink-600',
             borderColor: 'border-pink-200',
             shadowColor: 'shadow-pink-200',
-            subText: 'Nos plus belles photos'
+            subText: t('reseausocial.Instagram')
         },
         {
             name: 'TikTok',
@@ -76,7 +75,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-black',
             borderColor: 'border-gray-200',
             shadowColor: 'shadow-gray-400',
-            subText: 'Vidéos courtes & fun'
+            subText: t('reseausocial.TikTok')
         },
         {
             name: 'YouTube',
@@ -86,7 +85,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-red-600',
             borderColor: 'border-red-200',
             shadowColor: 'shadow-red-200',
-            subText: 'Nos expéditions en vidéo'
+            subText: t('reseausocial.YouTube')
         },
         {
             name: 'LinkedIn',
@@ -96,7 +95,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
             textColor: 'text-blue-700',
             borderColor: 'border-blue-200',
             shadowColor: 'shadow-blue-200',
-            subText: 'Réseau professionnel'
+            subText: t('reseausocial.LinkedIn')
         }
     ];
 
@@ -133,47 +132,71 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
                     {/* Header/Profile */}
                     <div className="flex flex-col items-center text-center">
                         <div className="relative mb-5">
-                            <div className="w-24 h-24 rounded-full p-1 border border-gray-100 shadow-sm bg-white overflow-hidden flex items-center justify-center site-logo-container">
-                                {/* Logo placeholder or image if available */}
+                            <div
+                                className="
+                                            w-24 h-24
+                                            sm:w-28 sm:h-28
+                                            md:w-32 md:h-32
+                                            lg:w-36 lg:h-36
+                                            rounded-full
+                                            p-2
+                                            border border-gray-100
+                                            shadow-sm
+                                            bg-white
+                                            overflow-hidden
+                                            flex items-center justify-center
+                                            site-logo-container
+                                        "
+                            >
                                 {config.logo ? (
                                     <img
                                         src={config.logo}
                                         alt={config.siteName}
-                                        className="site-logo w-full h-full rounded-full object-cover"
+                                        className="
+                                            site-logo
+                                            w-full h-full
+                                            rounded-full
+                                            object-contain
+                                        "
                                         style={{
                                             backgroundColor: 'transparent',
                                             background: 'transparent',
                                             mixBlendMode: 'normal'
                                         } as React.CSSProperties}
-                                        onLoad={(e) => {
-                                            const img = e.target as HTMLImageElement;
-                                            img.style.backgroundColor = 'transparent';
-                                            img.style.background = 'transparent';
-                                        }}
                                     />
                                 ) : (
-                                    <div className="w-full h-full rounded-full bg-[#443C34] text-white flex items-center justify-center text-3xl font-bold">
+                                    <div
+                                        className="
+                                            w-full h-full
+                                            rounded-full
+                                            bg-[#443C34]
+                                            text-white
+                                            flex items-center justify-center
+                                            text-3xl md:text-4xl font-bold
+                                        "
+                                    >
                                         {config.siteName?.charAt(0) || 'S'}
                                     </div>
                                 )}
                             </div>
+
                             <div className="absolute bottom-1 right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-white animate-pulse"></div>
                         </div>
 
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">👋</span>
-                            <h2 className="text-lg font-bold text-gray-900">Bienvenue chez {config.siteName}</h2>
+                            <h2 className="text-lg font-bold text-gray-900">{t('contact.bienvenue')} {config.siteName}</h2>
                         </div>
 
                         <p className="text-gray-500 text-sm leading-relaxed mb-8 px-4">
-                            Nous sommes là pour organiser votre voyage de rêve à Madagascar.
+                         {t('contact.subtitle')}
                         </p>
                     </div>
 
                     {/* Contact Options Box */}
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
                         <h3 className="text-center font-bold text-gray-900 mb-6 text-sm">
-                            Une question ? <span className="text-[#A68966]">Nous vous répondons !</span>
+                            {t('contact.question')} <span className="text-[#A68966]">{t('contact.nousvousreponds')}</span>
                         </h3>
 
                         <div className="space-y-4">
@@ -206,15 +229,15 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
                     <div className="space-y-2 px-4">
                         <div className="flex items-center gap-3">
                             <CheckCircle size={16} className="text-green-500 shrink-0" />
-                            <p className="text-[11px] text-gray-500">Expertise locale garantie</p>
+                            <p className="text-[11px] text-gray-500">{t('contact.expertiseLocale')}</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Clock size={16} className="text-blue-500 shrink-0" />
-                            <p className="text-[11px] text-gray-500">Support disponible 7j/7</p>
+                            <p className="text-[11px] text-gray-500">{t('contact.supportDisponible')}</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <ShieldCheck size={16} className="text-purple-500 shrink-0" />
-                            <p className="text-[11px] text-gray-500">Voyages sur mesure et sécurisés</p>
+                            <p className="text-[11px] text-gray-500">{t('contact.voyagesSurMesure')}</p>
                         </div>
                     </div>
 
@@ -227,7 +250,7 @@ export const ContactModal = ({ isOpen, onClose, config }: ContactModalProps) => 
                         className="bg-[#443C34] hover:bg-[#2c2620] text-white px-6 py-2.5 rounded-lg shadow-lg shadow-black/30 flex items-center gap-2 text-sm font-medium transition-all active:scale-95 pointer-events-auto"
                     >
                         <X size={18} />
-                        Fermer
+                        {t('common.close')}
                     </button>
                 </div>
 

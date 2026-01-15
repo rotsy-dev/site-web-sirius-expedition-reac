@@ -48,7 +48,10 @@
     "itinerary": "Itinéraire",
     "easy": "Facile",
     "moderate": "Modéré",
-    "challenging": "Difficile"
+    "challenging": "Difficile",
+    "periode": "Période",
+    "meilleursaison": "Meilleure saison",
+    "restantes" : "restantes"
   },
   "reviews": {
     "rating": "Note",
@@ -113,7 +116,13 @@
     "experienceSirius": "Expérience Sirius",
     "anAuthentic": " Une immersion",
     "immersion": "authentique",
-    "dscrVideo": "Nos circuits sont conçus pour ceux qui recherchent l'âme de Madagascar. Une véritable connexion avec la terre et ses habitants."
+    "dscrVideo": "Nos circuits sont conçus pour ceux qui recherchent l'âme de Madagascar. Une véritable connexion avec la terre et ses habitants.",
+    "bienvenue": "Bienvenue chez",
+    "question": "Une question ?",
+    "nousvousreponds": "Nous vous répondons !",
+    "expertiseLocale": "Expertise locale garantie",
+    "supportDisponible": "Support disponible 7j/7",
+    "voyagesSurMesure": "Voyages sur mesure et sécurisés"
   },
   "about": {
     "title": "À propos de Sirius Expedition",
@@ -141,7 +150,15 @@
     "publishedOn": "Publié le",
     "categories": "Catégories",
     "relatedPosts": "Articles connexes",
-    "shareArticle": "Partager l'article"
+    "shareArticle": "Partager l'article",
+    "partager": "Partager :",
+    "liencopie": "Lien copié !",
+    "delecture": "min de lecture",
+    "vues" : "vues",
+    "tags": "Tags :",
+    "articleNotFound": "Article non trouvé",
+    "slugdisponible": "Slugs disponibles :",
+    "slugfounded": "Slug recherché :"
   },
   "tourSpecialties": {
     "searchPlaceholder": "Rechercher une expérience...",
@@ -296,5 +313,15 @@
     "stillHaveQuestions": "Vous avez encore des questions ?",
     "contactUsMessage": "Vous ne trouvez pas la réponse que vous cherchez ? Notre équipe est là pour vous aider.",
     "contactUs": "Contactez-nous"
+  },
+  "reseausocial": {
+   "WhatsApp": "En ligne • Réponse immédiate",
+   "Email": "Réponse sous 24h maximum",
+   "Facebook": "Suivez notre actualité",
+   "Instagram": "Nos plus belles photos",
+   "TikTok": "Vidéos courtes & fun",
+   "YouTube": "Nos expéditions en vidéo",
+   "LinkedIn": "Réseau professionnel"
   }
+
 }

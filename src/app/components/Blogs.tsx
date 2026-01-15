@@ -29,6 +29,7 @@ const CACHE_KEY = `blog_posts_cache_v${CACHE_VERSION}`;
 // COMPOSANT : PARTAGE SUR LES RÉSEAUX SOCIAUX
 // ============================================
 const SocialShare = ({ post }: any) => {
+    const { t } = useTranslation();
     const [copied, setCopied] = useState(false);
 
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
@@ -62,7 +63,7 @@ const SocialShare = ({ post }: any) => {
         >
             <div className="flex items-center gap-2 text-[#443C34] dark:text-white font-bold">
                 <Share2 size={18} className="sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm">Partager :</span>
+                <span className="text-xs sm:text-sm">{t('blog.partager')}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -114,7 +115,7 @@ const SocialShare = ({ post }: any) => {
                     animate={{ opacity: 1, x: 0 }}
                     className="text-xs font-medium text-green-600 dark:text-green-400"
                 >
-                    Lien copié !
+                    {t('blog.liencopie')}
                 </motion.span>
             )}
         </motion.div>
@@ -189,6 +190,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
     const [selectedPost, setSelectedPost] = useState<any | null>(null);
     const [heroImageLoaded, setHeroImageLoaded] = useState(false);
     const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
+    const [isLoadingPosts, setIsLoadingPosts] = useState(true);
 
     // Préchargement de l'image hero
     useEffect(() => {
@@ -240,17 +242,17 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
     // Charger les posts depuis Firestore avec CACHE IMMÉDIAT
     useEffect(() => {
         const loadPosts = async () => {
+            setIsLoadingPosts(true);
             try {
                 // 1. Charger IMMÉDIATEMENT depuis le cache si disponible
                 const cachedPosts = localStorage.getItem(CACHE_KEY);
                 if (cachedPosts) {
                     const parsedCache = JSON.parse(cachedPosts);
-                    console.log('⚡ Chargement instantané depuis le cache:', parsedCache.length, 'posts');
                     setPosts(parsedCache);
+                    setIsLoadingPosts(false);
                 }
 
                 // 2. Puis charger depuis Firestore en arrière-plan
-                console.log('🔄 Mise à jour depuis Firestore...');
                 const postsSnap = await getDocs(collection(db, 'blogPosts'));
                 const freshPosts = postsSnap.docs.map(d => {
                     const data = d.data();
@@ -268,11 +270,10 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                     return idA - idB;
                 });
 
-                console.log(`✅ ${freshPosts.length} posts mis à jour depuis Firestore`);
-
                 // Mettre à jour les posts ET le cache
                 setPosts(freshPosts);
                 localStorage.setItem(CACHE_KEY, JSON.stringify(freshPosts));
+                setIsLoadingPosts(false);
 
                 // Nettoyer les anciens caches
                 Object.keys(localStorage).forEach(key => {
@@ -283,6 +284,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
 
             } catch (error) {
                 console.error("❌ Erreur lors du chargement des posts:", error);
+                setIsLoadingPosts(false);
             }
         };
 
@@ -295,10 +297,8 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
             const found = posts.find(p => p.slug === slug) || posts.find(p => p.id === slug);
 
             if (found) {
-                console.log('✅ Post trouvé:', { id: found.id, slug: found.slug });
                 setSelectedPost(found);
             } else {
-                console.log('❌ Post non trouvé avec slug:', slug);
                 setSelectedPost(null);
             }
         } else if (!isDetail) {
@@ -349,7 +349,6 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
                                                 }`}
                                             loading="eager"
-                                            fetchPriority="high"
                                         />
                                         {!heroImageLoaded && (
                                             <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
@@ -412,7 +411,16 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                         {/* Section Articles */}
                         <section className="py-20 sm:py-24 md:py-32 bg-[#F0E7D5]">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                                {displayPosts.length === 0 ? (
+                                {isLoadingPosts ? (
+                                    // Afficher un loader pendant le chargement
+                                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                        <Loader2 className="w-12 h-12 animate-spin text-[#8B7355]" />
+                                        <p className="text-lg text-gray-600 dark:text-gray-400">
+                                            {t('blog.loading') || 'Chargement des articles...'}
+                                        </p>
+                                    </div>
+                                ) :
+                                displayPosts.length === 0 ? (
                                     <div className="text-center py-20">
                                         <p className="text-xl text-gray-600 dark:text-gray-400">
                                             {t('blog.noPosts') || 'Aucun article disponible'}
@@ -536,7 +544,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                             <div className="flex items-center gap-3">
                                                                 <span className="flex items-center gap-1.5 font-medium">
                                                                     <Clock size={14} className="text-[#8B7355] dark:text-[#D4A574]" />
-                                                                    {post.readTime || '5 min'}
+                                                                    {post.readTime || '5 min'} {t('blog.delecture')}
                                                                 </span>
                                                                 <span className="w-1 h-1 rounded-full bg-gray-400" />
                                                                 <span className="flex items-center gap-1.5 font-medium">
@@ -560,11 +568,11 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                                     </div>
                                                                 )}
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-xs font-bold text-[#443C34] dark:text-white">
-                                                                        {post.author}
-                                                                    </span>
                                                                     <span className="text-[10px] text-gray-500 dark:text-gray-400">
                                                                         {t('blog.author')}
+                                                                    </span>
+                                                                    <span className="text-xs font-bold text-[#443C34] dark:text-white">
+                                                                        {post.author}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -609,7 +617,6 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                             alt={selectedPost.title}
                                             className="absolute inset-0 w-full h-full object-cover blur-sm"
                                             loading="eager"
-                                            fetchPriority="high"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/80" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/60" />
@@ -665,12 +672,12 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                     </span>
                                     <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
                                         <Clock size={14} className="sm:w-[18px] sm:h-[18px]" />
-                                        <span className="whitespace-nowrap">{selectedPost.readTime || '5 min'} de lecture</span>
+                                        <span className="whitespace-nowrap">{selectedPost.readTime || '5 min'} {t('blog.delecture')}</span>
                                     </span>
                                     {selectedPost?.views != null && selectedPost.views > 0 && (
                                         <span className="flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
                                             <Eye size={14} className="sm:w-[18px] sm:h-[18px]" />
-                                            <span className="whitespace-nowrap">{selectedPost.views} vues</span>
+                                        <span className="whitespace-nowrap">{selectedPost.views} {t('blog.vues')}</span>
                                         </span>
                                     )}
                                 </motion.div>
@@ -694,12 +701,13 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-black text-[#443C34] dark:text-white text-base sm:text-lg md:text-xl truncate">
-                                            {selectedPost.author || 'Auteur'}
-                                        </p>
                                         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                             {t('blog.author') || 'Auteur de l\'article'}
                                         </p>
+                                        <p className="font-black text-[#443C34] dark:text-white text-base sm:text-lg md:text-xl truncate">
+                                            {selectedPost.author || 'Auteur'}
+                                        </p>
+                                        
                                     </div>
                                 </div>
 
@@ -727,7 +735,7 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                             {/* Tags si disponibles */}
                             {selectedPost.tags && selectedPost.tags.length > 0 && (
                                 <div className="mb-6 sm:mb-8 flex flex-wrap gap-2">
-                                    <span className="text-xs sm:text-sm font-bold text-[#443C34] dark:text-white mr-2">Tags :</span>
+                                    <span className="text-xs sm:text-sm font-bold text-[#443C34] dark:text-white mr-2">{t('blog.tags')}</span>
                                     {selectedPost.tags.map((tag: string, idx: number) => (
                                         <span
                                             key={idx}
@@ -761,13 +769,13 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                         animate={{ opacity: 1, y: 0 }}
                         className="max-w-4xl mx-auto px-6 pt-32 pb-20 text-center"
                     >
-                        <h1 className="text-4xl font-bold text-[#443C34] dark:text-white mb-4">Article non trouvé</h1>
+                        <h1 className="text-4xl font-bold text-[#443C34] dark:text-white mb-4">{t('blog.articleNotFound')}</h1>
                         <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 mb-8 text-left">
                             <p className="text-gray-600 dark:text-gray-400 mb-2">
-                                <strong>Slug recherché :</strong> <code className="bg-white dark:bg-gray-700 px-2 py-1 rounded">{slug}</code>
+                                <strong>{t('blog.slugfounded')}</strong> <code className="bg-white dark:bg-gray-700 px-2 py-1 rounded">{slug}</code>
                             </p>
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                <strong>Slugs disponibles :</strong>
+                                <strong> {t('blog.slugdisponible')}</strong>
                             </p>
                             <ul className="mt-2 space-y-1">
                                 {posts.slice(0, 5).map(p => (

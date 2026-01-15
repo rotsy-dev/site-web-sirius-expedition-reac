@@ -48,7 +48,10 @@
     "itinerary": "Itinerario",
     "easy": "Facile",
     "moderate": "Moderato",
-    "challenging": "Impegnativo"
+    "challenging": "Impegnativo",
+    "periode": "Periodo di viaggio",
+    "meilleursaison": "Migliore stagione",
+    "restantes": "rimanenti"
   },
   "reviews": {
     "rating": "Valutazione",
@@ -113,7 +116,13 @@
     "experienceSirius": "Sirius Experience",
     "anAuthentic": "Un'autentica",
     "immersion": "immersione",
-    "dscrVideo": "I nostri circuiti sono pensati per chi è alla ricerca dell'anima del Madagascar. Un vero legame con la terra e i suoi abitanti."
+    "dscrVideo": "I nostri circuiti sono pensati per chi è alla ricerca dell'anima del Madagascar. Un vero legame con la terra e i suoi abitanti.",
+    "bienvenue": "Benvenuto a",
+    "question": "Una domanda ?",
+    "nousvousreponds": "Ti rispondiamo !",
+    "expertiseLocale": "Esperienza locale garantita",
+    "supportDisponible": "Supporto disponibile 7 giorni su 7",
+    "voyagesSurMesure": "Viaggi su misura e sicuri"
   },
   "about": {
     "title": "Su Sirius Expedition",
@@ -141,7 +150,15 @@
     "publishedOn": "Pubblicato il",
     "categories": "Categorie",
     "relatedPosts": "Articoli correlati",
-    "shareArticle": "Condividi l'articolo"
+    "shareArticle": "Condividi l'articolo",
+    "partager": "Condividi :",
+    "liencopie": "Link copiato!",
+    "delecture": "min di lettura",
+    "vues": "visualizzazioni",
+    "tags": "Tag :",
+    "articleNotFound": "Articolo non trovato",
+    "slugdisponible": "Slugs disponibili :",
+    "slugfounded": "Slug ricercato :"
   },
   "footer": {
     "description": "Il tuo partner di fiducia per scoprire le meraviglie del Madagascar. Guide esperte, esperienze indimenticabili, ricordi per tutta la vita.",
@@ -282,6 +299,15 @@
       "stillHaveQuestions": "Hai ancora domande?",
       "contactUsMessage": "Non riesci a trovare la risposta che cerchi? Il nostro team è qui per aiutarti.",
       "contactUs": "Contattaci"
+  },
+  "reseausocial": {
+    "WhatsApp": "Online • Risposta immediata",
+    "Email": "Risposta entro 24 ore massimo",
+    "Facebook": "Segui le nostre novità",
+    "Instagram": "Le nostre foto più belle",
+    "TikTok": "Video brevi e divertenti",
+    "YouTube": "Le nostre spedizioni in video",
+    "LinkedIn": "Rete professionale"
   }
 
 }

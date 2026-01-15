@@ -80,7 +80,6 @@ export function HeroCarousel({ slides, onNavigateToContact, onNavigateToTours }:
                   className={`w-full h-full object-cover transition-opacity duration-1000 ${imageLoaded[slide.id] ? 'opacity-100' : 'opacity-0'}`}
                   style={{ filter: 'brightness(0.4) saturate(1.2)' }}
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
                   decoding="async"
                 />
                 {/* Gradient overlay moderne */}

@@ -890,7 +890,7 @@ export function TourSpecialtiesEditor({
                 </div>
 
                 {/* Calendrier de disponibilités */}
-                <div>
+                {/* <div>
                   <div className="flex justify-between items-center mb-4">
                     <label className="text-lg font-medium">Calendrier de disponibilités</label>
                     <button
@@ -992,7 +992,7 @@ export function TourSpecialtiesEditor({
                       </div>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Carte interactive */}
                 <div>

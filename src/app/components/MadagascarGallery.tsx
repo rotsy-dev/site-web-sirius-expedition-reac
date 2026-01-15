@@ -213,7 +213,7 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
                 ) : (
                   <>
                     {t('gallery.loadMore', { defaultValue: 'Load More' })}
-                    <span className="text-sm opacity-80">({allImages.length - imagesToShow} restantes)</span>
+                      <span className="text-sm opacity-80">({allImages.length - imagesToShow} {t('tours.restantes')})</span>
                   </>
                 )}
               </button>

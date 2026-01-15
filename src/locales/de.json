@@ -48,7 +48,10 @@
     "itinerary": "Reiseroute",
     "easy": "Einfach",
     "moderate": "Mittel",
-    "challenging": "Anspruchsvoll"
+    "challenging": "Anspruchsvoll",
+    "periode": "Reisezeitraum",
+    "meilleursaison": "Beste Reisezeit",
+    "restantes": "verbleibend"
   },
   "reviews": {
     "rating": "Bewertung",
@@ -113,7 +116,13 @@
     "experienceSirius": "Sirius-Erlebnis",
     "anAuthentic": "Ein authentisches",
     "immersion": "Eintauchen",
-    "dscrVideo": "Unsere Rundreisen sind für diejenigen konzipiert, die die Seele Madagaskars suchen. Eine echte Verbindung mit dem Land und seinen Bewohnern."
+    "dscrVideo": "Unsere Rundreisen sind für diejenigen konzipiert, die die Seele Madagaskars suchen. Eine echte Verbindung mit dem Land und seinen Bewohnern.",
+    "bienvenue": "Willkommen bei",
+    "question": "Eine Frage ?",
+    "nousvousreponds": "Wir antworten Ihnen !",
+    "expertiseLocale": "Garantierte lokale Expertise",
+    "supportDisponible": "7 Tage die Woche verfügbarer Support",
+    "voyagesSurMesure": "Maßgeschneiderte und sichere Reisen"
   },
   "about": {
     "title": "Über Sirius Expedition",
@@ -141,7 +150,15 @@
     "publishedOn": "Veröffentlicht am",
     "categories": "Kategorien",
     "relatedPosts": "Verwandte Artikel",
-    "shareArticle": "Artikel teilen"
+    "shareArticle": "Artikel teilen",
+    "partager": "Teilen :",
+    "liencopie": "Link kopiert!",
+    "delecture": "min Lesezeit",
+    "vues": "Ansichten",
+    "tags": "Stichwörter :",
+    "articleNotFound": "Artikel nicht gefunden",
+    "slugdisponible": "Verfügbare Slugs:",
+    "slugfounded": "Gesuchter Slug :"
   },
   "footer": {
     "description": "Ihr vertrauenswürdiger Partner für die Entdeckung der Wunder Madagaskars. Fachkundige Reiseleiter, unvergessliche Erlebnisse, Erinnerungen fürs Leben.",
@@ -283,5 +300,14 @@
     "stillHaveQuestions": "Haben Sie noch Fragen?",
     "contactUsMessage": "Können Sie die gesuchte Antwort nicht finden? Unser Team hilft Ihnen gerne weiter.",
     "contactUs": "Kontaktieren Sie uns"
+  },
+  "reseausocial": {
+    "WhatsApp": "Online • Sofortige Antwort",
+    "Email": "Antwort innerhalb von maximal 24 Std.",
+    "Facebook": "Folgen Sie unseren Neuigkeiten",
+    "Instagram": "Unsere schönsten Fotos",
+    "TikTok": "Kurze & unterhaltsame Videos",
+    "YouTube": "Unsere Expeditionen im Video",
+    "LinkedIn": "Professionelles Netzwerk"
   }
 }

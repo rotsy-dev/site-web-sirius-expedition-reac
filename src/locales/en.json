@@ -75,7 +75,10 @@
     "itinerary": "Itinerary",
     "easy": "Easy",
     "moderate": "Moderate",
-    "challenging": "Challenging"
+    "challenging": "Challenging",
+    "periode": "Travel Period",
+    "meilleursaison": "Best Season",
+    "restantes": "remaining"
   },
   "reviews": {
     "rating": "Rating",
@@ -140,7 +143,13 @@
     "experienceSirius": "Sirius Experience",
     "anAuthentic": "An authentic",
     "immersion": "immersion",
-    "dscrVideo": "Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants."
+    "dscrVideo": "Our circuits are designed for those seeking the soul of Madagascar. A real connection with the land and its inhabitants.",
+    "bienvenue": "Welcome to",
+    "question": "A question ?",
+    "nousvousreponds": "We answer you !",
+    "expertiseLocale": "Guaranteed local expertise",
+    "supportDisponible": "Support available 7 days a week",
+    "voyagesSurMesure": "Tailor-made and secure trips"
   },
   "about": {
     "title": "About Sirius Expedition",
@@ -197,7 +206,15 @@
     "publishedOn": "Published on",
     "categories": "Categories",
     "relatedPosts": "Related posts",
-    "shareArticle": "Share article"
+    "shareArticle": "Share article",
+    "partager": "Share :",
+    "liencopie": "Link copied!",
+    "delecture": "min read",
+    "vues": "views",
+    "tags": "Tags :",
+    "articleNotFound": "Article not found",
+    "slugdisponible": "Available slugs:",
+    "slugfounded": "Searched slug :"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -293,5 +310,14 @@
     "stillHaveQuestions": "Still have questions?",
     "contactUsMessage": "Can't find the answer you're looking for? Our team is here to help you.",
     "contactUs": "Contact Us"
+  },
+  "reseausocial": {
+    "WhatsApp": "Online • Instant reply",
+    "Email": "Response within 24 hours max",
+    "Facebook": "Follow our latest updates",
+    "Instagram": "Our best photos",
+    "TikTok": "Short & fun videos",
+    "YouTube": "Our expeditions in video",
+    "LinkedIn": "Professional network"
   }
 }

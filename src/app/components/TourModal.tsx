@@ -324,7 +324,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
             </div>
 
             {/* Calendrier de disponibilités */}
-            <div className="mb-6 sm:mb-8 md:mb-10 bg-white rounded-2xl border-2 border-[#F0E7D5] p-4 sm:p-6">
+            {/* <div className="mb-6 sm:mb-8 md:mb-10 bg-white rounded-2xl border-2 border-[#F0E7D5] p-4 sm:p-6">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-[#332C26]">{tr('tourSpecialties.modal.availability', 'Disponibilités')}</h3>
                 <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500" /> {tr('tourSpecialties.modal.limited', 'Limité')}</div>
                 <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /> {tr('tourSpecialties.modal.unavailable', 'Complet')}</div>
               </div>
-            </div>
+            </div> */}
 
             {/* Info Bar amélioré */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-gradient-to-br from-[#F0E7D5]/40 to-[#E5D8C0]/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl mb-6 sm:mb-8 md:mb-10 border border-[#D4A574]/20">
@@ -438,7 +438,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {(tour as any).startDate && (tour as any).endDate && (
                     <div className="flex flex-col">
-                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">Période</span>
+                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">{t('tours.periode')}</span>
                       <span className="font-semibold text-[#332C26]">
                         {(tour as any).startDate} - {(tour as any).endDate}
                       </span>
@@ -446,7 +446,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                   )}
                   {tour.season && (
                     <div className="flex flex-col">
-                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">Meilleure saison</span>
+                      <span className="text-xs text-[#8B7355] uppercase font-bold tracking-wider mb-1">{t('tours.meilleursaison')}</span>
                       <span className="font-semibold text-[#332C26]">{tour.season}</span>
                     </div>
                   )}

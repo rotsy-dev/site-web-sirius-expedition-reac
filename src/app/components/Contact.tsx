@@ -124,7 +124,7 @@ export function Contact({ config, content = {} }: ContactProps) {
         EMAILJS_CONFIG.PUBLIC_KEY
       );
 
-      console.log('Email sent successfully!', response.status, response.text);
+
       setSubmitted(true);
 
       setTimeout(() => {
@@ -168,7 +168,6 @@ export function Contact({ config, content = {} }: ContactProps) {
                   heroImageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 loading="eager"
-                fetchPriority="high"
               />
               {!heroImageLoaded && (
                 <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
