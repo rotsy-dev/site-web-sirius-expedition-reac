@@ -35,7 +35,6 @@ const DEFAULT_IMAGES: GalleryImage[] = [
   { id: 9, src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80', alt: 'Travel agency tour', category: 'tours' }
 ];
 
-// Détection mobile
 const isMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
@@ -43,14 +42,11 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mobile, setMobile] = useState(false);
-
-  // Chargement progressif des images
-  const [imagesToShow, setImagesToShow] = useState(3); // Montrer seulement 3 au début sur mobile
+  const [imagesToShow, setImagesToShow] = useState(3);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     setMobile(isMobile());
-    // Sur desktop, montrer toutes les images immédiatement
     if (!isMobile()) {
       setImagesToShow(999);
     }
@@ -62,7 +58,6 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
     ? imageGallery
     : DEFAULT_IMAGES;
 
-  // Images à afficher selon le chargement progressif
   const images = allImages.slice(0, imagesToShow);
   const hasMore = imagesToShow < allImages.length;
 
@@ -74,7 +69,6 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
     }, 300);
   };
 
-  // Animations réduites sur mobile
   const itemVariants = {
     hidden: { opacity: 0, scale: mobile ? 0.95 : 0.8, y: mobile ? 10 : 30 },
     visible: {
@@ -107,10 +101,26 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
 
   return (
     <>
-      <section className="min-h-screen w-full safari-section py-20 md:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 safari-topo pointer-events-none opacity-25" />
-        <div className="absolute inset-0 safari-leaves pointer-events-none opacity-30" />
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="min-h-screen w-full py-20 md:py-32 relative overflow-hidden bg-[#F5EFE6]">
+
+        {/* Pattern baobab subtil */}
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 10 L55 40 L50 35 L45 45 L60 50 L75 45 L70 35 L65 40 Z M60 50 L60 90 M50 70 L40 75 M70 70 L80 75 M55 95 Q60 100 65 95' stroke='%234B3935' fill='none' stroke-width='1.5'/%3E%3C/svg%3E")`,
+            backgroundSize: '120px 120px'
+          }}
+        />
+
+        {/* Grain photographique */}
+        <div
+          className="absolute inset-0 opacity-[0.015] mix-blend-overlay pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+          }}
+        />
+
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,27 +136,54 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
               transition={{ delay: 0.1, duration: 0.4 }}
               className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-[#D4A574] to-[#C4965F] text-white text-xs md:text-sm font-bold tracking-wider mb-4 shadow-lg"
             >
-              {header.badge || t('gallery.badge', { defaultValue: 'Discover Madagascar' })}
+              {header.badge || t('gallery.badge')}
             </motion.span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#4B3935] mb-4 tracking-tight">
-              {header.title || t('gallery.title', { defaultValue: 'Madagascar in Pictures' })}
+              {header.title || t('gallery.title')}
             </h2>
             <p className="text-lg md:text-xl text-[#8B7355] max-w-2xl mx-auto font-medium">
-              {header.subtitle || t('gallery.subtitle', { defaultValue: 'Explore the beauty and diversity of the Red Island' })}
+              {header.subtitle || t('gallery.subtitle')}
             </p>
           </motion.div>
 
-          <div className="safari-divider safari-divider--top">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
-                className="fill-[#F0E7D5]"
-              />
-            </svg>
-          </div>
+          {/* Photo Grid - Style Masonry comme Pexels */}
+          <div
+            className="masonry-grid"
+            style={{
+              columnCount: 2,
+              columnGap: '1rem'
+            }}
+          >
+            <style>{`
+              @media (min-width: 768px) {
+                .masonry-grid {
+                  column-count: 3 !important;
+                  column-gap: 1.5rem !important;
+                }
+              }
+              @media (min-width: 1024px) {
+                .masonry-grid {
+                  column-count: 4 !important;
+                  column-gap: 1.5rem !important;
+                }
+              }
+              @media (min-width: 1280px) {
+                .masonry-grid {
+                  column-count: 5 !important;
+                  column-gap: 1.5rem !important;
+                }
+              }
+              .masonry-item {
+                break-inside: avoid;
+                margin-bottom: 1rem;
+              }
+              @media (min-width: 768px) {
+                .masonry-item {
+                  margin-bottom: 1.5rem;
+                }
+              }
+            `}</style>
 
-          {/* Photo Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
             {images.map((photo, index) => (
               <motion.div
                 key={photo.id}
@@ -157,14 +194,14 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
                 whileHover={mobile ? {} : { scale: 1.05, zIndex: 10 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleImageClick(photo, index)}
-                className={`relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group safari-frame ${index === 0 || index === 5 || index === 9 ? 'md:col-span-2 md:row-span-2' : ''
-                  }`}
+                className="masonry-item relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
               >
-                <div className="relative w-full h-full aspect-square md:aspect-auto min-h-[200px]">
+                <div className="relative w-full">
                   <img
                     src={photo.src}
                     alt={photo.alt}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
+                    style={{ display: 'block' }}
                     loading={index < 3 ? "eager" : "lazy"}
                     decoding="async"
                   />
@@ -208,12 +245,12 @@ export function MadagascarGallery({ content = {} }: MadagascarGalleryProps) {
                 {isLoadingMore ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    {t('common.loading', { defaultValue: 'Loading...' })}
+                    {t('common.loading')}
                   </>
                 ) : (
                   <>
-                    {t('gallery.loadMore', { defaultValue: 'Load More' })}
-                      <span className="text-sm opacity-80">({allImages.length - imagesToShow} {t('tours.restantes')})</span>
+                    {t('gallery.loadMore')}
+                    <span className="text-sm opacity-80">({allImages.length - imagesToShow})</span>
                   </>
                 )}
               </button>
