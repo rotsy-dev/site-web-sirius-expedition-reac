@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram } from 'lucide-react'
+import { Facebook, Youtube, Mail, MapPin, ArrowUpRight, Linkedin, Instagram, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { VisitorCounter } from '../../components/common/VisitorCounter'
+import { useState } from 'react'
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -50,8 +51,67 @@ export function Footer({ config }: FooterProps) {
   const { t } = useTranslation()
   const { lang } = useParams()
   
-  // Langue par défaut si non définie dans l'URL
   const currentLang = lang || 'en'
+
+  // Newsletter state
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [message, setMessage] = useState('')
+
+  // Validation email
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  // Handle newsletter subscription
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Reset status
+    setStatus('idle')
+    setMessage('')
+
+    // Validate email
+    if (!email.trim()) {
+      setStatus('error')
+      setMessage('Veuillez entrer votre email')
+      return
+    }
+
+    if (!isValidEmail(email)) {
+      setStatus('error')
+      setMessage('Email invalide')
+      return
+    }
+
+    // Start loading
+    setStatus('loading')
+
+    try {
+      const response = await fetch('/.netlify/functions/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setStatus('success')
+        setMessage(data.message || 'Inscription réussie ! Vérifiez votre boîte mail.')
+        setEmail('') // Clear input
+      } else {
+        setStatus('error')
+        setMessage(data.error || 'Une erreur est survenue')
+      }
+    } catch (error) {
+      setStatus('error')
+      setMessage('Erreur de connexion. Veuillez réessayer.')
+      console.error('Newsletter error:', error)
+    }
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -128,7 +188,6 @@ export function Footer({ config }: FooterProps) {
 
   return (
     <footer className="relative bg-gradient-to-br from-[#1a1410] via-[#2a201d] to-[#1a1410] text-white overflow-hidden">
-      {/* Effets de fond */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
@@ -143,9 +202,7 @@ export function Footer({ config }: FooterProps) {
           className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16"
           style={{ willChange: 'transform, opacity' }}
         >
-          {/* Section gauche */}
           <motion.div variants={itemVariants} className="space-y-8">
-            {/* Logo et description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -161,7 +218,7 @@ export function Footer({ config }: FooterProps) {
               </p>
             </motion.div>
 
-            {/* Newsletter moderne */}
+            {/* Newsletter Form */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -176,25 +233,56 @@ export function Footer({ config }: FooterProps) {
                 {t('footer.newsletter')}
               </h3>
               <p className="text-white/60 text-sm mb-6">{t('footer.newsletterText')}</p>
-              <div className="flex gap-3">
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
-                  type="email"
-                  placeholder={t('footer.emailPlaceholder')}
-                  className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#D4A574] focus:bg-white/15 transition-all text-white backdrop-blur-xl"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.05, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="cursor-pointer flex-shrink-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] hover:from-[#C4965F] hover:to-[#D4A574] px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center text-[#4B3935] shadow-xl"
-                >
-                  <ArrowUpRight className="w-5 h-5" />
-                </motion.button>
-              </div>
+              
+              <form onSubmit={handleSubscribe} className="space-y-4">
+                <div className="flex gap-3">
+                  <motion.input
+                    whileFocus={{ scale: 1.02 }}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t('footer.emailPlaceholder')}
+                    disabled={status === 'loading'}
+                    className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#D4A574] focus:bg-white/15 transition-all text-white backdrop-blur-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <motion.button
+                    whileHover={{ scale: status === 'loading' ? 1 : 1.05, rotate: status === 'loading' ? 0 : 5 }}
+                    whileTap={{ scale: status === 'loading' ? 1 : 0.95 }}
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="flex-shrink-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] hover:from-[#C4965F] hover:to-[#D4A574] px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center text-[#4B3935] shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {status === 'loading' ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <ArrowUpRight className="w-5 h-5" />
+                    )}
+                  </motion.button>
+                </div>
+
+                {/* Status Messages */}
+                {message && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl ${
+                      status === 'success'
+                        ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                    }`}
+                  >
+                    {status === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    )}
+                    <span>{message}</span>
+                  </motion.div>
+                )}
+              </form>
             </motion.div>
           </motion.div>
 
-          {/* Section navigation */}
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-8 lg:gap-12">
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
@@ -227,7 +315,6 @@ export function Footer({ config }: FooterProps) {
               </nav>
             </div>
 
-            {/* Section Corporate + Réseaux */}
             <div>
               <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
                 CORPORATE
@@ -258,7 +345,6 @@ export function Footer({ config }: FooterProps) {
                 ))}
               </nav>
 
-              {/* Réseaux sociaux */}
               <div>
                 <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
                   {t('footer.followUs')}
@@ -294,7 +380,6 @@ export function Footer({ config }: FooterProps) {
           </motion.div>
         </motion.div>
 
-        {/* Séparateur moderne */}
         <motion.div
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -305,7 +390,6 @@ export function Footer({ config }: FooterProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </motion.div>
 
-        {/* Copyright et Visitor Counter */}
         <motion.div
           variants={bottomVariants}
           initial="hidden"
@@ -313,7 +397,6 @@ export function Footer({ config }: FooterProps) {
           viewport={{ once: true, margin: "-50px" }}
           className="flex flex-col xl:flex-row items-center justify-between gap-6"
         >
-          {/* Colonne gauche : Copyright + Contact */}
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
             <p className="text-white/60 text-sm text-center lg:text-left">
               © {currentYear} {config.siteName}. {t('footer.rights')}
@@ -348,7 +431,6 @@ export function Footer({ config }: FooterProps) {
             </motion.div>
           </div>
 
-          {/* Colonne droite : Visitor Counter */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
