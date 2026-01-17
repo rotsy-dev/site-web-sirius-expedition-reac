@@ -216,7 +216,8 @@
     "tableOfContents": "Table des matières",
     "updated": "Mis à jour",
     "legalDocument": "Document légal",
-    "verify": "Vérifier"
+    "verify": "Vérifier",
+    "copyLink": "Copier le lien"
   },
   "admin": {
     "dashboard": "Tableau de bord",

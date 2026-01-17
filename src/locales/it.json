@@ -233,7 +233,8 @@
     "tableOfContents": "Indice",
     "updated": "Aggiornato",
     "legalDocument": "Documento legale",
-    "verify": "Verifica"
+    "verify": "Verifica",
+    "copyLink": "Copia link"
   },
   "admin": {
     "dashboard": "Dashboard",

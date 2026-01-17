@@ -233,7 +233,8 @@
     "tableOfContents": "Inhaltsverzeichnis",
     "updated": "Aktualisiert",
     "legalDocument": "Rechtliches Dokument",
-    "verify": "Überprüfen"
+    "verify": "Überprüfen",
+    "copyLink": "Link kopieren"
 
   },
   "admin": {

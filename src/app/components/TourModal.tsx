@@ -250,14 +250,14 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-black text-white mb-1 sm:mb-2 leading-tight drop-shadow-2xl">
                   {tour.title}
                 </h2>
-                {displaySlug && (
+                {/* {displaySlug && (
                   <div className="mb-1 sm:mb-2">
                     <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-xl text-white px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-white/25">
                       <span className="opacity-80">slug</span>
                       <span className="font-black">{displaySlug}</span>
                     </span>
                   </div>
-                )}
+                )} */}
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold border border-white/30">
                     <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D4A574]"></span>
