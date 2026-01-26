@@ -330,7 +330,7 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
   };
 
   return (
-    <section className="py-32 px-6 relative overflow-hidden bg-[#FFFEFC]">
+    <section className="py-32 px-6 relative overflow-hidden bg-[#E5D8C0]">
       {/* Effet de fond décoratif */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-20 left-10 w-96 h-96 bg-[#A68966]/5 rounded-full blur-3xl" />
@@ -382,7 +382,7 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
                 whileHover={{ x: -5, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sliderRef.current?.slickPrev()}
-                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
+                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group cursor-pointer"
                 aria-label="Avis précédent"
               >
                 <div className="w-16 h-16 rounded-full border-2 border-[#4B3935]/10 flex items-center justify-center group-hover:bg-[#4B3935] group-hover:text-[#F0E7D5] group-hover:border-[#4B3935] transition-all duration-300 shadow-xl bg-white">
@@ -408,7 +408,7 @@ export function Reviews({ reviews, config, content = {} }: ReviewsProps) {
                 whileHover={{ x: 5, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sliderRef.current?.slickNext()}
-                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group"
+                className="flex items-center gap-4 text-[#4B3935] font-black text-[11px] tracking-[0.4em] group cursor-pointer"
                 aria-label="Avis suivant"
               >
                 <span className="hidden sm:inline">NEXT</span>

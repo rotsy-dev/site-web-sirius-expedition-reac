@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { motion } from 'framer-motion'
-import { Award, Users, Globe, Heart, Shield, Clock, Star, Leaf, Target, TrendingUp, Headphones, DollarSign, UserCheck, Loader2 } from 'lucide-react';
-import ScrollReveal from 'scrollreveal'
+import { Award, Users, Globe, Heart, Shield, Clock, Star, Leaf, Target, TrendingUp, Headphones, DollarSign, UserCheck, Loader2, ArrowRight } from 'lucide-react';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
 import { useTranslation } from 'react-i18next';
 
@@ -32,18 +31,16 @@ interface AboutUsProps {
   };
 }
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1598563352765-85f7971070a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsZW11ciUyME1hZGFnYXNjYXIlMjB3aWxkbGlmZXxlbnwxfHx8fDE3NjQ1OTE4Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
+const HERO_IMAGE = "https://images.unsplash.com/photo-1598563352765-85f7971070a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsZW11ciUyME1hZGFnYXNjYXIlMjB3aWxkbGlmZXxlbnwxfHx8fDE3NjQ1OTE4Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080";
 
 export function AboutUs({ config, content = {} }: AboutUsProps) {
   const { t } = useTranslation();
 
-  // Traduire automatiquement l'histoire (ourStory)
   const { translatedContent: translatedStory, isLoading: isTranslatingStory } = useTranslatedContent(
     content?.ourStory ?? null,
     ['title', 'paragraphs']
   );
 
-  // Traduire automatiquement les headers de la section
   const { translatedContent: translatedAboutHeader } = useTranslatedContent(
     content?.pageHeaders?.about ?? null,
     ['badge', 'title', 'subtitle']
@@ -56,65 +53,25 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
 
   const [heroImageLoaded, setHeroImageLoaded] = React.useState(false);
 
-  // Préchargement de l'image hero
   React.useEffect(() => {
     if (HERO_IMAGE) {
       const img = new Image();
       img.onload = () => setHeroImageLoaded(true);
       img.onerror = () => setHeroImageLoaded(true);
       img.src = HERO_IMAGE;
+      const timeout = setTimeout(() => setHeroImageLoaded(true), 100);
+      return () => clearTimeout(timeout);
     } else {
       setHeroImageLoaded(true);
     }
   }, []);
 
-  React.useEffect(() => {
-    if (typeof ScrollReveal === 'undefined') return;
-    
-    let sr: any = null;
-    let isMounted = true;
-
-    try {
-      sr = ScrollReveal({
-        reset: false,
-        distance: '40px',
-        duration: 800,
-        delay: 0,
-        easing: 'cubic-bezier(0.5, 0, 0, 1)',
-        mobile: true
-      });
-
-      if (isMounted && sr) {
-        sr.reveal('.reveal-stats', { origin: 'bottom', interval: 100 })
-        sr.reveal('.reveal-left', { origin: 'left', distance: '60px' })
-        sr.reveal('.reveal-right', { origin: 'right', distance: '60px' })
-        sr.reveal('.reveal-bottom', { origin: 'bottom', distance: '60px' })
-        sr.reveal('.reveal-values', { origin: 'bottom', interval: 100 })
-        sr.reveal('.reveal-why', { origin: 'bottom', interval: 100 })
-      }
-    } catch (error) {
-      console.warn('ScrollReveal initialization error:', error);
-    }
-
-    return () => {
-      isMounted = false;
-      if (sr && typeof sr.destroy === 'function') {
-        try {
-          sr.destroy();
-        } catch (error) {
-          console.warn('ScrollReveal cleanup error:', error);
-        }
-      }
-    };
-  }, [])
-
-  // Récupération des données dynamiques de l'histoire (déjà traduite ci-dessus)
   const finalStory = story || {
     title: t('about.ourStory'),
     paragraphs: [
-      "Sirius Expedition was founded with a simple mission: to share the incredible beauty and biodiversity of Madagascar with the world...",
-      "With years of experience and deep local knowledge, we specialize in creating customized tours...",
-      "From the iconic Avenue of the Baobabs to the pristine beaches of Sainte Marie..."
+      t('about.paragraph1'),
+      t('about.paragraph2'),
+      t('about.paragraph3')
     ]
   };
 
@@ -127,22 +84,22 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
 
   const values = [
     {
-      icon: <Award size={32} />,
+      icon: <Award size={36} />,
       title: 'Excellence',
       description: 'We strive for the highest quality in every tour we offer',
     },
     {
-      icon: <Leaf size={32} />,
+      icon: <Leaf size={36} />,
       title: 'Sustainability',
       description: 'Committed to eco-friendly and responsible tourism',
     },
     {
-      icon: <Target size={32} />,
+      icon: <Target size={36} />,
       title: 'Authenticity',
       description: 'Genuine experiences that showcase real Madagascar',
     },
     {
-      icon: <Heart size={32} />,
+      icon: <Heart size={36} />,
       title: 'Passion',
       description: 'We love what we do and it shows in every detail',
     },
@@ -181,242 +138,236 @@ export function AboutUs({ config, content = {} }: AboutUsProps) {
     },
   ];
 
-
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden ">
-      {/* Hero Section avec Background Image */}
-      <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="absolute inset-0 overflow-hidden"
-        >
+    <div className="w-full min-h-screen bg-[#0a0806] overflow-hidden">
+      {/* Hero */}
+      <section className="relative h-screen flex items-end overflow-hidden bg-[#0a0806]">
+        <div className="absolute inset-0">
           {HERO_IMAGE ? (
-            <>
-              <img
-                src={HERO_IMAGE}
-                alt="About Sirius Expedition"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                  heroImageLoaded ? 'opacity-100' : 'opacity-0'
+            <img
+              src={HERO_IMAGE}
+              alt="About Us"
+              className={`w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
-                loading="eager"
-              />
-              {!heroImageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
-              )}
-            </>
+              style={{ filter: 'brightness(0.5) contrast(1.1)' }}
+              loading="eager"
+            />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+            <div className="w-full h-full bg-[#0a0806]" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-        </motion.div>
-
-        <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
-          <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path
-              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
-              className="fill-[#F0E7D5] dark:fill-[#1a1410]"
-            ></path>
-          </svg>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-[#0a0806]/50 to-transparent" />
         </div>
 
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 lg:px-12 pb-40">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-4"
+            transition={{ duration: 1 }}
           >
-            <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-              {header.badge || t('sections.aboutUs')}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
-          >
-            {header.title || t('about.title')}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
-          >
-            {header.subtitle || t('about.subtitle')}
-          </motion.p>
-          
-          {/* Indicateur de chargement de traduction */}
-          {isTranslatingStory && (
-            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{t('common.loading')}</span>
+            <div className="mb-6">
+              <span className="text-xs font-light text-[#F0E7D5]/60 uppercase tracking-[0.3em]">
+                {header.badge || t('sections.aboutUs')}
+              </span>
+              <div className="h-px w-16 bg-[#F0E7D5]/30 mt-3" />
             </div>
-          )}
+
+            <h1 className="text-5xl lg:text-8xl xl:text-9xl font-light text-[#F0E7D5] mb-8 leading-[1.05] tracking-tight max-w-5xl">
+              {header.title || t('about.title')}
+            </h1>
+
+            <p className="text-lg lg:text-xl text-[#F0E7D5]/70 max-w-2xl font-light leading-relaxed">
+              {header.subtitle || t('about.subtitle')}
+            </p>
+
+            {isTranslatingStory && (
+              <div className="flex items-center gap-2 mt-6 text-sm text-[#F0E7D5]/60 font-light">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="uppercase tracking-[0.15em] text-xs">{t('common.loading')}</span>
+              </div>
+            )}
+          </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 lg:left-12 lg:translate-x-0 flex flex-col items-center lg:items-start gap-4"
+        >
+          <span className="text-[#F0E7D5]/40 text-[10px] font-light uppercase tracking-[0.3em] lg:-rotate-90">
+            Scroll
+          </span>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-px h-12 bg-gradient-to-b from-[#F0E7D5]/60 to-transparent"
+          />
+        </motion.div>
       </section>
 
-      {/* Main Content Section */}
-      <section className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Stats Section - Thème Mocha & Vanilla */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-24 lg:mb-48">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className={`reveal-stats p-6 lg:p-8 rounded-2xl text-center flex flex-col items-center justify-center shadow-md hover:shadow-xl transition-all duration-300 ${
-                index === 1 || index === 3 
-                  ? 'bg-[#443C34] text-white hover:bg-[#332C26]' 
-                  : 'bg-[#F0E7D5] text-[#443C34] hover:bg-[#D4A574] hover:text-white'
-              }`}
-            >
-              <div className="mb-4 opacity-90">
-                {stat.icon}
-              </div>
-              <h3 className="text-4xl font-bold mb-2">
-                {stat.number}
-              </h3>
-              <p className="text-sm opacity-80">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+      {/* Stats Section - DESIGN VISIBLE ET PREMIUM */}
+      <section className="py-20 px-6 lg:px-12 bg-[#F0E7D5]">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className={`p-8 lg:p-10 rounded-2xl text-center shadow-xl hover:shadow-2xl transition-all duration-300 ${index % 2 === 0
+                    ? 'bg-white border-2 border-[#D4A574]/30'
+                    : 'bg-gradient-to-br from-[#443C34] to-[#5a4a44] text-white'
+                  }`}
+              >
+                <div className={`mb-6 mx-auto w-fit ${index % 2 === 0 ? 'text-[#443C34]' : 'text-white'}`}>
+                  {stat.icon}
+                </div>
+                <h3 className="text-5xl font-bold mb-3">
+                  {stat.number}
+                </h3>
+                <p className={`text-sm font-medium uppercase tracking-wider ${index % 2 === 0 ? 'text-[#8B7355]' : 'text-white/80'}`}>
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* Our Story with Video */}
-        <div className="mb-24 lg:mb-48">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 mb-12 lg:mb-20 ">
-            {/* Left: Story Text (MAINTENANT DYNAMIQUE) */}
-            <div
-              className="flex flex-col justify-center reveal-left"
-            >
-              <h3 className="text-5xl font-bold mb-6 text-[#443C34]">{finalStory.title}</h3>
+          {/* Notre Histoire - LAYOUT VISIBLE */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-32">
+            <div className="bg-white rounded-2xl p-10 shadow-xl border-2 border-[#D4A574]/30">
+              <h2 className="text-4xl lg:text-5xl font-bold text-[#443C34] mb-8">
+                {finalStory.title}
+              </h2>
+
               {finalStory.paragraphs.map((para, idx) => (
-                <p key={idx} className="text-gray-600 mb-4 text-base leading-relaxed">
+                <p key={idx} className="text-[#443C34]/80 mb-6 font-medium text-base leading-relaxed">
                   {para}
                 </p>
               ))}
             </div>
 
-            {/* Right: YouTube Video */}
-            <div className="reveal-right">
-              <div className="rounded-2xl overflow-hidden ">
-                <div className="relative pb-[56.25%] h-0 bg-black">
-                  <iframe
-                    className="absolute top-0 left-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${config.videos.aboutUsVideoId}`}
-                    title="Sirius Expedition - Discover Madagascar"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </div>
+            <div className="relative aspect-video lg:aspect-[4/5] overflow-hidden rounded-2xl shadow-2xl">
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src={`https://www.youtube.com/embed/${config.videos.aboutUsVideoId}`}
+                title="Sirius Expedition"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
           </div>
 
-          {/* Bottom Row: Photo left, Quote + Community card right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-15 lg:gap-14">
-            {/* Left: Lemur Photo */}
-            <div className="reveal-bottom">
-              <img
-                src="https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&h=600&fit=crop"
-                alt="Madagascar lemur"
-                className="rounded-2xl w-full object-cover h-auto max-h-[310px]"
-                loading="lazy"
-              />
+          {/* Nos Valeurs - CARTES PREMIUM VISIBLES */}
+          <div className="mb-32">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold text-[#443C34] mb-4">
+                {t('about.values')}
+              </h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-[#D4A574] to-[#443C34] mx-auto rounded-full" />
             </div>
 
-            {/* Right: Quote + Community Card - Thème Mocha & Vanilla */}
-            <div className="flex flex-col gap-6 reveal-bottom">
-              <div className="bg-white rounded-2xl p-6 border-2 border-[#D4A574]/30 border-l-4 border-l-[#443C34] shadow-md hover:shadow-xl transition-all duration-300">
-                <p className="text-gray-600 italic text-base leading-relaxed">
-                  "{finalStory.paragraphs[finalStory.paragraphs.length - 1]}"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {values.map((value, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  className="bg-white rounded-2xl p-8 shadow-xl border-2 border-[#D4A574]/30 hover:border-[#443C34] transition-all group"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#443C34] to-[#5a4a44] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                    <div className="text-white">
+                      {value.icon}
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl font-bold text-[#443C34] mb-4">
+                    {value.title}
+                  </h3>
+
+                  <p className="text-[#443C34]/70 font-medium leading-relaxed">
+                    {value.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pourquoi nous choisir - DESIGN MODERNE */}
+          <div>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold text-[#443C34] mb-4">
+                {t('about.whyChooseUs')}
+              </h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-[#D4A574] to-[#443C34] mx-auto rounded-full" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {whyChooseUs.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group bg-white rounded-2xl p-8 shadow-xl border-2 border-[#D4A574]/30 hover:border-[#443C34] hover:shadow-2xl transition-all"
+                >
+                  <div className="w-14 h-14 bg-gradient-to-br from-[#D4A574] to-[#c89963] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md">
+                    <div className="text-white">
+                      {item.icon}
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-[#443C34] mb-3">
+                    {item.title}
+                  </h3>
+
+                  <p className="text-[#443C34]/70 font-medium leading-relaxed mb-4">
+                    {item.description}
+                  </p>
+
+                  <motion.div
+                    className="flex items-center gap-2 text-[#443C34] opacity-0 group-hover:opacity-100 transition-opacity"
+                    whileHover={{ x: 5 }}
+                  >
+                    <span className="text-sm font-bold uppercase tracking-wider">{t('common.learnMore')}</span>
+                    <ArrowRight size={16} />
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Services Footer - CARTE PREMIUM */}
+          <div className="mt-32 bg-gradient-to-br from-[#443C34] to-[#5a4a44] rounded-2xl p-10 shadow-2xl text-white">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <p className="text-xs text-white/70 uppercase tracking-widest mb-3 font-bold">{t('contact.hosting')}</p>
+                <p className="text-xl font-bold">
+                  {config.services.hosting.join(' & ')}
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-[#F0E7D5] to-[#F8F5F0] rounded-[2rem] p-6 flex flex-col gap-3 border-2 border-[#D4A574]/20 shadow-md">
+              <div>
+                <p className="text-xs text-white/70 uppercase tracking-widest mb-3 font-bold">{t('contact.domain')}</p>
+                <p className="text-xl font-bold">
+                  {config.services.domain}
+                </p>
+              </div>
 
-                <div className="rounded-2xl flex flex-col gap-1">
-
-                  {/* LIGNE 1 : Hosting */}
-                  <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      {t('contact.hosting')} :
-                    </span>
-                    <span className="font-bold text-[#443C34] text-xs">
-                      {config.services.hosting.join(' & ')}
-                    </span>
-                  </div>
-
-                  {/* LIGNE 2 : Domaine */}
-                  <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      {t('contact.domain')} :
-                    </span>
-                    <span className="font-bold text-[#443C34] text-xs flex-1">
-                      {config.services.domain}
-                    </span>
-                  </div>
-
-                  {/* LIGNE 3 : Email */}
-                  <div className="bg-white/80 p-3 px-5 rounded-xl flex items-center justify-start gap-3 border-2 border-[#443C34]/10 hover:border-[#D4A574]/50 transition-all duration-300">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#8B7355] w-20">
-                      {t('contact.emailLabel')} :
-                    </span>
-                    <span className="font-bold text-[#443C34] text-xs flex-1">
-                      {config.services.email}
-                    </span>
-                  </div>
-
-                </div>
-
+              <div>
+                <p className="text-xs text-white/70 uppercase tracking-widest mb-3 font-bold">{t('contact.emailLabel')}</p>
+                <p className="text-xl font-bold">
+                  {config.services.email}
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Values - Thème Mocha & Vanilla */}
-        <div className="mb-24 lg:mb-48">
-          <div className="text-center space-y-3 mb-12 sm:mb-24">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">
-              {t('about.values')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {values.map((value, index) => (
-              <div key={index}
-                className="reveal-values group p-6 sm:p-8 rounded-3xl border-2 border-[#D4A574]/20 bg-white hover:bg-gradient-to-br hover:from-[#F0E7D5] hover:to-white transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:shadow-2xl flex flex-col items-start text-left">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-4 sm:mb-5 bg-[#F0E7D5] shadow-sm transition-all group-hover:bg-[#443C34]">
-                  <div className="text-[#443C34] group-hover:text-white transition-colors">{value.icon}</div>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-[#443C34] transition-colors group-hover:text-[#8B7355]">{value.title}</h3>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Why Choose Us - Thème Mocha & Vanilla */}
-        <div className="mb-24 lg:mb-48">
-          <div className="text-center space-y-3 mb-12 sm:mb-24">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#443C34]">
-              {t('about.whyChooseUs')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {whyChooseUs.map((item, index) => (
-              <div key={index}
-                className="reveal-why group p-6 sm:p-8 rounded-3xl border-2 border-[#D4A574]/20 bg-gradient-to-br from-[#F8F5F0] to-white hover:from-white hover:to-[#F0E7D5] transition-all duration-500 ease-out transform hover:-rotate-1 hover:-translate-y-3 hover:border-[#443C34] hover:shadow-2xl flex flex-col items-start text-left">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-4 sm:mb-5 bg-white shadow-md transition-all group-hover:bg-[#443C34] border-2 border-[#D4A574]/20">
-                  <div className="text-[#443C34] group-hover:text-white transition-colors">{item.icon}</div>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-[#443C34] transition-colors group-hover:text-[#8B7355]">{item.title}</h3>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{item.description}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

@@ -50,28 +50,22 @@ export function Footer({ config }: FooterProps) {
   const currentYear = new Date().getFullYear()
   const { t } = useTranslation()
   const { lang } = useParams()
-  
+
   const currentLang = lang || 'en'
 
-  // Newsletter state
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
-  // Validation email
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  // Handle newsletter subscription
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Reset status
     setStatus('idle')
     setMessage('')
 
-    // Validate email
     if (!email.trim()) {
       setStatus('error')
       setMessage('Veuillez entrer votre email')
@@ -84,7 +78,6 @@ export function Footer({ config }: FooterProps) {
       return
     }
 
-    // Start loading
     setStatus('loading')
 
     try {
@@ -101,7 +94,7 @@ export function Footer({ config }: FooterProps) {
       if (response.ok) {
         setStatus('success')
         setMessage(data.message || 'Inscription réussie ! Vérifiez votre boîte mail.')
-        setEmail('') // Clear input
+        setEmail('')
       } else {
         setStatus('error')
         setMessage(data.error || 'Une erreur est survenue')
@@ -112,66 +105,6 @@ export function Footer({ config }: FooterProps) {
       console.error('Newsletter error:', error)
     }
   }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -30 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-
-  const bottomVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-
-  const linkVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.4,
-      },
-    }),
-  };
-
-  const socialVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: (i: number) => ({
-      opacity: 1,
-      scale: 1,
-      transition: {
-        delay: i * 0.08,
-        duration: 0.4,
-        type: "spring" as const,
-        stiffness: 200,
-        damping: 15,
-      },
-    }),
-  };
 
   const pageLinks = [
     { path: `/${currentLang}`, label: t('nav.home') },
@@ -187,127 +120,133 @@ export function Footer({ config }: FooterProps) {
   ]
 
   return (
-    <footer className="relative bg-gradient-to-br from-[#1a1410] via-[#2a201d] to-[#1a1410] text-white overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#D4A574]/20 rounded-full blur-3xl" />
+    <footer className="relative bg-[#3d2f2b] text-white overflow-hidden">
+      {/* Accents décoratifs ultra-subtils */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#FFF8E1] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#6D4C41] rounded-full blur-3xl" />
       </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 z-10">
+
+      <div className="relative max-w-[1600px] mx-auto px-6 lg:px-16 py-24 lg:py-32 z-10">
+        {/* Section principale */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16"
-          style={{ willChange: 'transform, opacity' }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 mb-24"
         >
-          <motion.div variants={itemVariants} className="space-y-8">
+          {/* Colonne gauche - Branding & Newsletter */}
+          <div className="space-y-12">
+            {/* Logo et description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-4"
+              transition={{ duration: 0.8 }}
+              className="space-y-6"
             >
-              <h1 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F0E7D5] to-white">
+              <h1 className="text-5xl sm:text-6xl font-extralight text-white tracking-tighter">
                 {config.siteName}
               </h1>
-              <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-md">
+              <div className="h-[1px] w-20 bg-white/20" />
+              <p className="text-white/60 text-base leading-[1.8] max-w-lg font-light tracking-wide">
                 {t('footer.description')}
               </p>
             </motion.div>
 
-            {/* Newsletter Form */}
+            {/* Newsletter Form - Design minimaliste */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 lg:p-8 max-w-md shadow-2xl"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-8 max-w-lg"
             >
-              <h3 className="text-xl font-bold mb-2 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-[#D4A574] to-[#C4965F] rounded-xl">
-                  <Mail className="w-5 h-5 text-white" />
-                </div>
+              <h3 className="text-lg font-light mb-2 tracking-tight">
                 {t('footer.newsletter')}
               </h3>
-              <p className="text-white/60 text-sm mb-6">{t('footer.newsletterText')}</p>
-              
+              <p className="text-white/50 text-sm mb-6 font-light tracking-wide">
+                {t('footer.newsletterText')}
+              </p>
+
               <form onSubmit={handleSubscribe} className="space-y-4">
                 <div className="flex gap-3">
-                  <motion.input
-                    whileFocus={{ scale: 1.02 }}
+                  <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('footer.emailPlaceholder')}
                     disabled={status === 'loading'}
-                    className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none placeholder-white/40 focus:border-[#D4A574] focus:bg-white/15 transition-all text-white backdrop-blur-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 px-5 py-4 text-sm outline-none placeholder-white/30 focus:border-white/30 focus:bg-white/10 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed font-light"
                   />
                   <motion.button
-                    whileHover={{ scale: status === 'loading' ? 1 : 1.05, rotate: status === 'loading' ? 0 : 5 }}
+                    whileHover={{ scale: status === 'loading' ? 1 : 1.05 }}
                     whileTap={{ scale: status === 'loading' ? 1 : 0.95 }}
                     type="submit"
                     disabled={status === 'loading'}
-                    className="flex-shrink-0 bg-gradient-to-r from-[#D4A574] to-[#C4965F] hover:from-[#C4965F] hover:to-[#D4A574] px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center text-[#4B3935] shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-shrink-0 bg-white text-[#3E2723] px-6 py-4 font-light transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#FFF8E1] cursor-pointer"
                   >
                     {status === 'loading' ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} />
                     ) : (
-                      <ArrowUpRight className="w-5 h-5" />
+                      <ArrowUpRight className="w-5 h-5" strokeWidth={1.5} />
                     )}
                   </motion.button>
                 </div>
 
-                {/* Status Messages */}
                 {message && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl ${
-                      status === 'success'
-                        ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                    }`}
+                    className={`flex items-center gap-2 text-sm px-4 py-3 ${status === 'success'
+                        ? 'bg-green-500/10 text-green-300 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-300 border border-red-500/20'
+                      }`}
                   >
                     {status === 'success' ? (
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
                     ) : (
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
                     )}
-                    <span>{message}</span>
+                    <span className="font-light">{message}</span>
                   </motion.div>
                 )}
               </form>
             </motion.div>
-          </motion.div>
+          </div>
 
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-8 lg:gap-12">
+          {/* Colonne droite - Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="grid grid-cols-2 gap-12 lg:gap-16"
+          >
             <div>
-              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
+              <h3 className="text-[10px] font-light text-white/40 uppercase tracking-[0.3em] mb-8">
                 {t('footer.quickLinks')}
               </h3>
-              <nav className="space-y-4">
+              <nav className="space-y-5">
                 {pageLinks.map((link, i) => (
                   <motion.div
                     key={link.path}
-                    custom={i}
-                    variants={linkVariants}
-                    initial="hidden"
-                    whileInView="visible"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
                   >
                     <Link
                       to={link.path}
-                      className="group block text-white/70 hover:text-white transition-all duration-300"
+                      className="group block text-white/60 hover:text-white transition-all duration-300"
                     >
                       <motion.span
                         whileHover={{ x: 5 }}
-                        className="inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 text-sm font-light tracking-wide"
                       >
                         <span>{link.label}</span>
-                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
                       </motion.span>
                     </Link>
                   </motion.div>
@@ -316,62 +255,61 @@ export function Footer({ config }: FooterProps) {
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-6">
+              <h3 className="text-[10px] font-light text-white/40 uppercase tracking-[0.3em] mb-8">
                 CORPORATE
               </h3>
-              <nav className="space-y-4 mb-8">
+              <nav className="space-y-5 mb-12">
                 {corporateLinks.map((link, idx) => (
                   <motion.div
                     key={idx}
-                    custom={idx}
-                    variants={linkVariants}
-                    initial="hidden"
-                    whileInView="visible"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
                   >
                     <Link
                       to={link.path}
-                      className="group block text-white/70 hover:text-white transition-all duration-300"
+                      className="group block text-white/60 hover:text-white transition-all duration-300"
                     >
                       <motion.span
                         whileHover={{ x: 5 }}
-                        className="inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 text-sm font-light tracking-wide"
                       >
                         <span>{link.label}</span>
-                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
                       </motion.span>
                     </Link>
                   </motion.div>
                 ))}
               </nav>
 
+              {/* Réseaux sociaux */}
               <div>
-                <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">
+                <h3 className="text-[10px] font-light text-white/40 uppercase tracking-[0.3em] mb-6">
                   {t('footer.followUs')}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {[
-                    { href: config.social.facebook, icon: Facebook, index: 0 },
-                    { href: config.social.youtube, icon: Youtube, index: 1 },
-                    { href: '#', icon: Linkedin, index: 2 },
-                    { href: config.social.instagram || '#', icon: Instagram, index: 3 },
-                    { href: config.social.tiktok || '#', icon: TikTokIcon, index: 4 },
-                  ].map(({ href, icon: Icon, index }) => (
+                    { href: config.social.facebook, icon: Facebook },
+                    { href: config.social.youtube, icon: Youtube },
+                    { href: '#', icon: Linkedin },
+                    { href: config.social.instagram || '#', icon: Instagram },
+                    { href: config.social.tiktok || '#', icon: TikTokIcon },
+                  ].map(({ href, icon: Icon }, index) => (
                     <motion.a
                       key={index}
-                      custom={index}
-                      variants={socialVariants}
-                      initial="hidden"
-                      whileInView="visible"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      whileHover={{ scale: 1.15, rotate: 5, y: -5 }}
-                      whileTap={{ scale: 0.9 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.1, y: -3 }}
+                      whileTap={{ scale: 0.95 }}
                       href={href}
                       target={href !== '#' ? "_blank" : undefined}
                       rel={href !== '#' ? "noopener noreferrer" : undefined}
-                      className="group relative w-12 h-12 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center hover:bg-gradient-to-r hover:from-[#D4A574] hover:to-[#C4965F] hover:border-transparent transition-all duration-300 shadow-lg hover:shadow-2xl"
+                      className="w-11 h-11 bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white hover:border-white transition-all duration-300 group"
                     >
-                      <Icon className="w-5 h-5 text-white/80 group-hover:text-white transition-colors relative z-10" />
+                      <Icon className="w-4 h-4 text-white/70 group-hover:text-[#3E2723] transition-colors" strokeWidth={1.5} />
                     </motion.a>
                   ))}
                 </div>
@@ -380,62 +318,49 @@ export function Footer({ config }: FooterProps) {
           </motion.div>
         </motion.div>
 
+        {/* Séparateur */}
         <motion.div
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="relative h-px my-12 origin-left"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        </motion.div>
+          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+          className="h-[1px] bg-white/10 mb-12 origin-left"
+        />
 
+        {/* Footer bottom */}
         <motion.div
-          variants={bottomVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="flex flex-col xl:flex-row items-center justify-between gap-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col xl:flex-row items-center justify-between gap-8"
         >
-          <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
-            <p className="text-white/60 text-sm text-center lg:text-left">
+          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+            <p className="text-white/40 text-xs text-center lg:text-left font-light tracking-wide">
               © {currentYear} {config.siteName}. {t('footer.rights')}
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-white/70 text-sm"
-            >
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-white/50 text-xs">
               <motion.a
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 href={`mailto:${config.contact.email}`}
-                className="flex items-center gap-2 hover:text-white transition-colors"
+                className="flex items-center gap-2 hover:text-white transition-colors font-light"
               >
-                <Mail className="w-4 h-4 flex-shrink-0" />
-                <span className="break-all">{config.contact.email}</span>
+                <Mail className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.5} />
+                <span>{config.contact.email}</span>
               </motion.a>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex items-center gap-2"
-              >
-                <MapPin className="w-4 h-4 flex-shrink-0" />
-                <span className="text-center sm:text-left">{config.contact.address}</span>
-              </motion.div>
-            </motion.div>
+              <div className="flex items-center gap-2 font-light">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.5} />
+                <span>{config.contact.address}</span>
+              </div>
+            </div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.8 }}
           >
             <VisitorCounter />
           </motion.div>

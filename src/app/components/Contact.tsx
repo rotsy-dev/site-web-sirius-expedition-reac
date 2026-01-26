@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle, Linkedin, Check, Instagram, Twitter } from 'lucide-react';
-import { motion } from "framer-motion";
-import ScrollReveal from 'scrollreveal';
+import { Mail, Phone, MapPin, Send, Facebook, Youtube, CheckCircle, AlertCircle, Linkedin, Instagram, Twitter, ArrowRight, Loader2, Check } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
 import emailjs from '@emailjs/browser';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
-import { Loader2 } from 'lucide-react';
-
 
 interface ContactProps {
   // On accepte la structure réelle de siteConfig pour rester compatible
@@ -150,95 +147,70 @@ export function Contact({ config, content = {} }: ContactProps) {
 
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
-      {/* Hero Section avec Background Image */}
-      <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="absolute inset-0 overflow-hidden"
-        >
+    <div className="w-full min-h-screen bg-[#E5D8C0] overflow-hidden">
+      {/* Hero - Style Wilderness */}
+      <section className="relative h-screen flex items-end overflow-hidden bg-[#0a0806]">
+        <div className="absolute inset-0">
           {HERO_IMAGE ? (
-            <>
-              <img
-                src={HERO_IMAGE}
-                alt="Contact Sirius Expedition"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                  heroImageLoaded ? 'opacity-100' : 'opacity-0'
+            <img
+              src={HERO_IMAGE}
+              alt="Contact"
+              className={`w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
-                loading="eager"
-              />
-              {!heroImageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
-              )}
-            </>
+              style={{ filter: 'brightness(0.5) contrast(1.1)' }}
+              loading="eager"
+            />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+            <div className="w-full h-full bg-[#0a0806]" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-        </motion.div>
-
-        <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
-          <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path
-              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
-              className="fill-[#F0E7D5] dark:fill-[#1a1410]"
-            ></path>
-          </svg>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-[#0a0806]/50 to-transparent" />
         </div>
 
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 lg:px-12 pb-40">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-4"
+            transition={{ duration: 1 }}
           >
-            <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
+            <div className="mb-6">
+              <span className="text-xs font-light text-[#F0E7D5]/60 uppercase tracking-[0.3em]">
+                {isTranslatingHeader ? t('contact.title') : (header.badge || t('contact.title'))}
+              </span>
+              <div className="h-px w-16 bg-[#F0E7D5]/30 mt-3" />
+            </div>
+
+            <h1 className="text-5xl lg:text-8xl xl:text-9xl font-light text-[#F0E7D5] mb-8 leading-[1.05] tracking-tight max-w-5xl">
               {isTranslatingHeader ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                <span className="flex items-center gap-3">
+                  <Loader2 className="w-12 h-12 animate-spin" />
                   {t('contact.title')}
                 </span>
               ) : (
-                header?.badge || t('contact.title')
+                header.title || t('contact.title')
               )}
-            </span>
+            </h1>
+
+            <p className="text-lg lg:text-xl text-[#F0E7D5]/70 max-w-2xl font-light leading-relaxed">
+              {isTranslatingHeader ? t('contact.subtitle') : (header.subtitle || t('contact.subtitle'))}
+            </p>
           </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight"
-          >
-            {isTranslatingHeader ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {t('contact.title')}
-              </span>
-            ) : (
-              header?.title || t('contact.title')
-            )}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-base md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
-          >
-            {isTranslatingHeader ? (
-              <span className="flex items-center gap-2 justify-center">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {t('contact.subtitle')}
-              </span>
-            ) : (
-              header?.subtitle || t('contact.subtitle')
-            )}
-          </motion.p>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 lg:left-12 lg:translate-x-0 flex flex-col items-center lg:items-start gap-4"
+        >
+          <span className="text-[#F0E7D5]/40 text-[10px] font-light uppercase tracking-[0.3em] lg:-rotate-90">
+            Scroll
+          </span>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-px h-12 bg-gradient-to-b from-[#F0E7D5]/60 to-transparent"
+          />
+        </motion.div>
       </section>
 
       {/* Main Content Section - Thème Mocha & Vanilla */}

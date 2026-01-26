@@ -66,7 +66,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
   const sliderRef = useRef<Slider>(null)
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
   const [selectedTour, setSelectedTour] = useState<ExtendedTourSpecialty | null>(null)
-  
+
   // Traduire automatiquement le contenu des tours
   const { translatedContent: translatedTours, isLoading: isTranslatingTours } = useTranslatedContent(
     tours,
@@ -82,13 +82,13 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
   const header = (translatedBestSellersHeader as { badge?: string; title?: string; subtitle?: string } | null)
     || content.pageHeaders?.bestSellers
     || {}
-  
+
   // Utiliser les tours traduits ou les tours originaux
   const displayTours = (translatedTours || tours) as typeof tours
 
   useEffect(() => {
     if (typeof ScrollReveal === 'undefined') return;
-    
+
     let sr: any = null;
     let isMounted = true;
 
@@ -211,7 +211,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             <button
               onClick={() => handleOpenModal(tour)}
               className={`
-                mt-auto py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300
+                mt-auto py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300 cursor-pointer
                 ${isHovered
                   ? "bg-[#D4A574] text-[#4B3935] shadow-xl"
                   : "bg-[#4B3935] text-[#F0E7D5]"
@@ -238,38 +238,32 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#4B3935]/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="w-full max-w-[100rem] mx-auto relative z-10">
 
-          {/* Header stylé Safari */}
-          <div
-            className="section-header text-center mb-20 pt-16"
+
+          {/* En-tête de la section */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-20"
           >
-            {/* Badge avec style safari */}
-            <div className="inline-block mb-6">
-              <span className="bg-[#4B3935] text-[#D4A574] px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.3em] shadow-xl">
+            <div className="mb-6">
+              <span className="text-[10px] font-light text-[#5d4a42]/60 uppercase tracking-[0.3em]">
                 {header.badge || t('sections.bestSellers')}
               </span>
+              <div className="h-px w-12 bg-[#5d4a42]/20 mt-2" />
             </div>
 
-            {/* Titre avec effet gradient */}
-            <h2 className="text-5xl lg:text-7xl font-black mb-6 tracking-tight">
-              <span className="bg-gradient-to-r from-[#4B3935] via-[#6B5955] to-[#4B3935] bg-clip-text text-transparent">
-                {header.title || t('sections.bestSellers')}
-              </span>
+            <h2 className="text-5xl lg:text-7xl font-light text-[#5d4a42] mb-6 leading-[1.1] tracking-tight max-w-4xl">
+              {header.title || t('sections.bestSellers')}
             </h2>
 
-            {/* Sous-titre avec style */}
-            <p className="text-lg lg:text-xl text-[#4B3935]/70 max-w-3xl mx-auto font-light leading-relaxed">
+            <p className="text-lg text-[#5d4a42]/70 max-w-2xl font-light leading-relaxed">
               {header.subtitle || t('sections.bestSellersSubtitle')}
             </p>
-
-            {/* Ligne décorative */}
-            <div className="flex items-center justify-center gap-3 mt-8">
-              <div className="w-16 h-1 bg-gradient-to-r from-transparent to-[#D4A574] rounded-full" />
-              <div className="w-3 h-3 rounded-full bg-[#D4A574]" />
-              <div className="w-16 h-1 bg-gradient-to-l from-transparent to-[#D4A574] rounded-full" />
-            </div>
-          </div>
+          </motion.div>
 
           {/* Indicateur de chargement */}
           {isTranslatingTours && (
@@ -292,7 +286,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
               {displayTours.slice(0, 4).map((tour, index) => (
                 <div key={tour.id} className="px-4 pb-8">
                   {/* Décalage alternant */}
-                  <div className={index % 2 === 0 ? 'mt-0' : 'mt-12'}>
+                  <div className='mt-12'>
                     <Card tour={tour} index={index} />
                   </div>
                 </div>
@@ -303,7 +297,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
             <div className="flex justify-center items-center gap-6 mt-16">
               <button
                 onClick={() => sliderRef.current?.slickPrev()}
-                className="w-16 h-16 border-3 border-[#4B3935] rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300 shadow-xl flex items-center justify-center bg-[#F0E7D5]"
+                className="w-16 h-16 border-3 border-[#4B3935] rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300 shadow-xl flex items-center justify-center bg-[#F0E7D5] cursor-pointer"
               >
                 <ChevronLeft size={28} strokeWidth={2.5} />
               </button>
@@ -320,7 +314,7 @@ export function BestSellers({ tours, onNavigateToTour, content = {} }: BestSelle
 
               <button
                 onClick={() => sliderRef.current?.slickNext()}
-                className="w-16 h-16 border-3 border-[#4B3935] rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300 shadow-xl flex items-center justify-center bg-[#F0E7D5]"
+                className="w-16 h-16 border-3 border-[#4B3935] rounded-full text-[#4B3935] hover:bg-[#4B3935] hover:text-[#F0E7D5] transition-all duration-300 shadow-xl flex items-center justify-center bg-[#F0E7D5] cursor-pointer"
               >
                 <ChevronRight size={28} strokeWidth={2.5} />
               </button>

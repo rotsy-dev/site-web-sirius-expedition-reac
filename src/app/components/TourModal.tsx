@@ -201,7 +201,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto bg-black/30 backdrop-blur-sm"
       style={{ willChange: 'opacity' }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -250,14 +250,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-black text-white mb-1 sm:mb-2 leading-tight drop-shadow-2xl">
                   {tour.title}
                 </h2>
-                {/* {displaySlug && (
-                  <div className="mb-1 sm:mb-2">
-                    <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-xl text-white px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border border-white/25">
-                      <span className="opacity-80">slug</span>
-                      <span className="font-black">{displaySlug}</span>
-                    </span>
-                  </div>
-                )} */}
+                
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-xl text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold border border-white/30">
                     <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#D4A574]"></span>
@@ -322,79 +315,6 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                 {tour.description}
               </p>
             </div>
-
-            {/* Calendrier de disponibilités */}
-            {/* <div className="mb-6 sm:mb-8 md:mb-10 bg-white rounded-2xl border-2 border-[#F0E7D5] p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-[#332C26]">{tr('tourSpecialties.modal.availability', 'Disponibilités')}</h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-                    className="cursor-pointer px-3 py-2 rounded-xl bg-[#F0E7D5]/40 hover:bg-[#F0E7D5]/60 transition-all text-sm font-bold text-[#4B3935]"
-                  >
-                    ←
-                  </button>
-                  <div className="text-sm sm:text-base font-black text-[#332C26]">
-                    {calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-                    className="cursor-pointer px-3 py-2 rounded-xl bg-[#F0E7D5]/40 hover:bg-[#F0E7D5]/60 transition-all text-sm font-bold text-[#4B3935]"
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-2 text-xs font-bold text-[#8B7355] mb-2">
-                {[
-                  tr('common.weekdays.mon', 'Lun'),
-                  tr('common.weekdays.tue', 'Mar'),
-                  tr('common.weekdays.wed', 'Mer'),
-                  tr('common.weekdays.thu', 'Jeu'),
-                  tr('common.weekdays.fri', 'Ven'),
-                  tr('common.weekdays.sat', 'Sam'),
-                  tr('common.weekdays.sun', 'Dim'),
-                ].map((d) => (
-                  <div key={d} className="text-center">{d}</div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-2">
-                {calendarDays.map(({ date, inMonth }, idx) => {
-                  const key = formatYmd(date);
-                  const entry = availabilityByDate.get(key);
-                  const status = entry?.status;
-                  const dot =
-                    status === 'available'
-                      ? 'bg-green-500'
-                      : status === 'limited'
-                      ? 'bg-amber-500'
-                      : status === 'unavailable'
-                      ? 'bg-red-500'
-                      : 'bg-transparent';
-
-                  return (
-                    <div
-                      key={idx}
-                      title={entry?.note || ''}
-                      className={`relative rounded-xl border p-2 sm:p-2.5 text-center ${inMonth ? 'bg-[#FAF7F2]' : 'bg-white/50'} ${inMonth ? 'border-[#F0E7D5]' : 'border-transparent'} ${inMonth ? 'text-[#332C26]' : 'text-[#332C26]/35'}`}
-                    >
-                      <div className="text-xs sm:text-sm font-black">{date.getDate()}</div>
-                      <div className={`mx-auto mt-1 h-2 w-2 rounded-full ${dot}`} />
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex flex-wrap gap-3 mt-4 text-xs font-semibold text-[#4B3935]">
-                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-green-500" /> {tr('tourSpecialties.modal.available', 'Disponible')}</div>
-                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500" /> {tr('tourSpecialties.modal.limited', 'Limité')}</div>
-                <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /> {tr('tourSpecialties.modal.unavailable', 'Complet')}</div>
-              </div>
-            </div> */}
 
             {/* Info Bar amélioré */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-gradient-to-br from-[#F0E7D5]/40 to-[#E5D8C0]/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl mb-6 sm:mb-8 md:mb-10 border border-[#D4A574]/20">
@@ -542,9 +462,7 @@ export function TourModal({ tour, onClose, onNavigateToQuote }: { tour: Extended
                                     className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white"
                                   />
                                 )}
-                                <span className="absolute -top-6 sm:-top-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-black text-[#D4A574] whitespace-nowrap">
-                                  {tr('tourSpecialties.modal.day', 'Jour')} {i + 1}
-                                </span>
+                                
                               </div>
 
                               {/* Carte du jour améliorée */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Clock, Loader2, Calendar, Eye, Share2, Facebook, Twitter, Linkedin, Link2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Loader2, Calendar, Eye, Share2, Facebook, Twitter, Linkedin, Link2, Check, ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import { useTranslatedContent } from '../../hooks/useTranslatedContent';
@@ -20,13 +20,12 @@ interface BlogProps {
     isDetail?: boolean;
 }
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1659944984855-776187144baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW9iYWIlMjB0cmVlcyUyME1hZGFnYXNjYXIlMjBzdW5zZXR8ZW58MXx8fHwxNzY0NTkxODc5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
-
+const HERO_IMAGE = "https://images.unsplash.com/photo-1659944984855-776187144baf?w=1600&q=80";
 const CACHE_VERSION = '2.0';
 const CACHE_KEY = `blog_posts_cache_v${CACHE_VERSION}`;
 
 // ============================================
-// COMPOSANT : PARTAGE SUR LES RÉSEAUX SOCIAUX
+// COMPOSANT : PARTAGE PREMIUM
 // ============================================
 const SocialShare = ({ post }: any) => {
     const { t } = useTranslation();
@@ -59,71 +58,74 @@ const SocialShare = ({ post }: any) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-[#F0E7D5] to-[#E5D8C0] dark:from-[#443C34] dark:to-[#332C26] rounded-xl sm:rounded-2xl shadow-lg border-2 border-[#D4A574]/20"
+            className="p-6 bg-white border border-[#4B3935]/10"
         >
-            <div className="flex items-center gap-2 text-[#443C34] dark:text-white font-bold">
-                <Share2 size={18} className="sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm">{t('blog.partager')}</span>
-            </div>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <Share2 size={18} className="text-[#4B3935]" />
+                    <span className="text-xs font-light text-[#4B3935] uppercase tracking-[0.25em]">
+                        {t('blog.partager')}
+                    </span>
+                </div>
 
-            <div className="flex items-center gap-2">
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleShare('facebook')}
-                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1877F2] hover:bg-[#0d5dbf] text-white flex items-center justify-center shadow-md transition-all"
-                    aria-label="Partager sur Facebook"
-                >
-                    <Facebook size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
-                </motion.button>
+                <div className="flex items-center gap-2">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleShare('facebook')}
+                        className="w-10 h-10 bg-[#4B3935] hover:bg-[#3d2f2b] text-white flex items-center justify-center transition-all"
+                        aria-label="Facebook"
+                    >
+                        <Facebook size={16} fill="white" />
+                    </motion.button>
 
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleShare('twitter')}
-                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1DA1F2] hover:bg-[#0d8bd9] text-white flex items-center justify-center shadow-md transition-all"
-                    aria-label="Partager sur Twitter"
-                >
-                    <Twitter size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
-                </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleShare('twitter')}
+                        className="w-10 h-10 bg-[#4B3935] hover:bg-[#3d2f2b] text-white flex items-center justify-center transition-all"
+                        aria-label="Twitter"
+                    >
+                        <Twitter size={16} fill="white" />
+                    </motion.button>
 
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleShare('linkedin')}
-                    className="cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0A66C2] hover:bg-[#084d94] text-white flex items-center justify-center shadow-md transition-all"
-                    aria-label="Partager sur LinkedIn"
-                >
-                    <Linkedin size={16} className="sm:w-[18px] sm:h-[18px]" fill="white" />
-                </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleShare('linkedin')}
+                        className="w-10 h-10 bg-[#4B3935] hover:bg-[#3d2f2b] text-white flex items-center justify-center transition-all"
+                        aria-label="LinkedIn"
+                    >
+                        <Linkedin size={16} fill="white" />
+                    </motion.button>
 
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={copyToClipboard}
-                    className={` cursor-pointer w-9 h-9 sm:w-10 sm:h-10 rounded-full ${copied ? 'bg-green-500' : 'bg-[#8B7355] hover:bg-[#6B5535]'
-                        } text-white flex items-center justify-center shadow-md transition-all`}
-                    aria-label="Copier le lien"
-                >
-                    {copied ? <Check size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Link2 size={16} className="sm:w-[18px] sm:h-[18px]" />}
-                </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={copyToClipboard}
+                        className={`w-10 h-10 ${copied ? 'bg-green-600' : 'bg-[#4B3935] hover:bg-[#3d2f2b]'} text-white flex items-center justify-center transition-all`}
+                        aria-label="Copy"
+                    >
+                        {copied ? <Check size={16} /> : <Link2 size={16} />}
+                    </motion.button>
+                </div>
             </div>
 
             {copied && (
-                <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-medium text-green-600 dark:text-green-400"
+                <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 text-xs font-light text-green-600 uppercase tracking-[0.2em]"
                 >
                     {t('blog.liencopie')}
-                </motion.span>
+                </motion.p>
             )}
         </motion.div>
     );
 };
 
 // ============================================
-// COMPOSANT : NAVIGATION ENTRE ARTICLES
+// COMPOSANT : NAVIGATION PREMIUM
 // ============================================
 const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
     const currentIndex = posts.findIndex((p: any) => p.id === currentPost.id);
@@ -132,26 +134,24 @@ const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
 
     const NavCard = ({ post, direction, onClick }: any) => (
         <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -4 }}
             onClick={() => onClick(post)}
-            className={`cursor-pointer group flex-1 p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl bg-white dark:bg-[#443C34] border-2 border-[#D4A574]/20 hover:border-[#D4A574] shadow-lg hover:shadow-xl transition-all ${direction === 'prev' ? 'text-left' : 'text-right'
+            className={`group flex-1 p-8 bg-white border border-[#4B3935]/10 hover:border-[#4B3935]/30 transition-all cursor-pointer ${direction === 'prev' ? 'text-left' : 'text-right'
                 }`}
         >
-            <div className={`cursor-pointer flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 text-xs font-bold text-[#8B7355] dark:text-[#D4A574] ${direction === 'next' ? 'flex-row-reverse' : ''
-                }`}>
-                {direction === 'prev' ? <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> : <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
-                <span className="uppercase tracking-wider">
-                    {direction === 'prev' ? 'Prev' : 'Next'}
+            <div className={`flex items-center gap-2 mb-4 ${direction === 'next' ? 'flex-row-reverse' : ''}`}>
+                {direction === 'prev' ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                <span className="text-[10px] font-light text-[#4B3935]/60 uppercase tracking-[0.3em]">
+                    {direction === 'prev' ? 'Previous' : 'Next'}
                 </span>
             </div>
 
-            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#443C34] dark:text-white line-clamp-2 group-hover:text-[#8B7355] dark:group-hover:text-[#D4A574] transition-colors">
+            <h3 className="text-xl font-light text-[#4B3935] line-clamp-2 mb-3 group-hover:text-[#8B7355] transition-colors">
                 {post.title}
             </h3>
 
             {post.excerpt && (
-                <p className="cursor-pointer mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                <p className="text-sm text-[#4B3935]/60 font-light line-clamp-2">
                     {post.excerpt}
                 </p>
             )}
@@ -161,23 +161,11 @@ const BlogNavigation = ({ posts, currentPost, onNavigate }: any) => {
     if (!prevPost && !nextPost) return null;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row gap-4 mt-8 sm:mt-12"
-        >
-            {prevPost ? (
-                <NavCard post={prevPost} direction="prev" onClick={onNavigate} />
-            ) : (
-                <div className="flex-1 hidden md:block" />
-            )}
-
-            {nextPost ? (
-                <NavCard post={nextPost} direction="next" onClick={onNavigate} />
-            ) : (
-                <div className="flex-1 hidden md:block" />
-            )}
-        </motion.div>
+        <div className="grid md:grid-cols-2 gap-4 mt-16">
+            {prevPost && <NavCard post={prevPost} direction="prev" onClick={onNavigate} />}
+            {!prevPost && <div className="hidden md:block" />}
+            {nextPost && <NavCard post={nextPost} direction="next" onClick={onNavigate} />}
+        </div>
     );
 };
 
@@ -191,26 +179,28 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
     const [heroImageLoaded, setHeroImageLoaded] = useState(false);
     const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
     const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("Tous");
 
-    // Préchargement de l'image hero
     useEffect(() => {
         if (HERO_IMAGE) {
             const img = new Image();
             img.onload = () => setHeroImageLoaded(true);
             img.onerror = () => setHeroImageLoaded(true);
             img.src = HERO_IMAGE;
+            const timeout = setTimeout(() => setHeroImageLoaded(true), 100);
+            return () => clearTimeout(timeout);
         } else {
             setHeroImageLoaded(true);
         }
     }, []);
 
-    // Traduire automatiquement les posts de blog
     const { translatedContent: translatedPosts, isLoading: isTranslatingPosts } = useTranslatedContent(
         posts,
-        ['title', 'excerpt', 'content', 'author']
+        ['title', 'excerpt', 'content', 'author', 'category']
     );
 
-    // Traduire automatiquement les headers de la section
     const { translatedContent: translatedBlogHeader } = useTranslatedContent(
         content?.pageHeaders?.blog ?? null,
         ['badge', 'title', 'subtitle']
@@ -221,30 +211,23 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
         || content?.pageHeaders?.blog
         || {};
 
-    // Précharger les images des posts
     useEffect(() => {
         if (posts.length > 0) {
             posts.forEach((post) => {
                 if (post.image) {
                     const img = new Image();
-                    img.onload = () => {
-                        setImagesLoaded(prev => ({ ...prev, [post.id]: true }));
-                    };
-                    img.onerror = () => {
-                        setImagesLoaded(prev => ({ ...prev, [post.id]: true }));
-                    };
+                    img.onload = () => setImagesLoaded(prev => ({ ...prev, [post.id]: true }));
+                    img.onerror = () => setImagesLoaded(prev => ({ ...prev, [post.id]: true }));
                     img.src = post.image;
                 }
             });
         }
     }, [posts]);
 
-    // Charger les posts depuis Firestore avec CACHE IMMÉDIAT
     useEffect(() => {
         const loadPosts = async () => {
             setIsLoadingPosts(true);
             try {
-                // 1. Charger IMMÉDIATEMENT depuis le cache si disponible
                 const cachedPosts = localStorage.getItem(CACHE_KEY);
                 if (cachedPosts) {
                     const parsedCache = JSON.parse(cachedPosts);
@@ -252,30 +235,22 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                     setIsLoadingPosts(false);
                 }
 
-                // 2. Puis charger depuis Firestore en arrière-plan
                 const postsSnap = await getDocs(collection(db, 'blogPosts'));
                 const freshPosts = postsSnap.docs.map(d => {
                     const data = d.data();
-                    return {
-                        id: d.id,
-                        ...data,
-                        slug: data.slug || d.id
-                    };
+                    return { id: d.id, ...data, slug: data.slug || d.id };
                 });
 
-                // Trier par ID
                 freshPosts.sort((a: any, b: any) => {
                     const idA = parseInt(a.id) || 0;
                     const idB = parseInt(b.id) || 0;
                     return idA - idB;
                 });
 
-                // Mettre à jour les posts ET le cache
                 setPosts(freshPosts);
                 localStorage.setItem(CACHE_KEY, JSON.stringify(freshPosts));
                 setIsLoadingPosts(false);
 
-                // Nettoyer les anciens caches
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('blog_posts_cache') && key !== CACHE_KEY) {
                         localStorage.removeItem(key);
@@ -328,84 +303,70 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
         <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 min-h-screen font-sans">
             <AnimatePresence mode="wait">
                 {!selectedPost ? (
-                    <motion.div
-                        key="list"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        {/* Hero Section */}
-                        <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-                            <motion.div
-                                initial={{ scale: 1.1 }}
-                                animate={{ scale: 1 }}
-                                transition={{ duration: 1.2, ease: "easeOut" }}
-                                className="absolute inset-0 overflow-hidden"
-                            >
+                    <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        {/* Hero Minimaliste Premium */}
+                        <section className="relative h-screen flex items-end overflow-hidden bg-[#0a0806]">
+                            <div className="absolute inset-0">
                                 {HERO_IMAGE ? (
-                                    <>
-                                        <img
-                                            src={HERO_IMAGE}
-                                            alt="Madagascar Blog"
-                                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
-                                                }`}
-                                            loading="eager"
-                                        />
-                                        {!heroImageLoaded && (
-                                            <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
-                                        )}
-                                    </>
+                                    <img
+                                        src={HERO_IMAGE}
+                                        alt="Blog"
+                                        className={`w-full h-full object-cover transition-opacity duration-500 ${heroImageLoaded ? 'opacity-100' : 'opacity-0'
+                                            }`}
+                                        style={{ filter: 'brightness(0.5) contrast(1.1)' }}
+                                        loading="eager"
+                                    />
                                 ) : (
-                                    <div className="absolute inset-0 bg-gradient-to-br from-[#4B3935] to-[#3d2f2b]" />
+                                    <div className="w-full h-full bg-[#0a0806]" />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-                            </motion.div>
-
-                            <div className="absolute bottom-0 left-0 w-full leading-[0] z-20">
-                                <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                                    <path
-                                        d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.83C0,95.83,161,122.35,321.39,56.44Z"
-                                        className="fill-[#F0E7D5] dark:fill-[#1a1410]"
-                                    ></path>
-                                </svg>
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0806] via-[#0a0806]/50 to-transparent" />
                             </div>
 
-                            <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 lg:px-12 pb-40">
                                 <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 40 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.2 }}
-                                    className="mb-4"
+                                    transition={{ duration: 1 }}
                                 >
-                                    <span className="inline-block px-5 py-1.5 bg-[#D4A574] text-white rounded-full text-xs md:text-sm font-bold tracking-wider">
-                                        {header.badge || t('sections.blogs')}
-                                    </span>
-                                </motion.div>
-
-                                <motion.h1
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.3 }}
-                                    className="text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-black text-white mb-4 tracking-tight"
-                                >
-                                    {header.title || t('sections.blogs')}
-                                </motion.h1>
-
-                                <motion.p
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.4 }}
-                                    className="text-sm md:text-base lg:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed"
-                                >
-                                    {header.subtitle || t('sections.blogsSubtitle')}
-                                </motion.p>
-
-                                {isTranslatingPosts && (
-                                    <div className="flex items-center justify-center gap-2 mt-4 text-sm text-white/80">
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span>{t('common.loading')}</span>
+                                    <div className="mb-6">
+                                        <span className="text-xs font-light text-[#F0E7D5]/60 uppercase tracking-[0.3em]">
+                                            {header.badge || t('sections.blogs')}
+                                        </span>
+                                        <div className="h-px w-16 bg-[#F0E7D5]/30 mt-3" />
                                     </div>
-                                )}
+
+                                    <h1 className="text-5xl lg:text-8xl xl:text-9xl font-light text-[#F0E7D5] mb-8 leading-[1.05] tracking-tight max-w-5xl">
+                                        {header.title || t('sections.blogs')}
+                                    </h1>
+
+                                    <p className="text-lg lg:text-xl text-[#F0E7D5]/70 max-w-2xl font-light leading-relaxed">
+                                        {header.subtitle || t('sections.blogsSubtitle')}
+                                    </p>
+
+                                    {isTranslatingPosts && (
+                                        <div className="flex items-center gap-2 mt-6 text-sm text-[#F0E7D5]/60 font-light">
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <span className="uppercase tracking-[0.15em] text-xs">{t('common.loading')}</span>
+                                        </div>
+                                    )}
+                                </motion.div>
                             </div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1 }}
+                                className="absolute bottom-8 left-1/2 -translate-x-1/2 lg:left-12 lg:translate-x-0 flex flex-col items-center lg:items-start gap-4"
+                            >
+                                <span className="text-[#F0E7D5]/40 text-[10px] font-light uppercase tracking-[0.3em] lg:-rotate-90">
+                                    Scroll
+                                </span>
+                                <motion.div
+                                    animate={{ y: [0, 10, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    className="w-px h-12 bg-gradient-to-b from-[#F0E7D5]/60 to-transparent"
+                                />
+                            </motion.div>
                         </section>
 
                         {/* Section Articles */}
@@ -519,8 +480,10 @@ export function Blogs({ content = {}, isDetail = false }: BlogProps) {
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                                         {post.category && (
-                                                            <div className="absolute top-4 left-4 bg-[#D4A574] backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
-                                                                {post.category}
+                                                            <div className="absolute top-6 right-6 bg-[#F0E7D5]/95 backdrop-blur-sm px-3 py-1.5 border border-[#4B3935]/10">
+                                                                <span className="text-[9px] font-light text-[#4B3935] uppercase tracking-[0.25em]">
+                                                                    {post.category}
+                                                                </span>
                                                             </div>
                                                         )}
 
